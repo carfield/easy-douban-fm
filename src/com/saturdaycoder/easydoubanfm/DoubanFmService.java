@@ -44,6 +44,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	private MediaPlayer mPlayer;
 	private int sessionId = -1;
 	public static final String SESSION_STARTED = "easydoubanfm_music_started";
+	public static final String SESSION_FINISHED = "easydoubanfm_music_finished";
 	public static final String SESSION_STOPPED = "easydoubanfm_music_stopped";
 	public static final String SESSION_FAILED = "easydoubanfm_music_failed";
 	
@@ -90,8 +91,8 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		ComponentName thisWidget = new ComponentName(this, EasyDoubanFmWidget.class);
 		AppWidgetManager manager = AppWidgetManager.getInstance(this);
 		manager.updateAppWidget(thisWidget, updateViews);*/
-		stopMusic(this.sessionId);
-		startMusic(++this.sessionId, 0);
+		//stopMusic(this.sessionId);
+		startMusic(++this.sessionId, 1);
 	}
 	
 	@Override
@@ -108,7 +109,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		mPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
 			@Override
 			public void onBufferingUpdate(MediaPlayer mp, int percent) {
-				//Debugger.error("media player progress " + percent);
+				Debugger.info("media player progress " + percent);
 				
 			}
 		});
@@ -116,8 +117,12 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
+				int sid = getSessionId();
+				Intent intent = new Intent(SESSION_FINISHED);  
+			    intent.putExtra("session", sid);  
+			    sendBroadcast(intent);
 				
-				
+			    startMusic(getSessionId() + 1, 0);
 			}
 		});
 
@@ -145,7 +150,8 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		Debugger.info("stop session " + sessionid + " current is " + this.sessionId);
 		if (sessionid == this.sessionId) {
 			try {
-				mPlayer.stop();
+				if (mPlayer.isPlaying())
+					mPlayer.stop();
 				Intent intent = new Intent(SESSION_STOPPED);  
 			    intent.putExtra("session", sessionid);  
 			    sendBroadcast(intent);
@@ -158,7 +164,8 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	
 	private void stopAllMusic() {
 		try {
-			mPlayer.stop();
+			if (mPlayer.isPlaying())
+				mPlayer.stop();
 			Intent intent = new Intent(SESSION_FAILED);  
 		    intent.putExtra("session", this.sessionId);  
 		    sendBroadcast(intent);  
@@ -179,21 +186,21 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 			+ "&channel=" + channel
 			+ "&h="; //670248:p%7C626377:p%7C704713:p%7C961942:p";
 		String date = DateFormat.format("yyyy-MM-dd kk:mm:ss", Integer.parseInt("1308458469")).toString();
-		Debugger.error("expire = " + date);
+		//Debugger.error("expire = " + date);
 		HttpGet httpGet = new HttpGet(uri);
 		httpGet.setHeader("Connection", "Keep-Alive");
 		httpGet.setHeader("User-Agent", "Android-2.2.1");
 
 		try {
-			Debugger.error("request is:");
-			Debugger.error(httpGet.getRequestLine().toString());
+			//Debugger.error("request is:");
+			//Debugger.error(httpGet.getRequestLine().toString());
 			for (Header h: httpGet.getAllHeaders()) {
-				Debugger.error(h.toString());
+				//Debugger.error(h.toString());
 			}
 			
 			HttpResponse httpResponse = new DefaultHttpClient().execute(httpGet);
-			Debugger.error("response is:");
-			Debugger.error(httpResponse.getStatusLine().toString());
+			//Debugger.error("response is:");
+			//Debugger.error(httpResponse.getStatusLine().toString());
 			for (Header h: httpResponse.getAllHeaders()) {
 				Debugger.error(h.toString());
 			}
@@ -246,6 +253,9 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	@Override
 	public void startMusic(int sessionid, int channel) {
 		//stopAllMusic();
+		
+		if (mPlayer.isPlaying()) 
+			stopAllMusic();
 		
 		Debugger.info("session " + sessionid + " STARTED");
 		
@@ -356,17 +366,47 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
     private class PlayMusicTask extends AsyncTask<String, Integer, Integer> {
     	@Override
     	protected Integer doInBackground(String... params) {
+    		String musicurl = "";
     		try {
-    			String musicurl = (String)params[0];
-    			mPlayer.seekTo(0);
+    			if (mPlayer.isPlaying())
+    				mPlayer.stop();
+    			mPlayer.reset();
+    		} catch (Exception e) {
+    			Debugger.error("stop mediaplayer error: " + e.toString());
+    			return -1;
+    		}
+    		try {
+    			musicurl = (String)params[0];
+    		} catch (Exception e) {
+    			Debugger.error("get param for music url error: " + e.toString());
+    			return -1;
+    		}
+    		try {	
     			mPlayer.setDataSource(DoubanFmService.this, Uri.parse(musicurl));
+    		} catch (Exception e) {
+    			Debugger.error("mediaplayer setDataSource error: " + e.toString());
+    			return -1;
+    		}
+    		try {
     			mPlayer.prepare();
+    		} catch (Exception e) {
+    			Debugger.error("mediaplayer prepare error: " + e.toString());
+    			return -1;
+    		}
+    		try {
+    			mPlayer.seekTo(0);
+    		} catch (Exception e) {
+    			Debugger.error("mediaplayer seek error: " + e.toString());
+    			return -1;
+    		}
+    		try {
     			mPlayer.start();
     			return 0;
     		} catch (Exception e) {
-    			Debugger.dumpException(e);
-    		    return -1;
+    			Debugger.error("mediaplayer play error: " + e.toString());
+    			return -1;
     		}
+    		
         	
     	}
     	@Override
@@ -410,7 +450,8 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
             if (action.equals(DoubanFmService.DOUBAN_FM_STOP)) {
             	Debugger.info("Douban service received STOP command");
             	int sessionid = getSessionId();
-            	stopMusic(sessionid);
+            	//stopMusic(sessionid);
+            	stopAllMusic();
             }
             if (action.equals(DoubanFmService.DOUBAN_FM_CLOSE)) {
             	Debugger.info("Douban service received CLOSE command");

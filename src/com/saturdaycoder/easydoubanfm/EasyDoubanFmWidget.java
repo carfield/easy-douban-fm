@@ -32,19 +32,11 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			remoteViews.setOnClickPendingIntent(R.id.buttonSwitch, startPendingIntent);	
 
 			Intent closeIntent = new Intent(DoubanFmService.DOUBAN_FM_CLOSE);
-			//closeIntent.putExtra(DoubanFmService.DOUBAN_FM_ARG_COMMAND, 
-			//		DoubanFmService.DOUBAN_FM_CONTROL_CLOSE);
-			//closeIntent.putExtra(DoubanFmService.DOUBAN_FM_ARG_SESSION, 
-			//		5);
 			PendingIntent closePendingIntent = PendingIntent.getBroadcast(context, 
 					0, closeIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.buttonClose, closePendingIntent);	
 			
 			Intent stopIntent = new Intent(DoubanFmService.DOUBAN_FM_STOP);
-			//stopIntent.putExtra(DoubanFmService.DOUBAN_FM_ARG_COMMAND, 
-			//		DoubanFmService.DOUBAN_FM_CONTROL_STOP);
-			//stopIntent.putExtra(DoubanFmService.DOUBAN_FM_ARG_SESSION, 
-			//		5);
 			PendingIntent stopPendingIntent = PendingIntent.getBroadcast(context, 
 					0, stopIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.buttonStop, stopPendingIntent);	
