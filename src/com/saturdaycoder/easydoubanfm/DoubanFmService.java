@@ -52,6 +52,10 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	public static final String DOUBAN_FM_START = "easydoubanfm_start";
 	public static final String DOUBAN_FM_STOP = "easydoubanfm_stop";
 	public static final String DOUBAN_FM_CLOSE = "easydoubanfm_close";
+	public static final String DOUBAN_FM_PLAYPAUSE = "easydoubanfm_playpause";
+	public static final String DOUBAN_FM_DOWNLOAD = "easydoubanfm_download";
+	public static final String DOUBAN_FM_ADDTOFAVORIATE = "easydoubanfm_addtofavorite";
+	public static final String DOUBAN_FM_ADDTOTRASH = "easydoubanfm_addtotrash";
 	
 	//public static final String DOUBAN_FM_ARG_SESSION = "session";
 	//public static final String DOUBAN_FM_ARG_COMMAND = "command";
@@ -63,16 +67,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	private final IBinder mBinder = new LocalBinder();
 	
 	
-	public class DoubanFmMusic {
-		String albumtitle;
-		String company;
-		double rating_avg;
-		String album;
-		String artist;
-		String title;
-		String pictureUrl;
-		String musicUrl;
-	}
+
 	
 
 	
@@ -86,12 +81,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	public void onStart(Intent intent, int startId) {
 		Debugger.verbose("Service onStart");
 		super.onStart(intent, startId);
-		/*RemoteViews updateViews = new RemoteViews(this.getPackageName(),
-				R.layout.appwidget);
-		ComponentName thisWidget = new ComponentName(this, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(this);
-		manager.updateAppWidget(thisWidget, updateViews);*/
-		//stopMusic(this.sessionId);
+
 		startMusic(++this.sessionId, 1);
 	}
 	
@@ -109,11 +99,22 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		mPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
 			@Override
 			public void onBufferingUpdate(MediaPlayer mp, int percent) {
-				Debugger.info("media player progress " + percent);
+				Debugger.verbose("media player progress " + percent);
 				
 			}
 		});
-		
+		mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+			@Override
+			public boolean onError(MediaPlayer mp, int what, int extra) {
+				int sid = getSessionId();
+				Intent intent = new Intent(SESSION_FINISHED);  
+			    intent.putExtra("session", sid);  
+			    sendBroadcast(intent);
+				
+			    startMusic(getSessionId() + 1, 0);
+			    return true;
+			}
+		});
 		mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
@@ -186,23 +187,23 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 			+ "&channel=" + channel
 			+ "&h="; //670248:p%7C626377:p%7C704713:p%7C961942:p";
 		String date = DateFormat.format("yyyy-MM-dd kk:mm:ss", Integer.parseInt("1308458469")).toString();
-		//Debugger.error("expire = " + date);
+		
 		HttpGet httpGet = new HttpGet(uri);
 		httpGet.setHeader("Connection", "Keep-Alive");
 		httpGet.setHeader("User-Agent", "Android-2.2.1");
 
 		try {
-			//Debugger.error("request is:");
-			//Debugger.error(httpGet.getRequestLine().toString());
+			Debugger.verbose("request is:");
+			Debugger.verbose(httpGet.getRequestLine().toString());
 			for (Header h: httpGet.getAllHeaders()) {
-				//Debugger.error(h.toString());
+				Debugger.verbose(h.toString());
 			}
 			
 			HttpResponse httpResponse = new DefaultHttpClient().execute(httpGet);
-			//Debugger.error("response is:");
-			//Debugger.error(httpResponse.getStatusLine().toString());
+			Debugger.verbose("response is:");
+			Debugger.verbose(httpResponse.getStatusLine().toString());
 			for (Header h: httpResponse.getAllHeaders()) {
-				Debugger.error(h.toString());
+				Debugger.verbose(h.toString());
 			}
 			
 
@@ -273,6 +274,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		
 		// report picture ready
 		Intent intent = new Intent(SESSION_STARTED);  
+		intent.putExtra("session", sessionid);
 	    intent.putExtra("album", dfm.album);
 		intent.putExtra("albumtitle", dfm.albumtitle);
 		intent.putExtra("artist", dfm.artist);
@@ -281,36 +283,26 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		intent.putExtra("title", dfm.title);
 		intent.putExtra("pictureUrl", dfm.pictureUrl);
 		intent.putExtra("musicUrl", dfm.musicUrl);
+		Debugger.info("Session started: " + dfm.toString());
 	    sendBroadcast(intent);  
+	    EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this, null, dfm);
 	    
 		// get music
 	    PlayMusicTask musicTask = new PlayMusicTask();
 	    musicTask.execute(dfm.musicUrl);
 		
 	    // update appwidget view image
-	    GetPictureTask picTask = new GetPictureTask();
+	    GetPictureTask picTask = new GetPictureTask(sessionid);
 	    picTask.execute(dfm.pictureUrl);
 	    
 	    
 	}
 	
-	private void updateWidgetsImage(Bitmap bmp) {
-	    RemoteViews updateViews = new RemoteViews(this.getPackageName(),
-				R.layout.appwidget);
-	    if (bmp == null) {
-	    	updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
-	    } else {
-	    	updateViews.setImageViewBitmap(R.id.imageCover, bmp);
-	    }
-		ComponentName thisWidget = new ComponentName(this, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(this);
-		manager.updateAppWidget(thisWidget, updateViews);
-	
-	}
-	
 	
 	/*@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		Debugger.verbose("Service onStartCommand(intent, " + flags + ", " + startId + ")");
+		startMusic(++this.sessionId, 0);
 		return START_STICKY;
 	}*/
 	
@@ -330,12 +322,16 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		return mBinder;
 	}
 	
-	private void doGetPicture(String picurl) {
+	/*private void doGetPicture(String picurl) {
     	GetPictureTask task = new GetPictureTask();
         task.execute(picurl);
-    }
+    }*/
 	
     private class GetPictureTask extends AsyncTask<String, Integer, Bitmap> {
+    	public GetPictureTask(int session) {
+    		this.session = session;
+    	}
+    	private int session;
     	@Override
     	protected Bitmap doInBackground(String... params) {
     		try {
@@ -358,7 +354,8 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
         }
     	@Override
         protected void onPostExecute(Bitmap bmp) {
-    		updateWidgetsImage(bmp);
+    		if (session == getSessionId())
+    			EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this, bmp, null);
     		
         }
     }
@@ -446,55 +443,25 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
             	Debugger.info("Douban service received START command");
             	int sessionid = getSessionId() + 1;
             	startMusic(sessionid, 0);
+            	return;
             }
             if (action.equals(DoubanFmService.DOUBAN_FM_STOP)) {
             	Debugger.info("Douban service received STOP command");
             	int sessionid = getSessionId();
             	//stopMusic(sessionid);
             	stopAllMusic();
+            	return;
             }
             if (action.equals(DoubanFmService.DOUBAN_FM_CLOSE)) {
             	Debugger.info("Douban service received CLOSE command");
             	closeService();
+            	return;
             }
-            
-            /*if (action.equals(DoubanFmService.DOUBAN_FM_CONTROL)) {
-            	Debugger.error("received DOUBAN_FM_CONTROL");
-            	Bundle b = arg1.getExtras();
-            	int cmd = b.getInt(DOUBAN_FM_ARG_COMMAND);
-            	Debugger.info("command is " + cmd);
-            	int sessionid = 0;
-                switch (cmd) {
-                case DOUBAN_FM_CONTROL_START: {
-                	Debugger.info("Douban service received START command");
-                	sessionid = b.getInt(DOUBAN_FM_ARG_SESSION);
-                	if (sessionid == 0) {
-                		sessionid = getSessionId() + 1;
-                	} 
-                	startMusic(sessionid, 0);
-                	break;
-                }
-                case DOUBAN_FM_CONTROL_STOP: {
-                	Debugger.info("Douban service received STOP command");
-                	sessionid = b.getInt(DOUBAN_FM_ARG_SESSION);
-                	if (sessionid == 0) {
-                		sessionid = getSessionId();
-                	} 
-                	stopMusic(sessionid);
-                	break;
-                }
-                case DOUBAN_FM_CONTROL_CLOSE: {
-                	Debugger.info("Douban service received CLOSE command");
-                	closeService();
-                	break;
-                }
-                default: {
-                	Debugger.verbose("Douban service received UNKNOWN command");
-                	break;
-                }
-                }
-            }  */
-
+            if (action.equals(DoubanFmService.DOUBAN_FM_DOWNLOAD)) {
+            	Debugger.info("Douban service received DOWNLOAD command");
+            	closeService();
+            	return;
+            }
         }
     }  
 }

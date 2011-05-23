@@ -5,36 +5,99 @@
     android:layout_height="fill_parent"
     android:background="@drawable/appwidget_bg"
     >
-
 <ImageView 
+    android:paddingLeft="5dip"
+    android:paddingTop="5dip"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentTop="true"
 	android:src="@drawable/default_album" 
 	android:layout_width="120dip" 
 	android:id="@+id/imageCover"
-	android:layout_alignParentLeft="true" 
-	android:layout_height="fill_parent"></ImageView>
-	
+	android:layout_height="120dip"
+	/>
+<TextView 
+    android:paddingLeft="15dip"
+    android:paddingTop="5dip"
+    android:id="@+id/textArtist" 
+    android:textSize="20dip"     
+    android:textColor="#ffffff"   
+    android:layout_toRightOf="@+id/imageCover" 
+    android:text="Artist" 
+    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content" 
+    />
+<TextView 
+    android:paddingLeft="10dip"
+    android:paddingTop="5dip"
+    android:id="@+id/textTitle" 
+    android:textSize="16dip"     
+    android:textColor="#ffffff"   
+    android:layout_below="@+id/textArtist" 
+    android:text="Title" 
+    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content" 
+    android:layout_alignLeft="@+id/textArtist" 
+    />
 <Button 
-	android:background="@drawable/down_button_pause"
-	android:layout_toRightOf="@+id/imageCover"
-	android:text="" 
-	android:id="@+id/buttonSwitch" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content"></Button>
-	
+    android:paddingRight="8dip"
+    android:paddingTop="8dip"
+    android:background="@drawable/button_onoff_background_off"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentTop="true"
+    android:text="" 
+    android:id="@+id/buttonOnoff" 
+    android:layout_width="50dip" 
+    android:layout_height="50dip"
+    />
 <Button 
-	android:background="@drawable/down_button_running"
-	android:layout_toRightOf="@+id/buttonSwitch"
+    android:paddingLeft="5dip"
+    android:paddingBottom="5dip"
+	android:background="@drawable/button_trash_background"
+	android:layout_alignParentLeft="true"
+	android:layout_alignParentBottom="true"
 	android:text="" 
-	android:id="@+id/buttonStop" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content"></Button>
-	
+	android:id="@+id/buttonTrash" 
+	android:layout_width="48dip" 
+	android:layout_height="48dip"
+	/>
 <Button 
-	android:background="@drawable/btn_mode_switch_knob_pressed"
-	android:layout_toRightOf="@+id/buttonStop"
-	android:layout_alignParentRight="true" 
+    android:paddingLeft="5dip"
+	android:background="@drawable/button_favorite_background"
+	android:layout_toRightOf="@+id/buttonTrash"
 	android:text="" 
-	android:id="@+id/buttonClose" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content"></Button>
+	android:id="@+id/buttonFavorite" 
+	android:layout_width="60dip" 
+	android:layout_height="60dip"
+	android:layout_alignBottom="@+id/buttonTrash"
+	/>
+<Button 
+    android:paddingLeft="5dip"
+    android:layout_alignBottom="@+id/buttonTrash"
+	android:background="@drawable/button_next_background"
+	android:layout_toRightOf="@+id/buttonFavorite"
+	android:text="" 
+	android:id="@+id/buttonNext" 
+	android:layout_width="72dip" 
+	android:layout_height="72dip"
+	/>
+<Button 
+    android:paddingLeft="5dip"
+    android:layout_alignBottom="@+id/buttonTrash"
+    android:background="@drawable/button_play_background"
+    android:layout_toRightOf="@+id/buttonNext"
+    android:text="" 
+    android:id="@+id/buttonPlaypause" 
+    android:layout_width="60dip" 
+    android:layout_height="60dip"
+    />
+<Button 
+    android:paddingLeft="5dip"
+    android:layout_alignBottom="@+id/buttonTrash"
+    android:background="@drawable/button_download_background"
+    android:layout_toRightOf="@+id/buttonPlaypause"
+    android:text="" 
+    android:id="@+id/buttonDownload" 
+    android:layout_width="48dip" 
+    android:layout_height="48dip"
+    />
 </RelativeLayout>
