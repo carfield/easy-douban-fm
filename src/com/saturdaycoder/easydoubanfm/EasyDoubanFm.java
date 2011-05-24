@@ -51,9 +51,9 @@ public class EasyDoubanFm extends Activity {
         	}
         };
         
-        bindService(new Intent(EasyDoubanFm.this, DoubanFmService.class), 
+        /*bindService(new Intent(EasyDoubanFm.this, DoubanFmService.class), 
         		mServiceConn, Context.BIND_AUTO_CREATE);
-        mServiceIsBound = true;
+        mServiceIsBound = true;*/
         
         buttonSwitch.setOnClickListener(new Button.OnClickListener() {
         	@Override
@@ -74,10 +74,10 @@ public class EasyDoubanFm extends Activity {
     protected void onDestroy() {
     	unregisterReceiver(receiver);  
     	//receiver = null;
-    	if (mServiceIsBound) {
+    	/*if (mServiceIsBound) {
     		unbindService(mServiceConn);
     		mServiceIsBound = false;
-    	}
+    	}*/
     	super.onDestroy();
     }
     
