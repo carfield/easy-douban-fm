@@ -5,4 +5,5 @@ public interface IDoubanFmService {
 	public abstract void stopMusic(int sessionid);
 	public abstract int getSessionId();
 	public abstract void closeService();
+	public abstract void selectChannel(int id);
 }

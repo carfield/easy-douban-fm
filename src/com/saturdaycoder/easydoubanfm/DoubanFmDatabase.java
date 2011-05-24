@@ -22,6 +22,7 @@ public class DoubanFmDatabase extends SQLiteOpenHelper {
 				+ " name_en TEXT DEFAULT '', "
 				+ " name TEXT DEFAULT '', "
 				+ " seq_id INTEGER)");
+		//selectChannel(0);
 	}
 	
 	@Override
@@ -81,16 +82,37 @@ public class DoubanFmDatabase extends SQLiteOpenHelper {
 		else return null;
 	}
 	
+	public DoubanFmChannel getChannelInfo(int id) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cursor = db.rawQuery("select * from channels where channel_id=" + id, null);
+		if (cursor.moveToFirst()) 
+		{
+			DoubanFmChannel dfc = new DoubanFmChannel();
+			dfc.channelId = cursor.getInt(0);
+			dfc.abbrEn = cursor.getString(1);
+			dfc.nameEn = cursor.getString(2);
+			dfc.name = cursor.getString(3);
+			dfc.seqId = cursor.getInt(4);
+			return dfc;
+		}
+		else return null;
+	}
+	private static SharedPreferences pref = null;
 	public int getSelectedChannel() {
-		SharedPreferences sp = context.getSharedPreferences("settings.xml", Context.MODE_PRIVATE);
-		return sp.getInt("selected_channel", -1);
+		if (pref == null)
+			pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		int a = pref.getInt("selected_channel", -1);
+		Debugger.info("##### retrieved channel = " + a);
+		return (a == -1)? 0: a;
 	}
 	
 	public boolean selectChannel(int c) {
-		SharedPreferences sp = context.getSharedPreferences("settings.xml", Context.MODE_PRIVATE);
-		Editor ed = sp.edit();
+		if (pref == null)
+			pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
 		ed.putInt("selected_channel", c);
 		ed.commit();
+		Debugger.info("##### saved channel = " + c);
 		return true;
 	}
 }

@@ -30,18 +30,18 @@ import android.os.AsyncTask;
 public class EasyDoubanFm extends Activity {
 	private IDoubanFmService mDoubanFm;
 	private ServiceConnection mServiceConn;
-	private boolean mServiceIsBound;
-	private Button buttonSwitch;
-	private ImageView imageCover;
+	//private boolean mServiceIsBound;
+	//private Button buttonSwitch;
+	//private ImageView imageCover;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        buttonSwitch = (Button)findViewById(R.id.buttonSwitch);
-        buttonSwitch.setBackgroundResource(R.drawable.down_button_pause);
-        buttonSwitch.setText("");
-        imageCover = (ImageView)findViewById(R.id.imageCover);
+        //buttonSwitch = (Button)findViewById(R.id.buttonSwitch);
+        //buttonSwitch.setBackgroundResource(R.drawable.down_button_pause);
+        //buttonSwitch.setText("");
+        //imageCover = (ImageView)findViewById(R.id.imageCover);
         mServiceConn = new ServiceConnection(){
         	public void onServiceConnected(ComponentName className, IBinder service) {
         		mDoubanFm = (IDoubanFmService)((DoubanFmService.LocalBinder)service).getService();
@@ -55,12 +55,12 @@ public class EasyDoubanFm extends Activity {
         		mServiceConn, Context.BIND_AUTO_CREATE);
         mServiceIsBound = true;*/
         
-        buttonSwitch.setOnClickListener(new Button.OnClickListener() {
+        /*buttonSwitch.setOnClickListener(new Button.OnClickListener() {
         	@Override
         	public void onClick(View v) {
         		mDoubanFm.startMusic(0, 0);
         	}
-        });
+        });*/
         
         IntentFilter filter = new IntentFilter(DoubanFmService.SESSION_STARTED);  
         if (receiver == null)  {

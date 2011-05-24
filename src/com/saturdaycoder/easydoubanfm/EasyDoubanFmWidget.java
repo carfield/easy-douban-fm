@@ -12,7 +12,17 @@ import android.content.Intent;
 
 
 public class EasyDoubanFmWidget extends AppWidgetProvider {
-	
+	synchronized
+	public static void updateWidgetChannel(Context context, String name) {
+		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+							R.layout.appwidget);
+		
+		updateViews.setTextViewText(R.id.textChannel, name);
+		
+		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		manager.updateAppWidget(thisWidget, updateViews);
+	}
 	
 	synchronized
 	public static void updateWidgetProgress(Context context, boolean isOn) {
@@ -32,11 +42,11 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	    
 	    if (!isOn) {
 	    	Debugger.debug("set ON/OFF button as OFF");
-	    	updateViews.setViewVisibility(R.id.buttonOn, View.GONE);
+	    	//updateViews.setViewVisibility(R.id.buttonOn, View.GONE);
 	    	updateViews.setViewVisibility(R.id.buttonOnoff, View.VISIBLE);
 	    } else {
 	    	Debugger.debug("set ON/OFF button as ON");
-	    	updateViews.setViewVisibility(R.id.buttonOn, View.VISIBLE);
+	    	//updateViews.setViewVisibility(R.id.buttonOn, View.VISIBLE);
 	    	updateViews.setViewVisibility(R.id.buttonOnoff, View.GONE);
 	    }
 	    
@@ -55,6 +65,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		manager.updateAppWidget(thisWidget, updateViews);
 	}
 	
+	synchronized
 	public static void updateWidgetInfo(Context context, Bitmap bmp, DoubanFmMusic dfm) {
 		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
 					R.layout.appwidget);
@@ -87,7 +98,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 						R.layout.appwidget);
 			
 			// Trash button
-			Intent trashIntent = new Intent(DoubanFmService.DOUBAN_FM_TRASH);
+			/*Intent trashIntent = new Intent(DoubanFmService.DOUBAN_FM_TRASH);
 			PendingIntent trashPendingIntent = PendingIntent.getBroadcast(context, 
 					0, trashIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.buttonTrash, trashPendingIntent);
@@ -98,7 +109,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			PendingIntent favoritePendingIntent = PendingIntent.getBroadcast(context, 
 					0, favoriteIntent, 0);
 			remoteViews.setViewVisibility(R.id.buttonFavorite, View.GONE);
-			remoteViews.setOnClickPendingIntent(R.id.buttonFavorite, favoritePendingIntent);
+			remoteViews.setOnClickPendingIntent(R.id.buttonFavorite, favoritePendingIntent);*/
 			
 			// Next button
 			Intent nextIntent = new Intent(DoubanFmService.DOUBAN_FM_NEXT);
@@ -119,7 +130,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 					0, downloadIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.buttonDownload, downloadPendingIntent);
 			
-			// On/Off button
+			// Off button
 			Intent openIntent = new Intent(context, DoubanFmService.class);
 			PendingIntent openPendingIntent = PendingIntent.getService(context, 
 					0, openIntent, 0);
@@ -131,6 +142,14 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 					0, closeIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.buttonOn, closePendingIntent);
 			
+			// Menu button
+			Intent menuIntent = new Intent(context, ChannelSelectorActivity.class);
+			PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
+					0, menuIntent, 0);
+			remoteViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
+			
+			
+			// APPWIDGET manager updating
 			appWidgetManager.updateAppWidget(i, remoteViews);
 		}
 	}

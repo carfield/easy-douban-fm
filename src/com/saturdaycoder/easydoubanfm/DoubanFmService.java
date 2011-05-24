@@ -32,7 +32,7 @@ import android.graphics.BitmapFactory;
 
 public class DoubanFmService extends Service  implements IDoubanFmService {
 
-	private MediaPlayer mPlayer;
+	private MediaPlayer mPlayer = null;
 	private int sessionId = -1;
 	private DoubanFmMusic fmMusic = null;
 	public static final String SESSION_STARTED = "easydoubanfm_music_started";
@@ -46,21 +46,21 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	public static final String SESSION_FAVOR_TRASHED = "easydoubanfm_music_trashed";
 	public static final String SESSION_FAILED = "easydoubanfm_music_failed";
 	
-
 	public static final String DOUBAN_FM_NEXT = "easydoubanfm_next";
 	public static final String DOUBAN_FM_PLAYPAUSE = "easydoubanfm_playpause";
 	public static final String DOUBAN_FM_CLOSE = "easydoubanfm_close";
 	public static final String DOUBAN_FM_DOWNLOAD = "easydoubanfm_download";
 	public static final String DOUBAN_FM_FAVORITE = "easydoubanfm_favorite";
 	public static final String DOUBAN_FM_TRASH = "easydoubanfm_trash";
+	public static final String DOUBAN_FM_SELECT_CHANNEL = "easydoubanfm_select_channel";
 	
 	
 	private final IBinder mBinder = new LocalBinder();	
 
+	private PlayMusicThread musicThread = null;
 	
 	public class LocalBinder extends Binder {
-		public static final String DOUBAN_FM_TRASH = "easydoubanfm_trash";
-
+		
 		DoubanFmService getService() {
 			return DoubanFmService.this;
 		}
@@ -70,9 +70,8 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	public void onStart(Intent intent, int startId) {
 		Debugger.verbose("Service onStart");
 		super.onStart(intent, startId);
-
 		EasyDoubanFmWidget.updateWidgetOnOffButton(this, true);
-		startMusic(++this.sessionId, 1);
+		startMusic(++this.sessionId, db.getSelectedChannel());
 	}
 	
 	@Override
@@ -80,12 +79,91 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		return this.sessionId;
 	}
 	
+	private void getChannelTable() {
+		Debugger.verbose("Start SCANNING channel table");
+		String uri = "http://www.douban.com:80/j/app/radio/channels?";
+		HttpGet httpGet = new HttpGet(uri);
+		httpGet.setHeader("Connection", "Keep-Alive");
+		httpGet.setHeader("User-Agent", "Android-2.2.1");
+		try {
+			Debugger.verbose("request is:");
+			Debugger.verbose(httpGet.getRequestLine().toString());
+			for (Header h: httpGet.getAllHeaders()) {
+				Debugger.verbose(h.toString());
+			}
+			
+			HttpResponse httpResponse = new DefaultHttpClient().execute(httpGet);
+			Debugger.verbose("response is:");
+			Debugger.verbose(httpResponse.getStatusLine().toString());
+			for (Header h: httpResponse.getAllHeaders()) {
+				Debugger.verbose(h.toString());
+			}
+			if (httpResponse.getStatusLine().getStatusCode() != 200) {
+				Debugger.error("getchannel response is " + httpResponse.getStatusLine().getStatusCode());
+			} else {
+				InputStream is = httpResponse.getEntity().getContent();
+				long len = httpResponse.getEntity().getContentLength();
+				int length = (int)(len);
+				byte b[] = new byte[length];
+				int l = 0;
+				while (l < length) {
+					int tmpl = is.read(b, l, length);
+					if (tmpl == -1)
+						break;
+					l += tmpl;
+				}
+				
+				String c = new String(b, 0, length, "UTF-8");
+				JSONObject json = new JSONObject(c);
+				JSONArray jsa = json.getJSONArray("channels");
+				for (int i = 0; i < jsa.length(); ++i) {
+					DoubanFmChannel chan = new DoubanFmChannel();
+					JSONObject co = (JSONObject)jsa.get(i);
+					chan.abbrEn = co.getString("abbr_en");
+					chan.channelId = co.getInt("channel_id");
+					chan.nameEn = co.getString("name_en");
+					chan.name = co.getString("name");
+					chan.seqId = co.getInt("seq_id");
+					Debugger.info("scanned new channel: name=" + chan.name 
+							+ " id=" + chan.channelId + " seq=" + chan.seqId);
+					db.saveChannel(chan);
+				}
+			}
+		} catch (Exception e) {
+			Debugger.error("error scanning channel table: " + e.toString());
+		}
+	}
+	
+	private DoubanFmDatabase db;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		Debugger.debug("service onCreate");
+		
+		db = new DoubanFmDatabase(this);
+		
+		// get channel table if it's not existing
+		DoubanFmChannel[] chans = db.getChannels();
+		if (chans == null) {
+			getChannelTable();
+			db.selectChannel(0);
+			//EasyDoubanFmWidget.updateWidgetChannel(this, "公共频道");
+		}
+		
+		
+		int ci = db.getSelectedChannel();
+		if (ci == 0)
+			EasyDoubanFmWidget.updateWidgetChannel(this, "公共频道");
+		else {
+			DoubanFmChannel c = db.getChannelInfo(ci);
+			EasyDoubanFmWidget.updateWidgetChannel(this, c.name);
+		}
+		
+		// initiate media player
 		sessionId = 1;
-		mPlayer = new MediaPlayer();
+		if (mPlayer == null)
+			mPlayer = new MediaPlayer();
 		mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 		mPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
 			@Override
@@ -128,6 +206,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		filter.addAction(DoubanFmService.DOUBAN_FM_DOWNLOAD);
 		filter.addAction(DoubanFmService.DOUBAN_FM_FAVORITE);
 		filter.addAction(DoubanFmService.DOUBAN_FM_TRASH);
+		filter.addAction(DoubanFmService.DOUBAN_FM_SELECT_CHANNEL);
 		registerReceiver(receiver, filter); 
 		Debugger.verbose("DoubanFm Control Service registered");
 	}
@@ -269,6 +348,24 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	}
 	
 	@Override
+	public void selectChannel(int id) {
+		Debugger.info("SELECT CHANNEL to " + id);
+		DoubanFmChannel chan = db.getChannelInfo(id);
+		if (chan == null) {
+			Debugger.error("#### channel user selected is invalid");
+			id = 0;
+			db.selectChannel(id);
+			EasyDoubanFmWidget.updateWidgetChannel(this, "公共频道");
+		}
+		else {
+			db.selectChannel(id);
+			EasyDoubanFmWidget.updateWidgetChannel(this, chan.name);
+		}
+		stopAllMusic();
+		startMusic(getSessionId() + 1, id);
+	}
+	
+	@Override
 	public void startMusic(int sessionid, int channel) {
 		//stopAllMusic();
 		
@@ -311,8 +408,8 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		// get music
 	    //PlayMusicTask musicTask = new PlayMusicTask();
 	    //musicTask.execute(dfm.musicUrl);
-	    PlayMusicThread t = new PlayMusicThread(mPlayer, dfm.musicUrl);
-	    t.start();
+	    musicThread = new PlayMusicThread(mPlayer, dfm.musicUrl);
+	    musicThread.start();
 		
 	    // update appwidget view image
 	    GetPictureTask picTask = new GetPictureTask(sessionid);
@@ -335,11 +432,22 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		EasyDoubanFmWidget.updateWidgetOnOffButton(this, false);
 		EasyDoubanFmWidget.updateWidgetInfo(this, null, null);
 		EasyDoubanFmWidget.updateWidgetProgress(this, false);
-		stopAllMusic();
+		
 		this.sessionId = -1;
 		unregisterReceiver(receiver); 
 		Debugger.verbose("DoubanFm Control Service unregistered");
 		receiver = null;
+		
+		if (musicThread != null) {
+			try  {
+				musicThread.join();
+			} catch (Exception e) {
+				
+			}
+		}
+		
+		stopAllMusic();
+		
 		super.onDestroy();
 		
 	}
@@ -604,7 +712,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
             if (action.equals(DoubanFmService.DOUBAN_FM_NEXT)) {
             	Debugger.info("Douban service received START command");
             	int sessionid = getSessionId() + 1;
-            	startMusic(sessionid, 0);
+            	startMusic(sessionid, db.getSelectedChannel());
             	return;
             }
             if (action.equals(DoubanFmService.DOUBAN_FM_PLAYPAUSE)) {
@@ -633,6 +741,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
             	hateMusic();
             	return;
             }
+            
         }
     }  
 }

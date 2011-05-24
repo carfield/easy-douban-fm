@@ -3,15 +3,14 @@
     android:orientation="vertical"
     android:layout_width="280dip"
     android:layout_height="fill_parent"
-    android:background="@drawable/audio_player_default_show_bg_dark"
     >
-<Button 
+<!-- <Button 
     android:layout_height="wrap_content" 
     android:layout_gravity="center_horizontal"
     android:layout_width="280dip" 
     android:id="@+id/buttonUpdateChannels" 
     android:text="Update"
-    />
+    /> -->
 <ListView 
     android:layout_height="wrap_content" 
     android:id="@+id/lvChannels" 
@@ -19,7 +18,7 @@
     android:layout_gravity="center_horizontal"
     />
 
-<Button 
+<!-- <Button 
     android:textSize="24dip"
     android:background="@drawable/appwidget_bg"
     android:layout_height="wrap_content" 
@@ -27,6 +26,6 @@
     android:layout_gravity="center_horizontal"
     android:id="@+id/buttonConfirmChannel" 
     android:text="Confirm"
-    />
+    /> -->
 
 </LinearLayout>
