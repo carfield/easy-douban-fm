@@ -3,6 +3,6 @@
     
     <string name="app_name">我的豆瓣电台</string>
     <string name="appwidget_name">我的豆瓣电台</string>
-    <string name="intro_main">感谢下载“我的豆瓣电台”！\n\n这里将用4页简单地向您介绍一下程序的使用方法。如果您不想看说明，可以点击下面的“不用教我”按钮离开本说明。
+    <string name="intro_main">感谢下载“我的豆瓣电台”！在桌面上添加小部件后，您就可以看到下图那样的播放器了。下面是播放器各个按钮的介绍：
     </string>
 </resources>

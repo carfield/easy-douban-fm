@@ -270,6 +270,13 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	
 	public void stopAllMusic() {
 		Debugger.info("stop all music");
+		if (musicThread != null) {
+			try  {
+				musicThread.join();
+			} catch (Exception e) {
+				
+			}
+		}
 		try {
 			if (mPlayer.isPlaying())
 				mPlayer.stop();
@@ -389,7 +396,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		}
 		else {
 			db.selectChannel(id);
-			EasyDoubanFmWidget.updateWidgetChannel(this, chan.name);
+			EasyDoubanFmWidget.updateWidgetChannel(this, (id == 0)? "公共频道": chan.name);
 		}
 		stopAllMusic();
 		startMusic(getSessionId() + 1, id);
