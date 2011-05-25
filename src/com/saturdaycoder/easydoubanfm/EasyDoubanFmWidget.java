@@ -25,13 +25,27 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	}
 	
 	synchronized
-	public static void updateWidgetProgress(Context context, boolean isOn) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-							R.layout.appwidget);
-			
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
+	public static void updateWidgetProgress(Context context, int progress) {
+		if (progress >= 20
+        		&& progress < 40) {
+        	Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress1);
+        	EasyDoubanFmWidget.updateWidgetInfo(context, bmp, null);
+        }
+		if (progress >= 40
+        		&& progress < 60) {
+        	Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress2);
+        	EasyDoubanFmWidget.updateWidgetInfo(context, bmp, null);
+        }
+		if (progress >= 60
+        		&& progress < 80) {
+        	Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress3);
+        	EasyDoubanFmWidget.updateWidgetInfo(context, bmp, null);
+        }
+		if (progress >= 80
+        		&& progress < 100) {
+        	Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress4);
+        	EasyDoubanFmWidget.updateWidgetInfo(context, bmp, null);
+        }
 	}
 
 	
@@ -44,10 +58,21 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	    	Debugger.debug("set ON/OFF button as OFF");
 	    	//updateViews.setViewVisibility(R.id.buttonOn, View.GONE);
 	    	updateViews.setViewVisibility(R.id.buttonOnoff, View.VISIBLE);
+	    	
+	    	Intent menuIntent = new Intent(DoubanFmService.DOUBAN_FM_NULL);
+			PendingIntent menuPendingIntent = PendingIntent.getBroadcast(context, 
+					0, menuIntent, 0);
+	    	updateViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
 	    } else {
 	    	Debugger.debug("set ON/OFF button as ON");
 	    	//updateViews.setViewVisibility(R.id.buttonOn, View.VISIBLE);
 	    	updateViews.setViewVisibility(R.id.buttonOnoff, View.GONE);
+	    	
+			// Menu button
+			Intent menuIntent = new Intent(context, ChannelSelectorActivity.class);
+			PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
+					0, menuIntent, 0);
+			updateViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
 	    }
 	    
 		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
@@ -82,6 +107,99 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
 		AppWidgetManager manager = AppWidgetManager.getInstance(context);
 		manager.updateAppWidget(thisWidget, updateViews);
+	}
+	
+	synchronized
+	public static void clearWidgetInfo(Context context) {
+		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+					R.layout.appwidget);
+	    //updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
+	    
+	    updateViews.setTextViewText(R.id.textArtist, "");
+	    updateViews.setTextViewText(R.id.textTitle, "");
+	   
+	    
+		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		manager.updateAppWidget(thisWidget, updateViews);
+	}
+	
+	synchronized
+	public static void clearWidgetImage(Context context) {
+		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+					R.layout.appwidget);
+	    updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
+	    
+	    //updateViews.setTextViewText(R.id.textArtist, "");
+	    //updateViews.setTextViewText(R.id.textTitle, "");
+	   
+	    
+		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		manager.updateAppWidget(thisWidget, updateViews);
+	}
+	
+	synchronized
+	public static void clearWidgetChannel(Context context) {
+		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+					R.layout.appwidget);
+	    updateViews.setTextViewText(R.id.textChannel, "未选定频道");
+	   
+	    
+		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		manager.updateAppWidget(thisWidget, updateViews);
+	}
+	
+	synchronized
+	public static void updateWidgetBlurText(Context context, boolean blur) {
+		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+					R.layout.appwidget);
+		if (!blur) {
+		    updateViews.setTextColor(R.id.textArtist, 0xffffff);
+		    updateViews.setTextColor(R.id.textTitle, 0xffffff);
+		    updateViews.setTextColor(R.id.textChannel, 0xffffff);
+		} else {
+		    updateViews.setTextColor(R.id.textArtist, 0x808080);
+		    updateViews.setTextColor(R.id.textTitle, 0x808080);
+		    updateViews.setTextColor(R.id.textChannel, 0x808080);
+		}
+	    
+		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		//manager.updateAppWidget(thisWidget, updateViews);
+	}
+	
+	synchronized
+	public static void updateWidgetBlurInfo(Context context, boolean blur) {
+		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+					R.layout.appwidget);
+		if (!blur) {
+		    updateViews.setTextColor(R.id.textArtist, 0xffffff);
+		    updateViews.setTextColor(R.id.textTitle, 0xffffff);
+		} else {
+		    updateViews.setTextColor(R.id.textArtist, 0x808080);
+		    updateViews.setTextColor(R.id.textTitle, 0x808080);
+		}
+	    
+		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		//manager.updateAppWidget(thisWidget, updateViews);
+	}
+	
+	synchronized
+	public static void updateWidgetBlurChannel(Context context, boolean blur) {
+		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+					R.layout.appwidget);
+		if (!blur) {
+		    updateViews.setTextColor(R.id.textChannel, 0xffffff);
+		} else {
+		    updateViews.setTextColor(R.id.textChannel, 0x808080);
+		}
+	    
+		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		//manager.updateAppWidget(thisWidget, updateViews);
 	}
 	
 	
@@ -142,11 +260,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 					0, closeIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.buttonOn, closePendingIntent);
 			
-			// Menu button
-			Intent menuIntent = new Intent(context, ChannelSelectorActivity.class);
-			PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
-					0, menuIntent, 0);
-			remoteViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
+
 			
 			
 			// APPWIDGET manager updating

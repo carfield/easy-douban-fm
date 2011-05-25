@@ -7,15 +7,17 @@
 <!-- <Button 
     android:layout_height="wrap_content" 
     android:layout_gravity="center_horizontal"
-    android:layout_width="280dip" 
+    android:layout_width="180dip" 
     android:id="@+id/buttonUpdateChannels" 
     android:text="Update"
     /> -->
 <ListView 
     android:layout_height="wrap_content" 
     android:id="@+id/lvChannels" 
-    android:layout_width="280dip"
+    android:layout_width="270dip"
     android:layout_gravity="center_horizontal"
+    android:background="@drawable/audio_player_default_show_bg_dark"
+    android:divider="#FF000000"
     />
 
 <!-- <Button 

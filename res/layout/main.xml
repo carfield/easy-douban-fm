@@ -1,17 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-<Button 
-	android:text="Button" 
-	android:id="@+id/buttonSwitch" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content"></Button>
 <ImageView 
-	android:src="@drawable/icon" 
-	android:layout_width="300dip" 
-	android:id="@+id/imageCover" 
-	android:layout_height="300dip"></ImageView>
-</LinearLayout>
+    android:src="@drawable/intro_playing" 
+    android:layout_width="280dip"
+    android:layout_centerHorizontal="true"
+    android:layout_alignParentTop="true" 
+    android:id="@+id/imageCover" 
+    android:layout_height="200dip"
+    />
+<TextView
+    android:layout_alignLeft="@+id/imageCover" 
+    android:layout_alignRight="@+id/imageCover" 
+    android:text="@string/intro_main"
+    android:id="@+id/textIntro"
+    android:layout_below="@+id/imageCover"
+    android:layout_above="@+id/buttonNext"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical"/>
+<Button 
+    android:text="不用教我" 
+    android:id="@+id/buttonSkip" 
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentBottom="true"
+    android:layout_width="120dip" 
+    android:layout_height="50dip"
+    />
+<TextView
+    android:layout_toLeftOf="@+id/buttonNext" 
+    android:layout_toRightOf="@+id/buttonSkip" 
+    android:layout_alignTop="@+id/buttonSkip" 
+    android:layout_alignBottom="@+id/buttonSkip" 
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:textSize="20dip"
+    android:text="1 / 4"
+    android:id="@+id/textPage"
+    android:gravity="center"/>
+<Button 
+    android:text="下一页" 
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true"
+    android:id="@+id/buttonNext" 
+    android:layout_width="120dip" 
+    android:layout_height="50dip"
+    />
+
+</RelativeLayout>
