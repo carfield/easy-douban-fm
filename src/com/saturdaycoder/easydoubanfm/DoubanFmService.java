@@ -864,7 +864,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 				Notification notification = new Notification(android.R.drawable.stat_sys_download_done, 
 						"下载完成",
 		                System.currentTimeMillis());
-		        notification.setLatestEventInfo(this, "下载完成", dfm.title, pi);
+		        notification.setLatestEventInfo(this, "下载完成", "文件存放于/sdcard/easydoubanfm/" + dfm.title + ".mp3", pi);
 		        nm.notify(sid, notification);
 		        break;
 			}
