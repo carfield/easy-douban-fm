@@ -1,5 +1,6 @@
 package com.saturdaycoder.easydoubanfm;
 import android.media.MediaPlayer;
+import java.io.IOException;
 public class PlayMusicThread extends Thread {
 	private String url;
 	private MediaPlayer mPlayer;
@@ -19,6 +20,9 @@ public class PlayMusicThread extends Thread {
 			
 			try {	
 				mPlayer.setDataSource(url);
+			} catch (IOException e) {
+				Debugger.error("mediaplayer setDataSource error: " + e.toString());
+				return;
 			} catch (Exception e) {
 				Debugger.error("mediaplayer setDataSource error: " + e.toString());
 				return;

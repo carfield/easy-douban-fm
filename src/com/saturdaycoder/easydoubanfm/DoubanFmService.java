@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.format.DateFormat;
+import android.widget.Toast;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -79,7 +80,7 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 	public void onStart(Intent intent, int startId) {
 		Debugger.verbose("Service onStart");
 		super.onStart(intent, startId);
-		EasyDoubanFmWidget.updateWidgetOnOffButton(this, true);
+		
 		startMusic(++this.sessionId, db.getSelectedChannel());
 	}
 	
@@ -154,13 +155,14 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		
 		
 		
-		
+		EasyDoubanFmWidget.updateWidgetOnOffButton(this, true);
         // get stored channel table
 		db = new DoubanFmDatabase(this);
 		
 		// get channel table if it's not existing
 		DoubanFmChannel[] chans = db.getChannels();
 		if (chans == null) {
+			EasyDoubanFmWidget.updateWidgetChannel(this, "正在下载频道列表...");
 			getChannelTable();
 			db.selectChannel(0);
 			//EasyDoubanFmWidget.updateWidgetChannel(this, "公共频道");
@@ -225,9 +227,29 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		filter.addAction(DoubanFmService.DOUBAN_FM_SELECT_CHANNEL);
 		//filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
 		filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+		filter.addAction(Intent.ACTION_MEDIA_BUTTON );
+		filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(receiver, filter); 
 		Debugger.verbose("DoubanFm Control Service registered");
+		
+		shakeDetector = new ShakeDetector(this);
+		
+		shakeListener = new ShakeDetector.OnShakeListener() {
+			
+			@Override
+			public void onShake() {
+				// TODO Auto-generated method stub
+				Debugger.info("Detected SHAKING!!!");
+				int sessionid = getSessionId() + 1;
+            	startMusic(sessionid, db.getSelectedChannel());
+			}
+		};
+		
+		shakeDetector.registerOnShakeListener(shakeListener);
+		shakeDetector.start();
 	}
+	private ShakeDetector.OnShakeListener shakeListener;
+	private ShakeDetector shakeDetector;// = new ShakeDetector(this);
 	private DoubanFmControlReceiver receiver;
 	
 	@Override
@@ -378,9 +400,12 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 			Debugger.error("Error get new music info: " + e.toString());
 			return null;
 		} catch (IOException e) {
-			Debugger.error("Error get new music info: " + e.toString());			return null;
+			Debugger.error("Error get new music info: " + e.toString());	
+			popNotify("网络连接发生故障。请检查您的网络连接，或者稍等片刻，然后按前进按钮或耳机线控按钮，或者甩动手机继续。");
+			return null;
 		} catch (Exception e) {
-			Debugger.error("Error get new music info: " + e.toString());			return null;
+			Debugger.error("Error get new music info: " + e.toString());			
+			return null;
 		}
 	}
 	
@@ -484,15 +509,22 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
 		
 		this.sessionId = -1;
 		unregisterReceiver(receiver); 
+		
+		if (shakeDetector != null ) {
+			shakeDetector.stop();
+			if (shakeListener != null)
+				shakeDetector.unregisterOnShakeListener(shakeListener);
+		}
+		
 		Debugger.verbose("DoubanFm Control Service unregistered");
 		receiver = null;
 		
 		if (picTask != null)
 			picTask.cancel(true);
 		
-		for (DownloadMusicTask t: downloadingList) {
-			t.cancel(true);
-		}
+		//for (DownloadMusicTask t: downloadingList) {
+		//	t.cancel(true);
+		//}
 		
 		if (musicThread != null) {
 			try  {
@@ -875,7 +907,11 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
     	downloadTask.execute(fmMusic);
     }
     
-    
+    private void popNotify(String msg)
+    {
+        Toast.makeText(DoubanFmService.this, msg,
+                Toast.LENGTH_LONG).show();
+    }
     
     public class DoubanFmControlReceiver extends BroadcastReceiver {  
         @Override  
@@ -888,6 +924,15 @@ public class DoubanFmService extends Service  implements IDoubanFmService {
             	Debugger.info("Douban service received START command");
             	int sessionid = getSessionId() + 1;
             	startMusic(sessionid, db.getSelectedChannel());
+            	return;
+            }
+            if (action.equals(Intent.ACTION_MEDIA_BUTTON)) {
+            	String keyevent = arg1.getStringExtra(Intent.EXTRA_KEY_EVENT);
+            	Debugger.info("Douban service received MEDIA BUTTON: " + keyevent);
+            	int sessionid = getSessionId() + 1;
+            	startMusic(sessionid, db.getSelectedChannel());
+            	abortBroadcast();
+		        setResultData(null);		        
             	return;
             }
             if (action.equals(DoubanFmService.DOUBAN_FM_PLAYPAUSE)) {
