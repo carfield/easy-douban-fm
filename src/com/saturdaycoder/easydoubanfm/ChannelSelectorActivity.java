@@ -18,8 +18,8 @@ public class ChannelSelectorActivity extends Activity {
 	//private Button buttonConfirmChannel;
 	//private Button buttonUpdateChannels;
 	private ListView listChannels;
-	DoubanFmDatabase db;
-	ArrayList<DoubanFmChannel> channelList;
+	Database db;
+	ArrayList<FmChannel> channelList;
 	IDoubanFmService mDoubanFm;
 	ServiceConnection mServiceConn;
 	@Override
@@ -34,9 +34,9 @@ public class ChannelSelectorActivity extends Activity {
 		//buttonUpdateChannels = (Button)findViewById(R.id.buttonUpdateChannels);
 		listChannels = (ListView)findViewById(R.id.lvChannels);
 		
-		db = new DoubanFmDatabase(this);
-		DoubanFmChannel[] channels = db.getChannels();
-		channelList = new ArrayList<DoubanFmChannel>();
+		db = new Database(this);
+		FmChannel[] channels = db.getChannels();
+		channelList = new ArrayList<FmChannel>();
 
 		mServiceConn = new ServiceConnection(){
         	public void onServiceConnected(ComponentName className, IBinder service) {
@@ -71,7 +71,7 @@ public class ChannelSelectorActivity extends Activity {
         		}
         		
                 
-                DoubanFmChannel chan = channelList.get(position);
+                FmChannel chan = channelList.get(position);
                 if (chan == null) {
                 	Debugger.error("null pointer in channelList");
                 }
@@ -91,7 +91,7 @@ public class ChannelSelectorActivity extends Activity {
 		ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String, Object>>(); 
 		
 		for (int i = 0; i < channelList.size(); ++i) {
-			DoubanFmChannel chan = channelList.get(i);
+			FmChannel chan = channelList.get(i);
 			
 			
 			String chanName = (chan.channelId == 0)? "公共频道": chan.name;
