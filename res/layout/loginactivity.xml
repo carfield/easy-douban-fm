@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:orientation="vertical">
+	<TextView 
+			android:text="@string/text_login_email" 
+			android:id="@+id/textView1" 
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content"
+			/>
+    
+    <EditText 
+    		android:text="shaobingsjtu@gmail.com" 
+    		android:id="@+id/editEmail" 
+    		android:layout_width="200dip" 
+    		android:layout_height="wrap_content"
+    		/>
+    <TextView 
+    		android:text="@string/text_login_passwd" 
+    		android:id="@+id/textView2" 
+    		android:layout_width="wrap_content" 
+    		android:layout_height="wrap_content"
+    		/>
+    <EditText 
+    		android:text="09111616" 
+    		android:id="@+id/editPasswd" 
+    		android:layout_width="200dip" 
+    		android:layout_height="wrap_content"
+    		/>
+    <Button 
+    		android:text="@string/button_confirm_login_text" 
+    		android:id="@+id/buttonLogin" 
+    		android:layout_width="wrap_content" 
+    		android:layout_height="wrap_content"
+    		/>
+
+</LinearLayout>

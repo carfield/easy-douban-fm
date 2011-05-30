@@ -36,21 +36,26 @@
             </intent-filter> 
         </service >
         
-        <service android:name=".DownloadService"> 
+        <!-- <service android:name=".DownloadService"> 
             <intent-filter> 
                 <action android:name ="com.easydoubanfm.DownloadService" /> 
             </intent-filter> 
-        </service >
+        </service > -->
          
         <activity android:name=".ChannelSelectorActivity" 
                   android:theme="@android:style/Theme.Dialog"
                   android:label="" >
         </activity>
         
-        <!-- <activity android:name=".PreferenceActivity" 
+        <activity android:name=".PreferenceActivity" 
                   android:theme="@android:style/Theme.Dialog"
                   android:label="" >
-        </activity> -->
+        </activity>
+        
+        <activity android:name=".LoginActivity" 
+                  android:theme="@android:style/Theme.Dialog"
+                  android:label="" >
+        </activity>
         
     </application>
 </manifest>

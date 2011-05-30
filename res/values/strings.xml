@@ -7,4 +7,19 @@
     <string name="intro_main1">第一步，在桌面添加“我的豆瓣电台”小部件，按小部件开关启动豆瓣电台；\n第二步，按前进按钮，或者按耳机线控按钮，或者甩动手机来切换歌曲。\n</string>
     <string name="intro_main2">下面是小部件各个按钮的介绍：
     </string>
+    <string name="button_login_text">登录豆瓣</string>
+    <string name="button_confirm_login_text">登录</string>
+    <string name="text_login_email">E-Mail地址</string>
+    <string name="text_login_passwd">密码</string>
+    <string name="text_channel_unselected">未选择频道</string>
+    <string name="text_channel_updating">正在更新频道列表</string>
+    <string name="public_channel_name">公共频道</string>
+    <string name="notify_login_fail">登录失败</string>
+    <string name="text_network_error">网络发生故障</string>
+    <string name="text_downloading">下载中</string>
+    <string name="text_download_ok">下载完成</string>
+    <string name="text_download_fail">下载失败</string>
+    <string name="text_login_inprocess">正在登录</string>
+    <string name="button_confirm_logout_text">退出登录</string>
+    <string name="notify_logout_succ">您已退出登录</string>
 </resources>
