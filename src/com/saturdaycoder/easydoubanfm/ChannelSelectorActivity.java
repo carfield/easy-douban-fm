@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.view.View;
 import android.view.Window;
@@ -22,18 +23,22 @@ public class ChannelSelectorActivity extends Activity {
 	ArrayList<FmChannel> channelList;
 	IDoubanFmService mDoubanFm;
 	ServiceConnection mServiceConn;
+	Button buttonLogin;
+	Button buttonLogout;
+	//bool loggedIn;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);  
 		setContentView(R.layout.channelselector);
-		
-		
+
 		
 		//buttonConfirmChannel = (Button)findViewById(R.id.buttonConfirmChannel);
 		//buttonUpdateChannels = (Button)findViewById(R.id.buttonUpdateChannels);
 		listChannels = (ListView)findViewById(R.id.lvChannels);
-		
+		buttonLogin = (Button)findViewById(R.id.buttonLogin);
+		buttonLogout = (Button)findViewById(R.id.buttonLogout);
 		db = new Database(this);
 		FmChannel[] channels = db.getChannels();
 		channelList = new ArrayList<FmChannel>();
@@ -47,7 +52,7 @@ public class ChannelSelectorActivity extends Activity {
         	}
         };
         bindService(new Intent(ChannelSelectorActivity.this, DoubanFmService.class), 
-        		mServiceConn, Context.BIND_AUTO_CREATE);
+        		mServiceConn, 0);//Context.BIND_AUTO_CREATE);
 		
 		if (channels != null) {
 			for (int i = 0; i < channels.length; ++i) {
@@ -56,7 +61,31 @@ public class ChannelSelectorActivity extends Activity {
 		}
 		
 		
+		buttonLogin.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent();
+    			intent.setClass(ChannelSelectorActivity.this, LoginActivity.class);
+    			startActivityForResult(intent, 0);
+    			
+			}
+		});
 		
+		buttonLogout.setOnClickListener(new Button.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//Intent intent = new Intent();
+    			//intent.setClass(ChannelSelectorActivity.this, LoginActivity.class);
+    			//startActivityForResult(intent, 0);
+				Preference.setLogin(ChannelSelectorActivity.this, false);
+				Preference.setAccountPasswd(ChannelSelectorActivity.this, null);
+				
+				popNotify(getResources().getString(R.string.notify_logout_succ));
+				
+				buttonLogin.setVisibility(Button.VISIBLE);
+				buttonLogout.setVisibility(Button.GONE);
+			}
+		});
 
 		
 		listChannels.setOnItemClickListener(new OnItemClickListener() {
@@ -87,14 +116,41 @@ public class ChannelSelectorActivity extends Activity {
 		loadChannelList();
 	}
 	
+    @Override
+    protected void onResume() {
+    	boolean loggedIn = Preference.getLogin(this);
+		if (!loggedIn) {
+			buttonLogin.setVisibility(Button.VISIBLE);
+			buttonLogout.setVisibility(Button.GONE);
+		} else {
+			buttonLogin.setVisibility(Button.GONE);
+			buttonLogout.setVisibility(Button.VISIBLE);
+		}
+		super.onResume();
+    }
+	
+	 @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+    	Debugger.debug( "onActivityResult: " + requestCode + ", " + resultCode );
+    	switch (requestCode) {
+    	case 0: {
+    		loadChannelList();
+    	}
+    	default:
+    		break;
+    	}
+    }
+	
 	private void loadChannelList() {
 		ArrayList<HashMap<String, Object>> listItem = new ArrayList<HashMap<String, Object>>(); 
 		
 		for (int i = 0; i < channelList.size(); ++i) {
 			FmChannel chan = channelList.get(i);
 			
+			boolean login = Preference.getLogin(this);
 			
-			String chanName = (chan.channelId == 0)? "公共频道": chan.name;
+			String chanName = chan.getDisplayName(login);//(chan.channelId == 0)? "公共频道": chan.name;
 			
 		    HashMap<String, Object> map = new HashMap<String, Object>(); 
 		    
@@ -120,10 +176,11 @@ public class ChannelSelectorActivity extends Activity {
 		super.onStart();
 	}
 	
-	@Override
-	protected void onResume() {
-		super.onResume();
-	}
+    private void popNotify(String msg)
+    {
+        Toast.makeText(ChannelSelectorActivity.this, msg,
+                Toast.LENGTH_LONG).show();
+    }
 	
 	@Override
 	protected void onPause() {

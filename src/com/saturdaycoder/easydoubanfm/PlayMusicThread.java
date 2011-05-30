@@ -30,6 +30,7 @@ public class PlayMusicThread extends Thread {
 			@Override
 			public boolean onError(MediaPlayer mp, int what, int extra) {
 				reportState(PlayState.ERROR);
+				Debugger.info("media player onError");
 			    return true;
 			}
 		});
@@ -37,7 +38,7 @@ public class PlayMusicThread extends Thread {
 			
 			@Override
 			public boolean onInfo(MediaPlayer mp, int what, int extra) {
-				// TODO Auto-generated method stub
+				Debugger.info("media player onInfo");
 				return false;
 			}
 		});
@@ -45,26 +46,21 @@ public class PlayMusicThread extends Thread {
 			
 			@Override
 			public void onSeekComplete(MediaPlayer mp) {
-				// TODO Auto-generated method stub
+				Debugger.info("media player onSeekComplete");
 				
 			}
 		});
-		/*mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+		mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 			
 			@Override
 			public void onPrepared(MediaPlayer mp) {
-				try {
-					mp.seekTo(0);
-					mp.start();
-				} catch (IllegalStateException e) {
-					Debugger.error("Illegal state of mediaplayer: " + e.toString());
-					reportState(PlayState.ERROR);
-				}
+				Debugger.info("media player onPrepare");
 			}
-		});*/
+		});
 		mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
+				Debugger.info("media player onCompletion");
 				reportState(PlayState.COMPLETED);
 			}
 		});

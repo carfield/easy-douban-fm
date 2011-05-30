@@ -43,12 +43,25 @@ public class Preference {
 	
 	public static boolean getLogin(Context context) {
 		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getBoolean("login", true);
+		return pref.getBoolean("login", false);
 	}
 	
 	public static String getAccountEmail(Context context) {
 		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
 		return pref.getString("email", null);
+	}
+	public static void setAccountEmail(Context context, String email) {
+		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putString("email", email);
+		ed.commit();
+	}
+	
+	public static void setAccountPasswd(Context context, String passwd) {
+		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putString("passwd", passwd);
+		ed.commit();
 	}
 	
 	public static String getAccountPasswd(Context context) {

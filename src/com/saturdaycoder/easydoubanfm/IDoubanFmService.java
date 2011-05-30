@@ -6,6 +6,7 @@ public interface IDoubanFmService {
 	//void stopMusic();
 	void likeMusic(boolean like);
 	void banMusic();
-	void closeService();
+	void closeFM();
 	void selectChannel(int id);
+	boolean login(String email, String passwd);
 }

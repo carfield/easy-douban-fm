@@ -4,6 +4,7 @@ import android.graphics.*;
 import android.appwidget.AppWidgetProvider;
 import android.appwidget.AppWidgetManager;
 //import android.os.IBinder;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.content.ComponentName;
