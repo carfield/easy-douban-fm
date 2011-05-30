@@ -75,6 +75,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private final IBinder mBinder = new LocalBinder();
 	private GetPictureTask picTask = null;
 	private MediaScannerConnection.MediaScannerConnectionClient scannerClient;
+	private NotificationManager notificationManager;
 	//private IDownloadService mDownload;
 	//private ServiceConnection mDownloadServiceConn;
 	//private boolean mDownloadBind;
@@ -182,6 +183,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public void onCreate() {
 		super.onCreate();
 		Debugger.debug("service onCreate");
+		
+		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		
 		if (downloader == null)
 			downloader = new Downloader(this);
@@ -731,9 +734,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
             Debugger.debug("received broadcast: " + action);
             if (action.equals(ACTION_CLEAR_NOTIFICATION)) {
 				int sessionId = arg1.getIntExtra(EXTRA_DOWNLOAD_SESSION, -1);
-				NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 				if (sessionId != -1) {
-					nm.cancel(sessionId);
+					notificationManager.cancel(sessionId);
+					notifications.remove(sessionId);
 				}
 			}
 			if (action.equals(ACTION_DOWNLOAD)) {
@@ -855,10 +858,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	//private static final int 
 	
 	
-
+	private Map<Integer, Notification> notifications = new HashMap<Integer, Notification>(); 
 	
 	private void notifyDownloading(int sessionId, String url, String filename) {
-		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		
 		
 		Intent i = new Intent(ACTION_NULL);
 		i.putExtra(EXTRA_DOWNLOAD_SESSION, sessionId);
@@ -870,13 +873,24 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		Notification notification = new Notification(android.R.drawable.stat_sys_download, 
 				getResources().getString(R.string.text_downloading),
                 System.currentTimeMillis());
-        notification.setLatestEventInfo(this, getResources().getString(R.string.text_downloading), 
-        		filename, pi);
-        nm.notify(sessionId, notification);
+		
+		notification.contentView = new android.widget.RemoteViews(getPackageName(),
+				R.layout.download_notification); 
+		notification.contentView.setTextViewText(R.id.textDownloadFilename, filename);
+		notification.contentView.setProgressBar(R.id.progressDownloadNotification, 100,0, false);
+
+		notifications.put(sessionId, notification);
+		
+        //notification.setLatestEventInfo(this, getResources().getString(R.string.text_downloading), 
+        //		filename, pi);
+		//Intent notificationIntent = new Intent(DoubanFmService.ACTION_NULL); 
+    	//PendingIntent contentIntent = PendingIntent.getBroadcast(this,0,notificationIntent,0); 
+    	notification.contentIntent = pi;      
+
+		notificationManager.notify(sessionId, notification);
 	}
 	
 	private void notifyDownloadOk(int sessionId, String url, String filename) {
-		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 				
 		Intent i = new Intent(ACTION_CLEAR_NOTIFICATION);
 		i.putExtra(EXTRA_DOWNLOAD_SESSION, sessionId);
@@ -890,11 +904,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
                 System.currentTimeMillis());
         notification.setLatestEventInfo(this, getResources().getString(R.string.text_download_ok), 
         		filename, pi);
-        nm.notify(sessionId, notification);
+        notificationManager.notify(sessionId, notification);
 	}
 	
 	private void notifyDownloadFail(int sessionId, String url, String filename) {
-		NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		
 		Intent i = new Intent(ACTION_CLEAR_NOTIFICATION);
 		i.putExtra(EXTRA_DOWNLOAD_SESSION, sessionId);
@@ -908,7 +921,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
                 System.currentTimeMillis());
         notification.setLatestEventInfo(this, getResources().getString(R.string.text_download_fail), 
         		filename, pi);
-        nm.notify(sessionId, notification);
+        notificationManager.notify(sessionId, notification);
 		
 	}
 	
@@ -920,7 +933,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final String EXTRA_DOWNLOAD_FILENAME = "filename";
 	
 	private class Downloader { 
-		private static final int DOWNLOAD_BUFFER = 81920;
+		private static final int DOWNLOAD_BUFFER = 102400;
 		private class DownloadTask extends AsyncTask<String, Integer, Integer> {
 			private int sessionId;
 			private int progress;
@@ -937,6 +950,14 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	    	protected void onProgressUpdate(Integer... progress) {
 				this.progress = progress[0];
 				Debugger.verbose("Download progress: " + this.progress);
+				Notification n = notifications.get(this.sessionId);
+				n.contentView.setProgressBar(R.id.progressDownloadNotification, 
+						100, this.progress, false);
+				String text = String.valueOf(this.progress) + "%";
+				if (totalBytes != -1 && downloadedBytes != -1)
+					text += " (" + downloadedBytes/1024 + "K/" + totalBytes/1024 + "K)";
+				n.contentView.setTextViewText(R.id.textDownloadSize, text);
+				notificationManager.notify(this.sessionId, n);
 			}
 			
 			@Override
@@ -980,7 +1001,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					closeService();
 				}
 			}
-			
+			private long totalBytes = -1;
+			private long downloadedBytes = -1;
 			@Override
 	    	protected Integer doInBackground(String... params) {
 				// param 0: url of music
@@ -1000,9 +1022,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	    				String.valueOf(Preference.getClientVersion(DoubanFmService.this)));
 
 	    		HttpResponse httpResponse = null;
+	    		
+	    		HttpParams hp = new BasicHttpParams();
+	    		int timeoutConnection = 10000;
+	    		HttpConnectionParams.setConnectionTimeout(hp, timeoutConnection);
+	    		int timeoutSocket = 30000;
+	    		HttpConnectionParams.setSoTimeout(hp, timeoutSocket);
+	    		
 	    		try {
-	    			httpResponse = new DefaultHttpClient(httpParameters).execute(httpGet);
-	    			publishProgress(5);
+	    			httpResponse = new DefaultHttpClient(hp).execute(httpGet);
+	    			//publishProgress(5);
 	    		} catch (Exception e) {
 	    			Debugger.error("Error getting response of downloading music: " + e.toString());
 	    			return DOWNLOAD_ERROR_IOERROR;
@@ -1037,26 +1066,27 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					Debugger.error("Error writing file to external storage: " + e.toString());
 					return DOWNLOAD_ERROR_IOERROR;
 				}
-				publishProgress(10);
+				//publishProgress(10);
 				
 				// step 3. write into file after each read
 				byte b[] = new byte[DOWNLOAD_BUFFER];
 				try {
 					InputStream is = httpResponse.getEntity().getContent();
-					long len = httpResponse.getEntity().getContentLength();
-					int l = 0;
-					while (l < len) {
+					//long len = httpResponse.getEntity().getContentLength();
+					totalBytes = httpResponse.getEntity().getContentLength();
+					downloadedBytes = 0;
+					while (downloadedBytes < totalBytes) {
 						if (isCancelled())
 							return DOWNLOAD_ERROR_CANCELLED;
-						int tmpl = is.read(b, l, DOWNLOAD_BUFFER);
+						int tmpl = is.read(b, 0, DOWNLOAD_BUFFER);
 						if (tmpl == -1)
 							break;
 						
-						Debugger.debug("writing file " + tmpl + ", " + l + "/" + len);
+						Debugger.debug("writing file " + tmpl + ", " + downloadedBytes + "/" + totalBytes);
 						os.write(b, 0, tmpl);
-						l += tmpl;
+						downloadedBytes += tmpl;
 						
-						double prog = 10 + ((double)l / len * 90);
+						double prog = ((double)downloadedBytes / totalBytes * 100);
 						publishProgress((int)prog);
 						
 					}
