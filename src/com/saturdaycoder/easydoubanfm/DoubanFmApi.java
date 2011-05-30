@@ -1,5 +1,6 @@
 package com.saturdaycoder.easydoubanfm;
 import org.json.*;
+import org.apache.http.params.*;
 
 import java.net.SocketException;
 import java.util.Date;
@@ -22,6 +23,12 @@ public class DoubanFmApi {
 	public static final char TYPE_RATE = 'r';
 	public static final char TYPE_UNRATE = 'u';
 	
+	private static HttpParams httpParams = null;
+	
+	public static void setHttpParameters(HttpParams params) {
+		DoubanFmApi.httpParams = params;
+	}
+	
 	public static FmChannel[] getChannelTable() {
 		Debugger.verbose("Start SCANNING channel table");
 		String uri = "http://www.douban.com:80/j/app/radio/channels?";
@@ -35,7 +42,18 @@ public class DoubanFmApi {
 				Debugger.verbose(h.toString());
 			}
 			
-			HttpResponse httpResponse = new DefaultHttpClient().execute(httpGet);
+			DefaultHttpClient hc = null;
+			if (httpParams == null) {
+				hc = new DefaultHttpClient();
+			}
+			else {
+				hc = new DefaultHttpClient(httpParams);
+				Debugger.info("set timeout for login: " 
+						+ HttpConnectionParams.getConnectionTimeout(hc.getParams())
+						+ "/" 
+						+ HttpConnectionParams.getSoTimeout(hc.getParams()));
+			}
+			HttpResponse httpResponse = hc.execute(httpGet);
 			Debugger.verbose("response is:");
 			Debugger.verbose(httpResponse.getStatusLine().toString());
 			for (Header h: httpResponse.getAllHeaders()) {
@@ -129,7 +147,18 @@ public class DoubanFmApi {
 				Debugger.verbose(h.toString());
 			}
 			
-			HttpResponse httpResponse = new DefaultHttpClient().execute(httpGet);
+			DefaultHttpClient hc = null;
+			if (httpParams == null) {
+				hc = new DefaultHttpClient();
+			}
+			else {
+				hc = new DefaultHttpClient(httpParams);
+				Debugger.info("set timeout for login: " 
+						+ HttpConnectionParams.getConnectionTimeout(hc.getParams())
+						+ "/" 
+						+ HttpConnectionParams.getSoTimeout(hc.getParams()));
+			}
+			HttpResponse httpResponse = hc.execute(httpGet);
 			Debugger.verbose("response is:");
 			Debugger.verbose(httpResponse.getStatusLine().toString());
 			for (Header h: httpResponse.getAllHeaders()) {
@@ -286,7 +315,19 @@ public class DoubanFmApi {
 				Debugger.verbose(h.toString());
 			}
 			
-			HttpResponse httpResponse = new DefaultHttpClient().execute(httpGet);
+			DefaultHttpClient hc = null;
+			if (httpParams == null) {
+				hc = new DefaultHttpClient();
+			}
+			else {
+				
+				hc = new DefaultHttpClient(httpParams);
+				Debugger.info("set timeout for login: " 
+						+ HttpConnectionParams.getConnectionTimeout(hc.getParams())
+						+ "/" 
+						+ HttpConnectionParams.getSoTimeout(hc.getParams()));
+			}
+			HttpResponse httpResponse = hc.execute(httpGet);
 			Debugger.verbose("response is:");
 			Debugger.verbose(httpResponse.getStatusLine().toString());
 			for (Header h: httpResponse.getAllHeaders()) {

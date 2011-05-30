@@ -1,5 +1,6 @@
 package com.saturdaycoder.easydoubanfm;
 import android.app.Notification;
+import android.media.*;
 import android.os.Handler;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -73,10 +74,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private PlayMusicThread playThread = null;	
 	private final IBinder mBinder = new LocalBinder();
 	private GetPictureTask picTask = null;
+	private MediaScannerConnection.MediaScannerConnectionClient scannerClient;
 	//private IDownloadService mDownload;
 	//private ServiceConnection mDownloadServiceConn;
 	//private boolean mDownloadBind;
 	private Database db;
+	HttpParams httpParameters;
 	private char lastStopReason;
 	private Handler mainHandler;
 	//private ArrayList<DownloadInfo> pendingDownloads;
@@ -182,6 +185,14 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		if (downloader == null)
 			downloader = new Downloader(this);
+		
+		httpParameters = new BasicHttpParams();
+		int timeoutConnection = Preference.getConnectTimeout(this);
+		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+		int timeoutSocket = Preference.getSocketTimeout(this);
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+		
+		DoubanFmApi.setHttpParameters(httpParameters);
 	}
 	private ShakeDetector.OnShakeListener shakeListener;
 	private ShakeDetector shakeDetector;// = new ShakeDetector(this);
@@ -685,7 +696,24 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     		fileextension = ".mp3";
     	else fileextension = "." + tmp;//.substring(indDot);
     	
-    	return artist + "_-_" + title + fileextension;
+    	String name = artist + "_-_" + title;
+    	Debugger.debug("before transform: " + name);
+    	name = name.replace(" ", "_");
+    	name = name.replace("/", "-");
+    	name = name.replace("\\", "-");
+    	name = name.replace(":", "-");
+    	name = name.replace("?", "-");
+    	name = name.replace("*", "-");
+    	name = name.replace("\"", "-");
+    	name = name.replace("<", "-");
+    	name = name.replace(">", "-");
+    	name = name.replace("|", "-");
+    	
+    	int namelen = (name.length() + fileextension.length() > 255)? 
+    			(255 - fileextension.length()): name.length();
+    	name = name.substring(0, namelen);
+    	Debugger.debug("after transform: " + name + fileextension);
+    	return name + fileextension;
     }
     
     private void popNotify(String msg)
@@ -892,6 +920,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final String EXTRA_DOWNLOAD_FILENAME = "filename";
 	
 	private class Downloader { 
+		private static final int DOWNLOAD_BUFFER = 81920;
 		private class DownloadTask extends AsyncTask<String, Integer, Integer> {
 			private int sessionId;
 			private int progress;
@@ -907,7 +936,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			@Override
 	    	protected void onProgressUpdate(Integer... progress) {
 				this.progress = progress[0];
-				Debugger.debug("Download progress: " + this.progress);
+				Debugger.verbose("Download progress: " + this.progress);
 			}
 			
 			@Override
@@ -919,6 +948,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					break;
 				case DOWNLOAD_ERROR_IOERROR:
 				case DOWNLOAD_ERROR_CANCELLED:
+					File f = getDownloadFile(filename);
+					if (f.exists()) {
+						f.delete();
+					}
 					Debugger.info("Download failed");
 					notifyDownloadFail(this.sessionId, this.url, this.filename);
 					break;
@@ -935,6 +968,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			
 			@Override
 	    	protected void onCancelled() {
+				File f = getDownloadFile(filename);
+				if (f.exists()) {
+					f.delete();
+				}
+				
 				tasks.remove(this.sessionId);
 				notifyDownloadFail(this.sessionId, this.url, this.filename);
 				// exit service if no pending tasks
@@ -963,17 +1001,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
 	    		HttpResponse httpResponse = null;
 	    		try {
-	    			HttpParams httpParameters = new BasicHttpParams();
-	    			// Set the timeout in milliseconds until a connection is established.
-	    			int timeoutConnection = 3000;
-	    			HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-	    			// Set the default socket timeout (SO_TIMEOUT) 
-	    			// in milliseconds which is the timeout for waiting for data.
-	    			int timeoutSocket = 5000;
-	    			HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-	    			
 	    			httpResponse = new DefaultHttpClient(httpParameters).execute(httpGet);
-	    			publishProgress(10);
+	    			publishProgress(5);
 	    		} catch (Exception e) {
 	    			Debugger.error("Error getting response of downloading music: " + e.toString());
 	    			return DOWNLOAD_ERROR_IOERROR;
@@ -986,40 +1015,14 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	    			return statuscode;
 				}
 				
+				
+				
 				if (isCancelled()) {
 					return DOWNLOAD_ERROR_CANCELLED;
 				}
-				
-				byte b[] = null;
-				try {
-					InputStream is = httpResponse.getEntity().getContent();
-					long len = httpResponse.getEntity().getContentLength();
-					int length = (int)(len);
-					b = new byte[length];
-					int l = 0;
-					while (l < length) {
-						if (isCancelled())
-							return DOWNLOAD_ERROR_CANCELLED;
-						int tmpl = is.read(b, l, length);
-						if (tmpl == -1)
-							break;
-						l += tmpl;
-						double prog = 10 + ((double)l / length * 80);
-						publishProgress((int)prog);
-						//Debugger.info("read " + prog + "%");
-					}
-					
-				} catch (Exception e) {
-					Debugger.error("Error getting content of music: " + e.toString());
-					return DOWNLOAD_ERROR_IOERROR;
-				}
-				
-				Debugger.info("got all bytes");
-				
-				if (isCancelled())
-					return DOWNLOAD_ERROR_CANCELLED;
-				
-				// Step 2. write into external storage
+
+				// step 2. create file
+				OutputStream os = null;
 				try {
 					File musicfile = null;
 					musicfile = getDownloadFile(filename);
@@ -1029,16 +1032,43 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 						return DOWNLOAD_ERROR_IOERROR;
 					}
 					Debugger.info("got download file, start writing");
-					OutputStream os = new FileOutputStream(musicfile);
-					os.write(b);
+					os = new FileOutputStream(musicfile);
+				} catch (Exception e) {
+					Debugger.error("Error writing file to external storage: " + e.toString());
+					return DOWNLOAD_ERROR_IOERROR;
+				}
+				publishProgress(10);
+				
+				// step 3. write into file after each read
+				byte b[] = new byte[DOWNLOAD_BUFFER];
+				try {
+					InputStream is = httpResponse.getEntity().getContent();
+					long len = httpResponse.getEntity().getContentLength();
+					int l = 0;
+					while (l < len) {
+						if (isCancelled())
+							return DOWNLOAD_ERROR_CANCELLED;
+						int tmpl = is.read(b, l, DOWNLOAD_BUFFER);
+						if (tmpl == -1)
+							break;
+						
+						Debugger.debug("writing file " + tmpl + ", " + l + "/" + len);
+						os.write(b, 0, tmpl);
+						l += tmpl;
+						
+						double prog = 10 + ((double)l / len * 90);
+						publishProgress((int)prog);
+						
+					}
 					os.flush();
 					os.close();
 					publishProgress(100);
 					return DOWNLOAD_ERROR_OK;
 				} catch (Exception e) {
-					Debugger.error("Error writing file to external storage: " + e.toString());
+					Debugger.error("Error getting content of music: " + e.toString());
 					return DOWNLOAD_ERROR_IOERROR;
 				}
+				
 			}
 		}
 		private Context context;

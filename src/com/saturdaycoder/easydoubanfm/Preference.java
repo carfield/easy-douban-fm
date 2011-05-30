@@ -25,6 +25,16 @@ public class Preference {
 		return true;
 	}
 	
+	public static int getConnectTimeout(Context context) {
+		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		return pref.getInt("connect_timeout", 3000);
+	}
+	
+	public static int getSocketTimeout(Context context) {
+		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		return pref.getInt("socket_timeout", 5000);
+	}
+	
 	public static void saveAccount(Context context, String email, String passwd) {
 		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
