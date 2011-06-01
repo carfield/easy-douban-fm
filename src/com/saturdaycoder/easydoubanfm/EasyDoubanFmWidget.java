@@ -244,13 +244,18 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			remoteViews.setOnClickPendingIntent(R.id.buttonPlaypause, stopPendingIntent);	
 			
 			// Download button
-			Intent downloadIntent = new Intent(DoubanFmService.CONTROL_DOWNLOAD);
-			PendingIntent downloadPendingIntent = PendingIntent.getBroadcast(context, 
+			Intent downloadIntent = new Intent(context, DoubanFmService.class);
+			downloadIntent.putExtra(DoubanFmService.EXTRA_BINDSERVICE_TYPE, DoubanFmService.BINDTYPE_DOWNLOAD);
+			downloadIntent.setData((android.net.Uri.parse("foobar://"+android.os.SystemClock.elapsedRealtime())));
+			PendingIntent downloadPendingIntent = PendingIntent.getService(context, 
 					0, downloadIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.buttonDownload, downloadPendingIntent);
 			
 			// Off button
 			Intent openIntent = new Intent(context, DoubanFmService.class);
+			openIntent.putExtra(DoubanFmService.EXTRA_BINDSERVICE_TYPE, DoubanFmService.BINDTYPE_FM);
+			openIntent.setData((android.net.Uri.parse("foobar://"+android.os.SystemClock.elapsedRealtime())));
+			//Intent openIntent = new Intent(DoubanFmService.ACTION_NULL);
 			PendingIntent openPendingIntent = PendingIntent.getService(context, 
 					0, openIntent, 0);
 			remoteViews.setOnClickPendingIntent(R.id.buttonOnoff, openPendingIntent);

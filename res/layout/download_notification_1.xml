@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<RelativeLayout
+<LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
-  android:layout_height="100dip"
+  android:layout_height="fill_parent"
   android:orientation="vertical"
   >
 <TextView 
 		android:id="@+id/textDownloadFilename"
-		android:layout_alignParentTop="true"
- 		android:paddingTop="2dip"
+		android:paddingTop="2dip"
  		android:paddingBottom="2dip"  
         android:layout_width="fill_parent"    
         android:layout_height="20dip" 
@@ -18,28 +17,16 @@
         android:text=""
         />   
 <ProgressBar 
-		android:layout_below="@+id/textDownloadFilename"
-		android:layout_above="@+id/textDownloadSize"
 		android:id="@+id/progressDownloadNotification" 
 		android:paddingBottom="2dip"
 		android:paddingTop="2dip"
         android:layout_width="fill_parent" 
-        android:layout_height="fill_parent" 
+        android:layout_height="20dip" 
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_gravity="center_vertical"/>
-<Button 
-		android:id="@+id/buttonDownloadCanel"
-		android:layout_alignParentRight="true"
-		android:paddingLeft="2dip"
-		android:paddingRight="2dip"
-		android:layout_alignTop="@+id/progressDownloadNotification"
-		android:layout_width="100dip"
-		android:text="Cancel"
-		android:textColor="#000000"
-		/>      
+
 <TextView 
 		android:id="@+id/textDownloadSize" 
-		android:layout_alignParentBottom="true"
 		android:paddingBottom="2dip"
 		android:paddingLeft="20dip"
 		android:singleLine="true"
@@ -48,5 +35,5 @@
         android:textSize="12dip" 
         android:textColor="#000000"
         android:text=""
-        />       
-</RelativeLayout>
+        />  
+</LinearLayout>

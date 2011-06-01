@@ -167,6 +167,11 @@ public class PlayMusicThread extends Thread {
 					//if (mPlayer.isPlaying()) {
 					//	mPlayer.stop();
 					//}
+					mAudioManager.requestAudioFocus(mAudioFocusListener, 
+													AudioManager.STREAM_MUSIC,
+													AudioManager.AUDIOFOCUS_GAIN);
+					
+					
 					mPlayer.reset();
 					Bundle b = msg.getData();
 					String url = b.getString("url");
