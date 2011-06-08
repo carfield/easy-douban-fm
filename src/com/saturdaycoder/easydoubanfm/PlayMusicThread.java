@@ -7,15 +7,18 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import java.io.IOException;
+
 public class PlayMusicThread extends Thread {
 	//private String url;
 	private MediaPlayer mPlayer;
 	private Handler mHandler;
 	private Handler mainHandler;
+	private AudioManager mAudioManager;
 	
-	public PlayMusicThread(Handler mainHandler) { //MediaPlayer mPlayer) {
+	public PlayMusicThread(Handler mainHandler, AudioManager am) { 
 		//this.url = url;
 		this.mainHandler = mainHandler;
+		this.mAudioManager = am;
 		
 		mPlayer = new MediaPlayer();
 		mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -167,11 +170,7 @@ public class PlayMusicThread extends Thread {
 					//if (mPlayer.isPlaying()) {
 					//	mPlayer.stop();
 					//}
-					mAudioManager.requestAudioFocus(mAudioFocusListener, 
-													AudioManager.STREAM_MUSIC,
-													AudioManager.AUDIOFOCUS_GAIN);
-					
-					
+				
 					mPlayer.reset();
 					Bundle b = msg.getData();
 					String url = b.getString("url");
@@ -207,6 +206,7 @@ public class PlayMusicThread extends Thread {
 				}
 				case RESUME: {
 					mPlayer.start();
+					break;
 				}
 				case STOP: {
 					if (mPlayer.isPlaying()) {

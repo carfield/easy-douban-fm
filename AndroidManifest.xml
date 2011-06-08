@@ -3,11 +3,12 @@
       package="com.saturdaycoder.easydoubanfm"
       android:versionCode="3"
       android:versionName="0.3">
-    <uses-sdk android:minSdkVersion="5"/>
+    <uses-sdk android:minSdkVersion="7"/>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" /> -->
     <uses-permission android:name="android.permission.INTERNET" /> 
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     
@@ -20,7 +21,7 @@
             </intent-filter>
         </activity>
         
-        <receiver android:name=".EasyDoubanFmWidget"
+        <receiver android:name="EasyDoubanFmWidget"
                   android:label="@string/appwidget_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -30,29 +31,36 @@
             </meta-data>
         </receiver>
         
-		<service android:name=".DoubanFmService"> 
+        <!-- <receiver android:name="MediaButtonListener">
+        	<intent-filter>
+        		<action android:name="android.intent.action.MEDIA_BUTTON" />
+        	</intent-filter>
+        </receiver> -->
+        
+        <receiver android:name="PhoneCallListener">
+        	<intent-filter>
+        		<action android:name="android.intent.action.PHONE_STATE" />
+        	</intent-filter>
+        </receiver>
+        
+		<service android:name="DoubanFmService"> 
             <intent-filter> 
                 <action android:name ="com.easydoubanfm.DoubanFmService" /> 
             </intent-filter> 
         </service >
         
-        <!-- <service android:name=".DownloadService"> 
-            <intent-filter> 
-                <action android:name ="com.easydoubanfm.DownloadService" /> 
-            </intent-filter> 
-        </service > -->
-         
-        <activity android:name=".ChannelSelectorActivity" 
+        
+        <activity android:name="ChannelSelectorActivity" 
                   android:theme="@android:style/Theme.Dialog"
                   android:label="" >
         </activity>
         
-        <activity android:name=".PreferenceActivity" 
+        <activity android:name="PreferenceActivity" 
                   android:theme="@android:style/Theme.Dialog"
                   android:label="" >
         </activity>
         
-        <activity android:name=".LoginActivity" 
+        <activity android:name="LoginActivity" 
                   android:theme="@android:style/Theme.Dialog"
                   android:label="" >
         </activity>

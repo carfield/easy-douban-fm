@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.Toast;
 import android.content.*;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.os.*;
 import android.view.*;
 
@@ -56,26 +57,22 @@ public class LoginActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				showDialog(0);
-				try {
+				/*try {
 					Thread.sleep(1000);
 				} catch (Exception e) {
 					
-				}
+				}*/
 				email = editEmail.getText().toString();
 				passwd = editPasswd.getText().toString();
 				Debugger.debug("pressed login");
-				if (mDoubanFm.login(email, passwd)) {
-					dismissDialog(0);
-					Debugger.debug("pressed login succ");
-					Preference.setAccountEmail(LoginActivity.this, email);
-					Preference.setAccountPasswd(LoginActivity.this, passwd);
-					Preference.setLogin(LoginActivity.this, true);
-					LoginActivity.this.setResult(RESULT_OK, intent);
-					LoginActivity.this.finish();
-				} else {
-					dismissDialog(0);
-					popNotify(getResources().getString(R.string.notify_login_fail));
-				}
+				//if (mDoubanFm.login(email, passwd)) {
+					
+				LoginTask loginTask = new LoginTask();
+				loginTask.execute(email, passwd);
+				//} else {
+				//	dismissDialog(0);
+					
+				//}
 			}
 		});
 
@@ -107,4 +104,50 @@ public class LoginActivity extends Activity {
         return null;
     }
 
+    
+    private class LoginTask extends AsyncTask<String, Integer, Boolean> {
+    	
+    	@Override
+    	protected void onCancelled () {
+    		Debugger.info("GetPictureTask is cancelled");
+    		
+    	}
+    	@Override
+    	protected Boolean doInBackground(String... params) {
+    		if (params.length < 2 || mDoubanFm == null) {
+    			return false;
+    		}
+    		
+    		try {
+    			mDoubanFm.login(params[0], params[1]);
+    			return true;
+    		} catch (Exception e) {
+    			return false;
+    		}
+    		
+    	}
+    	@Override
+    	protected void onProgressUpdate(Integer... progress) {
+    		
+        }
+    	@Override
+        protected void onPostExecute(Boolean result) {
+    		try {
+    			dismissDialog(0);
+    		} catch (Exception e) {
+    			
+    		}
+    		if (result) {
+    			
+				Debugger.debug("pressed login succ");
+				Preference.setAccountEmail(LoginActivity.this, email);
+				Preference.setAccountPasswd(LoginActivity.this, passwd);
+				Preference.setLogin(LoginActivity.this, true);
+				LoginActivity.this.setResult(RESULT_OK, intent);
+				LoginActivity.this.finish();
+    		} else {
+    			popNotify(getResources().getString(R.string.notify_login_fail));
+    		}
+        }
+    }
 }

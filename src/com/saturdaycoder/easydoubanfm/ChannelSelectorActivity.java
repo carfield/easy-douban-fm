@@ -4,7 +4,6 @@ import java.util.HashMap;
 import android.app.*;
 import android.os.*;
 import android.content.*;
-import android.text.format.DateFormat;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -33,9 +32,7 @@ public class ChannelSelectorActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);  
 		setContentView(R.layout.channelselector);
 
-		
-		//buttonConfirmChannel = (Button)findViewById(R.id.buttonConfirmChannel);
-		//buttonUpdateChannels = (Button)findViewById(R.id.buttonUpdateChannels);
+
 		listChannels = (ListView)findViewById(R.id.lvChannels);
 		buttonLogin = (Button)findViewById(R.id.buttonLogin);
 		buttonLogout = (Button)findViewById(R.id.buttonLogout);
@@ -43,7 +40,7 @@ public class ChannelSelectorActivity extends Activity {
 		FmChannel[] channels = db.getChannels();
 		channelList = new ArrayList<FmChannel>();
 
-		mServiceConn = new ServiceConnection(){
+		/*mServiceConn = new ServiceConnection(){
         	public void onServiceConnected(ComponentName className, IBinder service) {
         		mDoubanFm = (IDoubanFmService)((DoubanFmService.LocalBinder)service).getService();
         	}
@@ -52,7 +49,7 @@ public class ChannelSelectorActivity extends Activity {
         	}
         };
         bindService(new Intent(ChannelSelectorActivity.this, DoubanFmService.class), 
-        		mServiceConn, 0);//Context.BIND_AUTO_CREATE);
+        		mServiceConn, 0);*/
 		
 		if (channels != null) {
 			for (int i = 0; i < channels.length; ++i) {
@@ -74,9 +71,7 @@ public class ChannelSelectorActivity extends Activity {
 		buttonLogout.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//Intent intent = new Intent();
-    			//intent.setClass(ChannelSelectorActivity.this, LoginActivity.class);
-    			//startActivityForResult(intent, 0);
+
 				Preference.setLogin(ChannelSelectorActivity.this, false);
 				Preference.setAccountPasswd(ChannelSelectorActivity.this, null);
 				
@@ -84,6 +79,7 @@ public class ChannelSelectorActivity extends Activity {
 				
 				buttonLogin.setVisibility(Button.VISIBLE);
 				buttonLogout.setVisibility(Button.GONE);
+				loadChannelList();
 			}
 		});
 
@@ -94,7 +90,8 @@ public class ChannelSelectorActivity extends Activity {
         	public void onItemClick(AdapterView<?> a, View v, int position, long id) 
         	{
         		if (position >= channelList.size()) {
-        			Debugger.error("selected " + position + " but channel table size is " 
+        			Debugger.error("selected " + position 
+        					+ " but channel table size is " 
         					+ channelList.size());
         			return;
         		}
@@ -104,20 +101,25 @@ public class ChannelSelectorActivity extends Activity {
                 if (chan == null) {
                 	Debugger.error("null pointer in channelList");
                 }
-                if(mDoubanFm == null) {
-                	Debugger.error("service not bound");
-                }
+
                 Debugger.info("##### User selected channel id = " + chan.channelId);
-                mDoubanFm.selectChannel(chan.channelId);
+                
+                
+                
+                Intent i = new Intent(DoubanFmService.CONTROL_SELECT_CHANNEL);
+                i.putExtra("channel", chan.channelId);
+                sendBroadcast(i);
+                
                 ChannelSelectorActivity.this.finish();
         	}
 		});
 		
-		loadChannelList();
+		
 	}
 	
     @Override
     protected void onResume() {
+    	loadChannelList();
     	boolean loggedIn = Preference.getLogin(this);
 		if (!loggedIn) {
 			buttonLogin.setVisibility(Button.VISIBLE);

@@ -25,4 +25,5 @@
     <string name="button_confirm_logout_text">退出登录</string>
     <string name="notify_logout_succ">您已退出登录</string>
     <string name="text_download_cancel">点击取消下载</string>
+    <string name="text_killed_for_memory">因为内存不足，豆瓣电台被系统强行关闭</string>
 </resources>

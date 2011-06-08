@@ -1,8 +1,7 @@
 package com.saturdaycoder.easydoubanfm;
 import org.json.*;
 import org.apache.http.params.*;
-
-import java.net.SocketException;
+//import java.net.SocketException;
 import java.util.Date;
 import java.io.IOException;
 import java.io.InputStream;

@@ -5,15 +5,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import android.content.ContentValues;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
+//import android.content.SharedPreferences;
+//import android.content.SharedPreferences.Editor;
 public class Database extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "userdb.sqlite";
 	private static final int DB_VERSION = 1;
-	private Context context;
 	protected Database(Context context) {
 		super(context, DATABASE_NAME, null, DB_VERSION);
-		this.context = context;
+		//this.context = context;
 	}
 	@Override
 	public void onCreate(SQLiteDatabase db) {
