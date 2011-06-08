@@ -77,8 +77,8 @@ public class ChannelSelectorActivity extends Activity {
 				
 				popNotify(getResources().getString(R.string.notify_logout_succ));
 				
-				buttonLogin.setVisibility(Button.VISIBLE);
-				buttonLogout.setVisibility(Button.GONE);
+				//buttonLogin.setVisibility(Button.VISIBLE);
+				//buttonLogout.setVisibility(Button.GONE);
 				loadChannelList();
 			}
 		});

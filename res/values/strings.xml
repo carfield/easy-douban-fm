@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="app_name">我的豆瓣电台</string>
-    <string name="appwidget_name">我的豆瓣电台</string>
+    <string name="app_name">Easy豆瓣电台</string>
+    <string name="appwidget_name">Easy豆瓣电台</string>
     <string name="intro_main">感谢下载“我的豆瓣电台”！使用方法：</string>
     <string name="intro_main1">第一步，在桌面添加“我的豆瓣电台”小部件，按小部件开关启动豆瓣电台；\n第二步，按前进按钮，或者按耳机线控按钮，或者甩动手机来切换歌曲。\n</string>
     <string name="intro_main2">下面是小部件各个按钮的介绍：

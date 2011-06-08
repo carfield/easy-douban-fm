@@ -334,7 +334,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		};
 		
 		shakeDetector.registerOnShakeListener(shakeListener);
-		shakeDetector.start();
+		
+		try {
+			shakeDetector.start();
+		} catch (Exception e) {
+			Debugger.error("no shake sensor: " + e.toString());
+		}
 		
 		// get stored channel table
 		db = new Database(this);		
