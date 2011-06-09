@@ -8,7 +8,8 @@
         android:paddingRight="10dip"
         > 
   
-        <TextView        
+        <TextView      
+        	android:background="@drawable/appwidget_bg"  
             android:text="Channel Name"        
             android:textColor="#ffffff"        
             android:textSize="20dip"      

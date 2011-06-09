@@ -15,6 +15,7 @@ public class LoginActivity extends Activity {
 	private EditText editEmail;
 	private EditText editPasswd;
 	private Button buttonLogin;
+	private TextView textRegister;
 	//private Button buttonLogout;
 	
 	private Intent intent;
@@ -36,11 +37,17 @@ public class LoginActivity extends Activity {
 		editPasswd = (EditText)findViewById(R.id.editPasswd);
 		buttonLogin = (Button)findViewById(R.id.buttonLogin);
 		//buttonLogout = (Button)findViewById(R.id.buttonLogout);
-		intent = this.getIntent();
-		bundle = intent.getExtras();
+		//intent = this.getIntent();
+		//bundle = intent.getExtras();
+		email = Preference.getAccountEmail(LoginActivity.this);
+		if (email != null) {
+			editEmail.setText(email);
+		}
 		//loggedIn = bundle.getBoolean("login");
 		
-
+		textRegister = (TextView) findViewById(R.id.textRegister);
+		textRegister.setText(android.text.Html.fromHtml("<a href=\"http://www.google.com\">去豆瓣网站注册账号</a>"));
+		textRegister.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
 		
 		mServiceConn = new ServiceConnection(){
         	public void onServiceConnected(ComponentName className, IBinder service) {
@@ -117,10 +124,10 @@ public class LoginActivity extends Activity {
     		if (params.length < 2 || mDoubanFm == null) {
     			return false;
     		}
-    		
+    		boolean succ = false;
     		try {
-    			mDoubanFm.login(params[0], params[1]);
-    			return true;
+    			succ = mDoubanFm.login(params[0], params[1]);
+    			return succ;
     		} catch (Exception e) {
     			return false;
     		}
@@ -143,9 +150,11 @@ public class LoginActivity extends Activity {
 				Preference.setAccountEmail(LoginActivity.this, email);
 				Preference.setAccountPasswd(LoginActivity.this, passwd);
 				Preference.setLogin(LoginActivity.this, true);
+				popNotify(getResources().getString(R.string.notify_login_succ));
 				LoginActivity.this.setResult(RESULT_OK, intent);
 				LoginActivity.this.finish();
     		} else {
+    			Preference.setAccountEmail(LoginActivity.this, email);
     			popNotify(getResources().getString(R.string.notify_login_fail));
     		}
         }

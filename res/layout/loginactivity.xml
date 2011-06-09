@@ -2,7 +2,9 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
-  android:layout_height="fill_parent" android:orientation="vertical">
+  android:layout_height="wrap_content" 
+  android:orientation="vertical"
+  >
 	<TextView 
 			android:text="@string/text_login_email" 
 			android:id="@+id/textView1" 
@@ -11,7 +13,7 @@
 			/>
     
     <EditText 
-    		android:text="shaobingsjtu@gmail.com" 
+    		android:text="" 
     		android:id="@+id/editEmail" 
     		android:layout_width="280dip" 
     		android:layout_height="wrap_content"
@@ -23,7 +25,7 @@
     		android:layout_height="wrap_content"
     		/>
     <EditText 
-    		android:text="09111616" 
+    		android:text="" 
     		android:id="@+id/editPasswd" 
     		android:layout_width="280dip" 
     		android:layout_height="wrap_content"
@@ -34,7 +36,21 @@
     		android:layout_centerHorizontal="true"
     		android:layout_width="wrap_content" 
     		android:layout_height="wrap_content"
+    		android:gravity="center" 
+    		android:layout_gravity="center"
+    		android:paddingBottom="10dip"
+    		android:paddingTop="10dip"
+    		android:paddingLeft="20dip"
+    		android:paddingRight="20dip"
     		/>
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:linksClickable="true" android:text="TextView" android:id="@+id/textView3" android:autoLink="web"></TextView>
+    <TextView 
+    		android:paddingTop="30dip"
+    		android:paddingBottom="30dip"
+    		android:layout_width="wrap_content" 
+    		android:layout_height="wrap_content" 
+    		android:linksClickable="true" 
+    		android:text="注册豆瓣电台账号" 
+    		android:id="@+id/textRegister" 
+    		android:layout_gravity="center"></TextView>
 
 </LinearLayout>

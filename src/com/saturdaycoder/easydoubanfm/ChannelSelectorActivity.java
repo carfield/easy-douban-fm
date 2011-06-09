@@ -62,6 +62,7 @@ public class ChannelSelectorActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent();
+
     			intent.setClass(ChannelSelectorActivity.this, LoginActivity.class);
     			startActivityForResult(intent, 0);
     			
@@ -77,8 +78,8 @@ public class ChannelSelectorActivity extends Activity {
 				
 				popNotify(getResources().getString(R.string.notify_logout_succ));
 				
-				//buttonLogin.setVisibility(Button.VISIBLE);
-				//buttonLogout.setVisibility(Button.GONE);
+				buttonLogin.setVisibility(Button.VISIBLE);
+				buttonLogout.setVisibility(Button.GONE);
 				loadChannelList();
 			}
 		});
@@ -119,7 +120,7 @@ public class ChannelSelectorActivity extends Activity {
 	
     @Override
     protected void onResume() {
-    	loadChannelList();
+    	super.onResume();
     	boolean loggedIn = Preference.getLogin(this);
 		if (!loggedIn) {
 			buttonLogin.setVisibility(Button.VISIBLE);
@@ -128,7 +129,9 @@ public class ChannelSelectorActivity extends Activity {
 			buttonLogin.setVisibility(Button.GONE);
 			buttonLogout.setVisibility(Button.VISIBLE);
 		}
-		super.onResume();
+    	loadChannelList();
+
+		
     }
 	
 	 @Override
