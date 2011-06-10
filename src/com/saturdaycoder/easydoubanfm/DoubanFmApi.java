@@ -28,7 +28,7 @@ public class DoubanFmApi {
 		DoubanFmApi.httpParams = params;
 	}
 	
-	public static FmChannel[] getChannelTable() {
+	public static FmChannel[] getChannelTable() throws IOException {
 		Debugger.verbose("Start SCANNING channel table");
 		String uri = "http://www.douban.com:80/j/app/radio/channels?";
 		HttpGet httpGet = new HttpGet(uri);
@@ -93,6 +93,9 @@ public class DoubanFmApi {
 				}
 				return channels;
 			}
+		} catch (IOException e) {
+			Debugger.error("error scanning channel table: " + e.toString());	
+			throw e;
 		} catch (Exception e) {
 			Debugger.error("error scanning channel table: " + e.toString());
 			return null;

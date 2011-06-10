@@ -114,10 +114,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private MediaButtonListener mediaButtonListener;
 	//private PhoneStateListener phoneListener;
 	
-	private class DownloadInfo {
+	/*private class DownloadInfo {
 		String url;
 		String filename;
-	}
+	}*/
 	
 	public class LocalBinder extends Binder {
 		
@@ -136,7 +136,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Debugger.verbose("ON START COMMAND");
+		Debugger.warn("SERVICE ONSTARTCOMMAND");
 		
 		if (intent == null) { // it tells us the service was killed by system.
 			//EasyDoubanFmWidget.updateWidgetOnOffButton(this, false);
@@ -150,7 +150,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			return START_NOT_STICKY;
 		}
 		
-		Debugger.verbose("Intent action=\"" + intent.getAction() + "\" flags=" + flags + " startId=" + startId);
+		Debugger.warn("Intent action=\"" + intent.getAction() + "\" flags=" + flags + " startId=" + startId);
 		
 		String act = intent.getExtras().getString(EXTRA_BINDSERVICE_TYPE);
 		Debugger.verbose("action is \"" + act + "\"");
@@ -197,8 +197,13 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			}
 		}
 		
-
-		return START_STICKY;
+		switch (flags) {
+		case START_FLAG_RETRY:
+		case START_FLAG_REDELIVERY:
+		default:
+			return START_STICKY;
+		}
+		
 	}
 	
 
@@ -225,11 +230,13 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public void onCreate() {
 		super.onCreate();
 		Debugger.debug("service onCreate");
+		
+		// work-around on gingerbread restart bug: onStartCommand will not execute,
+		// so update widgets here
 		updateWidgets();
+		
+		
 		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		
-		
-		
 		httpParameters = new BasicHttpParams();
 		int timeoutConnection = Preference.getConnectTimeout(this);
 		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
@@ -352,10 +359,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		db = new Database(this);		
 		// get channel table if it's not existing
 		FmChannel[] chans = db.getChannels();
-		if (chans == null) {
+		if (chans == null || chans.length <= 1) {
 			EasyDoubanFmWidget.updateWidgetChannel(this, 
 					getResources().getString(R.string.text_channel_updating));
-			chans = DoubanFmApi.getChannelTable();
+			try {
+				chans = DoubanFmApi.getChannelTable();
+			} catch (IOException e) {
+				popNotify("由于网络原因无法获取频道列表，请稍后重试");
+				Intent i = new Intent(CONTROL_CLOSE);
+				sendBroadcast(i);
+				return;
+			}
+
 			for (FmChannel c: chans) {
 				db.saveChannel(c);
 			}
@@ -388,6 +403,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				}
 			} catch (Exception e) {
 				Debugger.error("IO ERROR loging in: " + e.toString());
+				popNotify("由于网络原因登录失败");
+				session = null;
 			}
 		}
 		else {
@@ -407,6 +424,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		Debugger.info("DoubanFmService closeFM");
 		EasyDoubanFmWidget.updateWidgetOnOffButton(this, 0);
+		EasyDoubanFmWidget.updateWidgetChannel(this, "正在关闭电台...");
 		EasyDoubanFmWidget.updateWidgetInfo(this, null, null);
 
 		curMusic = lastMusic = null;
@@ -439,14 +457,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		Debugger.debug("DoubanFm Control Service unregistered");
 		controlListener = null;
 		
-		if (picTask != null)
+		if (picTask != null) {
 			picTask.cancel(true);
+			picTask = null;
+		}
 		
 		if (playThread != null) {
 			playThread.releasePlay();
 			playThread.quit();
 			try  {
-				playThread.join();
+				//playThread.join();
 				Debugger.info("PlayMusic thread has quited");
 				playThread = null;
 			} catch (Exception e) {
@@ -702,12 +722,21 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	}*/
 	
 	@Override
+	public void onLowMemory() {
+		Debugger.warn("SERVICE ONLOWMEMORY");
+		closeFM();
+		closeDownloader();
+		//isFmOn = false;
+		//curMusic = lastMusic = null;
+		//curPic = null;
+		//updateWidgets();
+	}
+	
+	@Override
 	public void onDestroy() {
-		
-		
-		
+		Debugger.warn("SERVICE ONDESTROY");
 		super.onDestroy();
-		
+	
 	}
 	
 	@Override
@@ -1006,6 +1035,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     }  
     
     private void updateWidgets() {
+    	EasyDoubanFmWidget.setWidgetButtonListeners(DoubanFmService.this, null);
     	int selChan = Preference.getSelectedChannel(DoubanFmService.this);
 
     	EasyDoubanFmWidget.updateWidgetOnOffButton(DoubanFmService.this, 
@@ -1032,7 +1062,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	    	mi.artist = mi.title = "";
 	    	EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this, null, mi);
     	}
-    	EasyDoubanFmWidget.setWidgetButtonListeners(DoubanFmService.this, null);
+    	
     }
     
     @Override 
@@ -1055,24 +1085,24 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     		}
     		case ERROR: {
     			Intent intent = new Intent(STATE_FAILED);  
-    		    Debugger.info("Session failed: " + curMusic.toString());
+    		    Debugger.info("Session failed");//: " + curMusic.toString());
     		    sendBroadcast(intent);
     		    lastStopReason = DoubanFmApi.TYPE_SKIP;
     		    nextMusic();
     		}
     		case PAUSED: {
     			Intent intent = new Intent(STATE_PAUSED);  
-    		    Debugger.info("Session failed: " + curMusic.toString());
+    		    Debugger.info("Session failed");//: " + curMusic.toString());
     		    sendBroadcast(intent);
     		}
     		case IOERROR: {
     			Intent intent = new Intent(STATE_FAILED);  
-    		    Debugger.info("Session failed IOERROR: " + curMusic.toString());
+    		    Debugger.info("Session failed IOERROR");//: " + curMusic.toString());
     		    sendBroadcast(intent);
     		}
     		case COMPLETED: {
     			Intent intent = new Intent(STATE_FINISHED);  
-    		    Debugger.info("Session failed: " + curMusic.toString());
+    		    Debugger.info("Session failed");//: " + curMusic.toString());
     		    sendBroadcast(intent);
     		    lastStopReason = DoubanFmApi.TYPE_NEW;
     		    nextMusic();

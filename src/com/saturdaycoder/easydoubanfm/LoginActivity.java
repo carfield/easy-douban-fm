@@ -25,6 +25,9 @@ public class LoginActivity extends Activity {
 	
 	private boolean loggedIn;
 	
+	
+	private static String registerUrl;
+	
 	IDoubanFmService mDoubanFm;
 	ServiceConnection mServiceConn;
 	
@@ -45,8 +48,12 @@ public class LoginActivity extends Activity {
 		}
 		//loggedIn = bundle.getBoolean("login");
 		
+		//registerUrl = "http://www.douban.com/j/app/register?app_name=radio_android&version=" 
+		//			+ Preference.getClientVersion(this);
+		registerUrl = "http://www.douban.com/accounts/register";
+		
 		textRegister = (TextView) findViewById(R.id.textRegister);
-		textRegister.setText(android.text.Html.fromHtml("<a href=\"http://www.google.com\">去豆瓣网站注册账号</a>"));
+		textRegister.setText(android.text.Html.fromHtml("<a href=\"" + registerUrl + "\">去豆瓣网站注册账号</a>"));
 		textRegister.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
 		
 		mServiceConn = new ServiceConnection(){
