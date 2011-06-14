@@ -33,7 +33,7 @@ public class DoubanFmApi {
 		String uri = "http://www.douban.com:80/j/app/radio/channels?";
 		HttpGet httpGet = new HttpGet(uri);
 		httpGet.setHeader("Connection", "Keep-Alive");
-		httpGet.setHeader("User-Agent", getSdkVersion());
+		httpGet.setHeader("User-Agent", Preference.getSdkVersion());
 		try {
 			Debugger.verbose("request is:");
 			Debugger.verbose(httpGet.getRequestLine().toString());
@@ -136,7 +136,7 @@ public class DoubanFmApi {
 		}
 		HttpGet httpGet = new HttpGet(url);
 		httpGet.setHeader("Connection", "Keep-Alive");
-		httpGet.setHeader("User-Agent", getSdkVersion());
+		httpGet.setHeader("User-Agent", Preference.getSdkVersion());
 		if (user != null) {
 			httpGet.setHeader("Cookie", "bid=\"" + cookie.bid + "\"");
 			//httpGet.setHeader("Cookie2", "$Version=1");

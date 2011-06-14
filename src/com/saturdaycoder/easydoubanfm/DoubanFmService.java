@@ -44,6 +44,8 @@ import android.graphics.BitmapFactory;
 import android.os.Message;
 import org.apache.http.params.*;
 public class DoubanFmService extends Service implements IDoubanFmService {
+	
+	// service status
 	public static final String STATE_STARTED = "com.saturdaycoder.easydoubanfm.state.started";
 	public static final String STATE_FINISHED = "com.saturdaycoder.easydoubanfm.state.finished";
 	public static final String STATE_PAUSED = "com.saturdaycoder.easydoubanfm.state.paused";
@@ -72,7 +74,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final String CONTROL_RATE = "com.saturdaycoder.easydoubanfm.control.rate";
 	public static final String CONTROL_TRASH = "com.saturdaycoder.easydoubanfm.control.trash";
 	public static final String CONTROL_SELECT_CHANNEL = "com.saturdaycoder.easydoubanfm.control.select_channel";
-	
 	public static final String CONTROL_UPDATE_WIDGET = "com.saturdaycoder.easydoubanfm.control.update_widget";
 	
 	// actions for downloader
@@ -97,15 +98,20 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private PlayMusicThread playThread = null;	
 	private final IBinder mBinder = new LocalBinder();
 	private GetPictureTask picTask = null;
-	private MediaScannerConnection.MediaScannerConnectionClient scannerClient;
+	
+	
+	// SYSTEM SERVICES
 	private NotificationManager notificationManager;
-
+	private AudioManager audioManager;
+	private MediaScannerConnection.MediaScannerConnectionClient scannerClient;
 
 	private Database db;
 	HttpParams httpParameters;
 	private char lastStopReason;
 	private Handler mainHandler;
 	private Downloader downloader;
+	
+	// variables that need synchronize
 	private boolean isFmOn;
 	private boolean isDownloaderOn;
 	
@@ -118,7 +124,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private DoubanFmControlReceiver controlListener;
 	
 	
-	AudioManager audioManager;
+	
 	
 	
 	public class LocalBinder extends Binder {
@@ -187,6 +193,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 		// open neither FM nor downloader
 		else  {
+			Debugger.warn("open neither FM nor downloader");
 			return START_NOT_STICKY;
 		}
 		
@@ -262,7 +269,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			synchronized(DoubanFmService.this) {
 				if (!isDownloaderOn) {
 					downloader = new Downloader(this);
-					isDownloaderOn = true;
+					
 					IntentFilter dfilter = new IntentFilter();
 					dfilter.addAction(DoubanFmService.ACTION_DOWNLOAD);
 					dfilter.addAction(DoubanFmService.ACTION_CANCEL_DOWNLOAD);
@@ -343,11 +350,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
 					registerReceiver(mediaButtonListener, mfilter);
 					
-					/*IntentFilter pfilter = new IntentFilter();
-					pfilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-					phoneListener = new PhoneStateListener();
-					registerReceiver(phoneListener, pfilter);*/
-					
 					Debugger.verbose("DoubanFm Control Service registered");
 					
 					shakeDetector = new ShakeDetector(this);
@@ -374,6 +376,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					db = new Database(this);		
 					// get channel table if it's not existing
 					FmChannel[] chans = db.getChannels();
+					
 					if (chans == null || chans.length <= 1) {
 						EasyDoubanFmWidget.updateWidgetChannel(this, 
 								getResources().getString(R.string.text_channel_updating));
@@ -395,6 +398,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					
 					// get the currently selected channel
 					int ci = Preference.getSelectedChannel(this);
+					int idx = 0;
+					for (; idx < chans.length; ++idx) {
+						if (ci == chans[idx].channelId) {
+							break;
+						}
+					}
+					if (idx == chans.length) {
+						// selected channel not exist
+						Preference.selectChannel(this, 0);
+						ci = 0;
+					}
+					
 					FmChannel c = db.getChannelInfo(ci);
 					
 					
@@ -719,8 +734,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	    EasyDoubanFmWidget.updateWidgetProgress(this, 60);
 		
 	    // update appwidget view image
-	    if (picTask != null)
+	    if (picTask != null) {
 	    	picTask.cancel(true);
+	    }
 	    picTask = new GetPictureTask();
 	    picTask.execute(curMusic.pictureUrl);
 	    
@@ -747,10 +763,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		Debugger.warn("SERVICE ONLOWMEMORY");
 		closeFM();
 		closeDownloader();
-		//isFmOn = false;
-		//curMusic = lastMusic = null;
-		//curPic = null;
-		//updateWidgets();
 	}
 	
 	@Override
@@ -767,10 +779,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	
     private class GetPictureTask extends AsyncTask<String, Integer, Bitmap> {
-    	public GetPictureTask(){//MusicInfo info) {
-    		//this.session = session;
+    	public GetPictureTask(){
     	}
-    	//private int session;
+    	
     	@Override
     	protected void onCancelled () {
     		Debugger.info("GetPictureTask is cancelled");
@@ -778,7 +789,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	}
     	@Override
     	protected Bitmap doInBackground(String... params) {
-
         	
     		HttpGet httpGet = new HttpGet(params[0]);
     		httpGet.setHeader("User-Agent", 
@@ -813,14 +823,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					if (tmpl == -1)
 						break;
 					l += tmpl;
-					//double prog = 60 + ((double)l / length * 40);
-					//if (l >= length / 3)
-						//publishProgress(80);
 				}
-				//publishProgress(90);
 				
 				Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, length);
-				//publishProgress(100);
 				return bmp;
 			} catch (Exception e) {
 				Debugger.error("Error getting picture: " + e.toString());
@@ -828,7 +833,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			}
         	
     	}
-    	//private int lastProg = 0;
     	@Override
     	protected void onProgressUpdate(Integer... progress) {
     		EasyDoubanFmWidget.updateWidgetProgress(DoubanFmService.this, progress[0].intValue());
@@ -846,8 +850,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     
     @Override
     public void banMusic() {
-    	if (curMusic == null)
+    	if (curMusic == null) {
     		return;
+    	}
     	
 		lastStopReason = DoubanFmApi.TYPE_BYE;
 		pendingMusicList.clear();
@@ -862,53 +867,35 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     
     @Override
     public void downloadMusic() {
+    	if (curMusic == null) {
+    		return;
+    	}
+    	
     	String url = curMusic.musicUrl;
     	String filename = getUnixFilename(curMusic.artist, curMusic.title,
     			url);
-    	Debugger.verbose("download filename is \"" + filename + "\"");
-    	/*if (!mDownloadBind) {
-    		// add this download to pending list
-	        DownloadInfo d = new DownloadInfo();
-	        d.url = url;
-	        d.filename = filename;
-	        pendingDownloads.add(d);
-    		
-    		Intent i = new Intent(this, Downloader.class);
-    		this.startService(i);
-    		
-	    	mDownloadServiceConn = new ServiceConnection(){
-	        	public void onServiceConnected(ComponentName className, IBinder service) {
-	        		Downloader.LocalBinder b = (Downloader.LocalBinder)service;
-	        		mDownload = (IDownloadService)b.getService();
-	        		Debugger.info("DownloadService connected");
-	        		mDownloadBind = true;
-	        		while (pendingDownloads.size() > 0) {
-	        			DownloadInfo d = pendingDownloads.remove(0);
-	        			Debugger.info("ADD one pending download");
-	        			mDownload.download(d.url, d.filename);
-	        		}
-	        	}
-	        	public void onServiceDisconnected(ComponentName className) {
-	        		Debugger.info("DownloadService disconnected");
-	        		mDownload = null;
-	        		mDownloadBind = false;
-	        	}
-	        };
-	        bindService(new Intent(this, Downloader.class), 
-	        		mDownloadServiceConn, 0);//Context.BIND_NOT_FOREGROUND);
-	        
-	        
+    	
+    	if (filename == null) {
+    		return;
     	}
-    	//Debugger.verbose("Download service started");
-    	else {
-    		mDownload.download(url, filename);
-    	}*/
-    	downloader.download(Integer.parseInt(curMusic.sid), url, filename);
+    	
+    	Debugger.verbose("download filename is \"" + filename + "\"");
+
+    	int sid = 0;
+    	try {
+    		sid = Integer.parseInt(curMusic.sid);
+    	} catch (Exception e) {
+    		sid = 0;
+    	}
+    	downloader.download(sid, url, filename);
     }
     
     
     
     private String getUnixFilename(String artist, String title, String url) {
+    	if (artist == null || title == null || url == null) {
+    		return null;
+    	}
     	String fileextension = "";
     	String tmp = url;
     	int indDot = -1;
