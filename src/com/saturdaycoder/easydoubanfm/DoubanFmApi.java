@@ -261,36 +261,7 @@ public class DoubanFmApi {
 		return encoded;
 	}
 	
-	private static String getSdkVersion() {
-		switch (android.os.Build.VERSION.SDK_INT) {
-		case 1:
-			return "Android-1.0";
-		case 2:
-			return "Android-1.1";
-		case 3:
-			return "Android-1.5";
-		case 4:
-			return "Android-1.6";
-		case 5:
-			return "Android-2.0";
-		case 6:
-			return "Android-2.0.1";
-		case 7:
-			return "Android-2.1";
-		case 8:
-			return "Android-2.2";
-		case 9:
-			return "Android-2.3";
-		case 10:
-			return "Android-2.3.3";
-		case 11:
-			return "Android-3.0";
-		case 12:
-			return "Android-3.1";
-		default:
-			return "Android-unknown";
-		}
-	}
+
 	
 	private static String lastLoginErr = "";
 	public static String getLoginError() {
@@ -304,7 +275,7 @@ public class DoubanFmApi {
 				+ cliVer + "&email=" + encodeUrl(email) + "&password=" + encodeUrl(passwd);
 		HttpGet httpGet = new HttpGet(url);
 		httpGet.setHeader("Connection", "Keep-Alive");
-		httpGet.setHeader("User-Agent", getSdkVersion());
+		httpGet.setHeader("User-Agent", Preference.getSdkVersion());
 		
 		//DoubanFmSession session = new DoubanFmSession();
 		

@@ -99,25 +99,27 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private GetPictureTask picTask = null;
 	private MediaScannerConnection.MediaScannerConnectionClient scannerClient;
 	private NotificationManager notificationManager;
-	//private IDownloadService mDownload;
-	//private ServiceConnection mDownloadServiceConn;
-	//private boolean mDownloadBind;
+
+
 	private Database db;
 	HttpParams httpParameters;
 	private char lastStopReason;
 	private Handler mainHandler;
-	//private ArrayList<DownloadInfo> pendingDownloads;
 	private Downloader downloader;
 	private boolean isFmOn;
 	private boolean isDownloaderOn;
-	private DownloadReceiver downloadReceiver;
-	private MediaButtonListener mediaButtonListener;
-	//private PhoneStateListener phoneListener;
 	
-	/*private class DownloadInfo {
-		String url;
-		String filename;
-	}*/
+	
+	// Event Listeners
+	private DownloadReceiver downloadListener;
+	private MediaButtonListener mediaButtonListener;
+	private ShakeDetector.OnShakeListener shakeListener;
+	private ShakeDetector shakeDetector;
+	private DoubanFmControlReceiver controlListener;
+	
+	
+	AudioManager audioManager;
+	
 	
 	public class LocalBinder extends Binder {
 		
@@ -139,11 +141,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		Debugger.warn("SERVICE ONSTARTCOMMAND");
 		
 		if (intent == null) { // it tells us the service was killed by system.
-			//EasyDoubanFmWidget.updateWidgetOnOffButton(this, false);
-			//EasyDoubanFmWidget.clearWidgetChannel(this);
-			//EasyDoubanFmWidget.clearWidgetImage(this);
-			//EasyDoubanFmWidget.clearWidgetInfo(this);
-			//return START_NOT_STICKY;
 			popNotify(getResources().getString(R.string.text_killed_for_memory));
 			closeDownloader();
 			closeFM();
@@ -157,58 +154,54 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		// open FM alone
 		if (act != null && act.equals(BINDTYPE_FM)) {
-			
-			if (!isFmOn) {
-				openFM();
-				isFmOn = true;
-			}
+			openFM();
 		}
 		// open downloader alone
 		else if (act != null && act.equals(BINDTYPE_DOWNLOAD)) {
-			if (!isDownloaderOn) {
-				openDownloader();
-				isDownloaderOn = true;
-			}
-			String url = intent.getExtras().getString(EXTRA_DOWNLOAD_URL);
-			String filename = intent.getExtras().getString(EXTRA_DOWNLOAD_FILENAME);
-			int sessionId = intent.getExtras().getInt(EXTRA_DOWNLOAD_SESSION);
-			notificationManager.cancel(sessionId);
-			if (url != null && filename != null) {
-				Debugger.info("got extra url=\"" + url + "\" filename=\"" + filename + "\"");
-				downloader.download(sessionId, url, filename);
-				
-			} else {
-				Debugger.info("got no extra url and filename, download current playing music");
-				if (curMusic != null) {
-					downloader.download(Integer.parseInt(curMusic.sid), curMusic.musicUrl, 
-							getUnixFilename(curMusic.artist, curMusic.title, curMusic.musicUrl));
+			openDownloader();
+			
+			if (isDownloaderOn) {
+				String url = intent.getExtras().getString(EXTRA_DOWNLOAD_URL);
+				String filename = intent.getExtras().getString(EXTRA_DOWNLOAD_FILENAME);
+				int sessionId = intent.getExtras().getInt(EXTRA_DOWNLOAD_SESSION);
+				notificationManager.cancel(sessionId);
+				if (url != null && filename != null) {
+					Debugger.info("got extra url=\"" + url + "\" filename=\"" + filename + "\"");
+					downloader.download(sessionId, url, filename);
+					
+				} else {
+					Debugger.info("got no extra url and filename, download current playing music");
+					if (curMusic != null) {
+						int sid = 0;
+						try {
+							sid = Integer.parseInt(curMusic.sid);
+						} catch (Exception e) {
+							Debugger.error("SID is not a number: " + e.toString());
+							sid = 0;
+						}
+						downloader.download(sid, curMusic.musicUrl, 
+								getUnixFilename(curMusic.artist, curMusic.title, curMusic.musicUrl));
+					}
 				}
 			}
 		}
-		// open both FM and downloader
+		// open neither FM nor downloader
 		else  {
-			if (!isFmOn) {
-				openFM();
-				isFmOn = true;
-			}
-			if (!isDownloaderOn) {
-				openDownloader();
-				isDownloaderOn = true;
-			}
+			return START_NOT_STICKY;
 		}
 		
-		switch (flags) {
-		case START_FLAG_RETRY:
-		case START_FLAG_REDELIVERY:
-		default:
-			return START_STICKY;
-		}
+		return START_STICKY;
 		
 	}
 	
 
 	@Override
 	public boolean login(String email, String passwd) {
+		if (email == null || email.equals("") 
+				|| passwd == null || passwd.equals("")) {
+			return false;
+		}
+			
 		try {
 			session = DoubanFmApi.login(email, passwd, 583);
 			Preference.setLogin(this, (session != null));
@@ -231,9 +224,25 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		super.onCreate();
 		Debugger.debug("service onCreate");
 		
+		curMusic = lastMusic = null;
+		curPic = null;
+		
+		lastStopReason = DoubanFmApi.TYPE_NEW;
+        // get system audio manager
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        
+        if (audioManager  == null) {
+        	Debugger.error("Error getting system AUDIO_SERVICE");
+        	popNotify("Audio Manager not exist!!");
+        	return;
+        }
+ 
 		// work-around on gingerbread restart bug: onStartCommand will not execute,
 		// so update widgets here
-		updateWidgets();
+		if (android.os.Build.VERSION.SDK_INT == 9 
+				|| android.os.Build.VERSION.SDK_INT == 10) {
+			updateWidgets();
+		}
 		
 		
 		notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -245,255 +254,267 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		DoubanFmApi.setHttpParameters(httpParameters);
 	}
-	private ShakeDetector.OnShakeListener shakeListener;
-	private ShakeDetector shakeDetector;// = new ShakeDetector(this);
-	private DoubanFmControlReceiver controlListener;
+
 	
 	@Override
 	public void openDownloader() {
-		if (downloader == null && isDownloaderOn == false) {
-			downloader = new Downloader(this);
-			isDownloaderOn = true;
+		if (!isDownloaderOn) {
+			synchronized(DoubanFmService.this) {
+				if (!isDownloaderOn) {
+					downloader = new Downloader(this);
+					isDownloaderOn = true;
+					IntentFilter dfilter = new IntentFilter();
+					dfilter.addAction(DoubanFmService.ACTION_DOWNLOAD);
+					dfilter.addAction(DoubanFmService.ACTION_CANCEL_DOWNLOAD);
+					dfilter.addAction(DoubanFmService.ACTION_CLEAR_NOTIFICATION);
+					downloadListener = new DownloadReceiver();
+					registerReceiver(downloadListener, dfilter);
+					
+					isDownloaderOn = true;
+				}
+
+			}
 		}
-		IntentFilter dfilter = new IntentFilter();
-		dfilter.addAction(DoubanFmService.ACTION_DOWNLOAD);
-		dfilter.addAction(DoubanFmService.ACTION_CANCEL_DOWNLOAD);
-		dfilter.addAction(DoubanFmService.ACTION_CLEAR_NOTIFICATION);
-		downloadReceiver = new DownloadReceiver();
-		registerReceiver(downloadReceiver, dfilter);
 	}
 	
 	@Override
 	public void closeDownloader() {
-		if (isDownloaderOn && downloader != null) {
-			Debugger.verbose("closeDownloader: cancel all tasks");
-			downloader.cancelAll();
-			Debugger.verbose("closeDownloader: unregister download receiver");
-			try {
-				unregisterReceiver(downloadReceiver);
-			} catch (IllegalArgumentException e) {
-				Debugger.error("download receiver not registered, skip unregistering");
+		if (isDownloaderOn) {
+			synchronized(this) {
+				if (isDownloaderOn) {
+					Debugger.verbose("closeDownloader: cancel all tasks");
+					downloader.cancelAll();
+					Debugger.verbose("closeDownloader: unregister download receiver");
+					try {
+						unregisterReceiver(downloadListener);
+					} catch (IllegalArgumentException e) {
+						Debugger.error("download receiver not registered, skip unregistering");
+					}
+					isDownloaderOn = false;
+					downloader = null;
+				}
 			}
-			isDownloaderOn = false;
-			downloader = null;
 		}
 		
 		if (!isFmOn) {
-			Debugger.verbose("closeDownloader: FM is not on. close service");
-			closeService();
+			synchronized(this) {
+				if (!isFmOn) {
+					Debugger.verbose("closeDownloader: FM is not on. close service");
+					closeService();
+				}
+			}
 		}
 	}
 	@Override
 	public void openFM() {
 		EasyDoubanFmWidget.updateWidgetOnOffButton(this, 0);
-		curMusic = lastMusic = null;
-		curPic = null;
-		
-		lastStopReason = DoubanFmApi.TYPE_NEW;
-		
-        if (controlListener == null)  {
-            controlListener = new DoubanFmControlReceiver();  
-        }
-        
-        // get system audio manager
-        AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        
-        if (am  == null) {
-        	Debugger.error("Error getting system AUDIO_SERVICE");
-        }
-        
-        mainHandler = new DoubanFmHandler();
-        playThread = new PlayMusicThread(mainHandler, am);
-        playThread.start();
-        
-        musicHistory = new ArrayList<MusicInfo>();
-        pendingMusicList = new ArrayList<MusicInfo>();
-        
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(DoubanFmService.CONTROL_NEXT);
-		filter.addAction(DoubanFmService.CONTROL_PLAYPAUSE);
-		filter.addAction(DoubanFmService.CONTROL_PAUSE);
-		filter.addAction(DoubanFmService.CONTROL_RESUME);
-		filter.addAction(DoubanFmService.CONTROL_CLOSE);
-		filter.addAction(DoubanFmService.CONTROL_DOWNLOAD);
-		filter.addAction(DoubanFmService.CONTROL_RATE);
-		filter.addAction(DoubanFmService.CONTROL_UNRATE);
-		filter.addAction(DoubanFmService.CONTROL_TRASH);
-		filter.addAction(DoubanFmService.CONTROL_SELECT_CHANNEL);
-		filter.addAction(DoubanFmService.CONTROL_UPDATE_WIDGET);
-		registerReceiver(controlListener, filter); 
-				
-		mediaButtonListener = new MediaButtonListener();
-		IntentFilter mfilter = new IntentFilter();
-		mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
-		registerReceiver(mediaButtonListener, mfilter);
-		
-		/*IntentFilter pfilter = new IntentFilter();
-		pfilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-		phoneListener = new PhoneStateListener();
-		registerReceiver(phoneListener, pfilter);*/
-		
-		Debugger.verbose("DoubanFm Control Service registered");
-		
-		shakeDetector = new ShakeDetector(this);
-		
-		shakeListener = new ShakeDetector.OnShakeListener() {
-			
-			@Override
-			public void onShake() {
-				Debugger.info("Detected SHAKING!!!");
-				Intent i = new Intent(DoubanFmService.CONTROL_NEXT);
-				sendBroadcast(i);
-			}
-		};
-		
-		shakeDetector.registerOnShakeListener(shakeListener);
-		
-		try {
-			shakeDetector.start();
-		} catch (Exception e) {
-			Debugger.error("no shake sensor: " + e.toString());
-		}
-		
-		// get stored channel table
-		db = new Database(this);		
-		// get channel table if it's not existing
-		FmChannel[] chans = db.getChannels();
-		if (chans == null || chans.length <= 1) {
-			EasyDoubanFmWidget.updateWidgetChannel(this, 
-					getResources().getString(R.string.text_channel_updating));
-			try {
-				chans = DoubanFmApi.getChannelTable();
-			} catch (IOException e) {
-				popNotify("由于网络原因无法获取频道列表，请稍后重试");
-				Intent i = new Intent(CONTROL_CLOSE);
-				sendBroadcast(i);
-				return;
-			}
 
-			for (FmChannel c: chans) {
-				db.saveChannel(c);
-			}
-			Preference.selectChannel(this, 0);
+		if (!isFmOn) {
+			synchronized(this) {
+				if (!isFmOn) {
+			        if (controlListener == null)  {
+			            controlListener = new DoubanFmControlReceiver();  
+			        }
+			        
+			       
+			        mainHandler = new DoubanFmHandler();
+			        playThread = new PlayMusicThread(mainHandler, audioManager);
+			        playThread.start();
+			        
+			        musicHistory = new ArrayList<MusicInfo>();
+			        pendingMusicList = new ArrayList<MusicInfo>();
+			        
+					IntentFilter filter = new IntentFilter();
+					filter.addAction(DoubanFmService.CONTROL_NEXT);
+					filter.addAction(DoubanFmService.CONTROL_PLAYPAUSE);
+					filter.addAction(DoubanFmService.CONTROL_PAUSE);
+					filter.addAction(DoubanFmService.CONTROL_RESUME);
+					filter.addAction(DoubanFmService.CONTROL_CLOSE);
+					filter.addAction(DoubanFmService.CONTROL_DOWNLOAD);
+					filter.addAction(DoubanFmService.CONTROL_RATE);
+					filter.addAction(DoubanFmService.CONTROL_UNRATE);
+					filter.addAction(DoubanFmService.CONTROL_TRASH);
+					filter.addAction(DoubanFmService.CONTROL_SELECT_CHANNEL);
+					filter.addAction(DoubanFmService.CONTROL_UPDATE_WIDGET);
+					registerReceiver(controlListener, filter); 
+							
+					mediaButtonListener = new MediaButtonListener();
+					IntentFilter mfilter = new IntentFilter();
+					mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
+					registerReceiver(mediaButtonListener, mfilter);
+					
+					/*IntentFilter pfilter = new IntentFilter();
+					pfilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+					phoneListener = new PhoneStateListener();
+					registerReceiver(phoneListener, pfilter);*/
+					
+					Debugger.verbose("DoubanFm Control Service registered");
+					
+					shakeDetector = new ShakeDetector(this);
+					
+					shakeListener = new ShakeDetector.OnShakeListener() {
+						
+						@Override
+						public void onShake() {
+							Debugger.info("Detected SHAKING!!!");
+							Intent i = new Intent(DoubanFmService.CONTROL_NEXT);
+							sendBroadcast(i);
+						}
+					};
+					
+					shakeDetector.registerOnShakeListener(shakeListener);
+					
+					try {
+						shakeDetector.start();
+					} catch (Exception e) {
+						Debugger.error("no shake sensor: " + e.toString());
+					}
+					
+					// get stored channel table
+					db = new Database(this);		
+					// get channel table if it's not existing
+					FmChannel[] chans = db.getChannels();
+					if (chans == null || chans.length <= 1) {
+						EasyDoubanFmWidget.updateWidgetChannel(this, 
+								getResources().getString(R.string.text_channel_updating));
+						try {
+							chans = DoubanFmApi.getChannelTable();
+						} catch (IOException e) {
+							popNotify("由于网络原因无法获取频道列表，请稍后重试");
+							Intent i = new Intent(CONTROL_CLOSE);
+							sendBroadcast(i);
+							return;
+						}
 			
-		}
-		
-		// get the currently selected channel
-		int ci = Preference.getSelectedChannel(this);
-		FmChannel c = db.getChannelInfo(ci);
-		
-		
-		// check login
-		boolean login = Preference.getLogin(this);
-		if (login) {
-			EasyDoubanFmWidget.updateWidgetChannel(this, 
-					getResources().getString(R.string.text_login_inprocess));
-			String email = Preference.getAccountEmail(this);
-			String passwd = Preference.getAccountPasswd(this);
-			try {
-				session = DoubanFmApi.login(email, passwd, 583);
-				if (session != null) {
-					Preference.setAccountEmail(this, email);
-					Preference.setAccountPasswd(this, passwd);
-					Preference.setLogin(this, true);
-				} else {
-					Preference.setAccountEmail(this, email);
-					Preference.setAccountPasswd(this, null);
-					Preference.setLogin(this, false);
+						for (FmChannel c: chans) {
+							db.saveChannel(c);
+						}
+						Preference.selectChannel(this, 0);
+						
+					}
+					
+					// get the currently selected channel
+					int ci = Preference.getSelectedChannel(this);
+					FmChannel c = db.getChannelInfo(ci);
+					
+					
+					// check login
+					boolean login = Preference.getLogin(this);
+					if (login) {
+						EasyDoubanFmWidget.updateWidgetChannel(this, 
+								getResources().getString(R.string.text_login_inprocess));
+						String email = Preference.getAccountEmail(this);
+						String passwd = Preference.getAccountPasswd(this);
+						try {
+							session = DoubanFmApi.login(email, passwd, 583);
+							if (session != null) {
+								Preference.setAccountEmail(this, email);
+								Preference.setAccountPasswd(this, passwd);
+								Preference.setLogin(this, true);
+							} else {
+								Preference.setAccountEmail(this, email);
+								Preference.setAccountPasswd(this, null);
+								Preference.setLogin(this, false);
+							}
+						} catch (Exception e) {
+							Debugger.error("IO ERROR loging in: " + e.toString());
+							popNotify("由于网络原因登录失败");
+							session = null;
+						}
+					}
+					else {
+						session = null;
+					}
+					
+					EasyDoubanFmWidget.updateWidgetOnOffButton(this, 1);
+					EasyDoubanFmWidget.updateWidgetChannel(this, c.getDisplayName(login));
+					
+					isFmOn = true;
+					
+					nextMusic();
 				}
-			} catch (Exception e) {
-				Debugger.error("IO ERROR loging in: " + e.toString());
-				popNotify("由于网络原因登录失败");
-				session = null;
 			}
 		}
-		else {
-			session = null;
-		}
-		
-		EasyDoubanFmWidget.updateWidgetOnOffButton(this, 1);
-		EasyDoubanFmWidget.updateWidgetChannel(this, c.getDisplayName(login));
-		
-		nextMusic();
-
 	}
 	
 	
 	@Override
 	public void closeFM() {
-		
-		Debugger.info("DoubanFmService closeFM");
-		EasyDoubanFmWidget.updateWidgetOnOffButton(this, 0);
-		EasyDoubanFmWidget.updateWidgetChannel(this, "正在关闭电台...");
-		EasyDoubanFmWidget.updateWidgetInfo(this, null, null);
+		if (isFmOn) {
+			synchronized(this) {
+				if (isFmOn) {
+					Debugger.info("DoubanFmService closeFM");
+					EasyDoubanFmWidget.updateWidgetOnOffButton(this, 0);
+					EasyDoubanFmWidget.updateWidgetChannel(this, "正在关闭电台...");
+					EasyDoubanFmWidget.updateWidgetInfo(this, null, null);
 
-		curMusic = lastMusic = null;
-		curPic = null;
-		
-		try {
-			unregisterReceiver(controlListener);
-		} catch (IllegalArgumentException e) {
-			Debugger.error("download receiver not registered, skip unregistering");
-		}
-		
-		try {
-			unregisterReceiver(mediaButtonListener);
-		} catch (IllegalArgumentException e) {
-			Debugger.error("media button listener not registered, skip unregistering");
-		}
-		
-		/*try {
-			unregisterReceiver(phoneListener);
-		} catch (IllegalArgumentException e) {
-			Debugger.error("phone Listener not registered, skip unregistering");
-		}*/
-		
-		if (shakeDetector != null ) {
-			shakeDetector.stop();
-			if (shakeListener != null)
-				shakeDetector.unregisterOnShakeListener(shakeListener);
-		}
-		
-		Debugger.debug("DoubanFm Control Service unregistered");
-		controlListener = null;
-		
-		if (picTask != null) {
-			picTask.cancel(true);
-			picTask = null;
-		}
-		
-		if (playThread != null) {
-			playThread.releasePlay();
-			playThread.quit();
-			try  {
-				//playThread.join();
-				Debugger.info("PlayMusic thread has quited");
-				playThread = null;
-			} catch (Exception e) {
-				
+					curMusic = lastMusic = null;
+					curPic = null;
+					
+					try {
+						unregisterReceiver(controlListener);
+					} catch (IllegalArgumentException e) {
+						Debugger.error("download receiver not registered, skip unregistering");
+					}
+					
+					try {
+						unregisterReceiver(mediaButtonListener);
+					} catch (IllegalArgumentException e) {
+						Debugger.error("media button listener not registered, skip unregistering");
+					}
+					
+					if (shakeDetector != null ) {
+						shakeDetector.stop();
+						if (shakeListener != null)
+							shakeDetector.unregisterOnShakeListener(shakeListener);
+					}
+					
+					Debugger.debug("DoubanFm Control Service unregistered");
+					controlListener = null;
+					
+					if (picTask != null) {
+						picTask.cancel(true);
+						picTask = null;
+					}
+					
+					if (playThread != null) {
+						playThread.releasePlay();
+						playThread.quit();
+						try  {
+							//playThread.join();
+							Debugger.info("PlayMusic thread has quited");
+							playThread = null;
+						} catch (Exception e) {
+							
+						}
+					}
+					
+					EasyDoubanFmWidget.clearWidgetChannel(this);
+					EasyDoubanFmWidget.clearWidgetImage(this);
+					EasyDoubanFmWidget.clearWidgetInfo(this);
+					
+					EasyDoubanFmWidget.updateWidgetOnOffButton(this, -1);		
+					isFmOn = false;
+				}
 			}
 		}
-		
-		EasyDoubanFmWidget.clearWidgetChannel(this);
-		EasyDoubanFmWidget.clearWidgetImage(this);
-		EasyDoubanFmWidget.clearWidgetInfo(this);
-		
-		isFmOn = false;
-		
-		if (downloader == null || !downloader.isRunning()) {
-			Debugger.debug("no download in process. close service");
-			closeService();
+		if (!isDownloaderOn) {
+			synchronized(this) {
+				if (!isDownloaderOn) {
+					Debugger.debug("no download in process. close service");
+					closeService();
+				}
+			}
 		}
-		EasyDoubanFmWidget.updateWidgetOnOffButton(this, -1);
 	}
 	
 	private void closeService() {
 		Debugger.info("closeService");
 		
-		
-		
 		stopSelf();
 	}
+	
+	
 	
 	@Override
 	public void resumeMusic() {
@@ -1043,6 +1064,14 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	
     	if (isFmOn) {
 	    	FmChannel[] chans = db.getChannels();
+	    	if (chans == null || chans.length == 0) {
+	    		Debugger.error("channel number in database is 0!");
+	    		return;
+	    	}
+	    	if (selChan >= chans.length) {
+	    		Debugger.error("selected channel out of bound!");
+	    		return;
+	    	}
 	    	String chanName = chans[selChan].name;
 	    	EasyDoubanFmWidget.updateWidgetChannel(DoubanFmService.this, 
 	    			chanName);
