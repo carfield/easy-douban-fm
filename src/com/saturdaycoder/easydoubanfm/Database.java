@@ -67,12 +67,12 @@ public class Database extends SQLiteOpenHelper {
 		if (cursor.moveToFirst()) 
 		{
 			do {
-				FmChannel dfc = new FmChannel();
-				dfc.channelId = cursor.getInt(0);
-				dfc.abbrEn = cursor.getString(1);
-				dfc.nameEn = cursor.getString(2);
-				dfc.name = cursor.getString(3);
-				dfc.seqId = cursor.getInt(4);
+				FmChannel dfc = new FmChannel(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getInt(4));
+				//dfc.channelId = cursor.getInt(0);
+				//dfc.abbrEn = cursor.getString(1);
+				//dfc.nameEn = cursor.getString(2);
+				//dfc.name = cursor.getString(3);
+				//dfc.seqId = cursor.getInt(4);
 				list.add(dfc);
 			} while(cursor.moveToNext());
 			FmChannel[] dfcs = new FmChannel[list.size()];
@@ -86,12 +86,12 @@ public class Database extends SQLiteOpenHelper {
 		Cursor cursor = db.rawQuery("select * from channels where channel_id=" + id, null);
 		if (cursor.moveToFirst()) 
 		{
-			FmChannel dfc = new FmChannel();
-			dfc.channelId = cursor.getInt(0);
-			dfc.abbrEn = cursor.getString(1);
-			dfc.nameEn = cursor.getString(2);
-			dfc.name = cursor.getString(3);
-			dfc.seqId = cursor.getInt(4);
+			FmChannel dfc = new FmChannel(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getInt(4));
+			//dfc.channelId = cursor.getInt(0);
+			//dfc.abbrEn = cursor.getString(1);
+			//dfc.nameEn = cursor.getString(2);
+			//dfc.name = cursor.getString(3);
+			//dfc.seqId = cursor.getInt(4);
 			return dfc;
 		}
 		else return null;

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 public class Preference {
+
 	public static String getSdkVersion() {
 		switch (android.os.Build.VERSION.SDK_INT) {
 		case 1:
@@ -41,9 +42,10 @@ public class Preference {
 		return pref.getInt("selected_channel", 0);
 	}
 	
-	public static int getClientVersion(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getInt("client_version", 583);
+	public static int getClientVersion(){//Context context) {
+		//SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		//return pref.getInt("client_version", getClientVersion());
+		return 583;////getClientVersion();
 	}
 	
 	public static boolean selectChannel(Context context, int c) {

@@ -79,13 +79,18 @@ public class DoubanFmApi {
 				JSONArray jsa = json.getJSONArray("channels");
 				FmChannel[] channels = new FmChannel[jsa.length()];
 				for (int i = 0; i < jsa.length(); ++i) {
-					FmChannel chan = new FmChannel();
 					JSONObject co = (JSONObject)jsa.get(i);
+					FmChannel chan = new FmChannel(co.getInt("channel_id"),
+							co.getString("abbr_en"),
+							co.getString("name_en"),
+							co.getString("name"),
+							co.getInt("seq_id"));
+					/*JSONObject co = (JSONObject)jsa.get(i);
 					chan.abbrEn = co.getString("abbr_en");
 					chan.channelId = co.getInt("channel_id");
 					chan.nameEn = co.getString("name_en");
 					chan.name = co.getString("name");
-					chan.seqId = co.getInt("seq_id");
+					chan.seqId = co.getInt("seq_id");*/
 					Debugger.info("scanned new channel: name=" + chan.name 
 							+ " id=" + chan.channelId + " seq=" + chan.seqId);
 					channels[i] = chan;
@@ -120,7 +125,7 @@ public class DoubanFmApi {
 		} 
 		url += "&type=" + reportType;
 		
-		url += "&version=583"
+		url += "&version=" + Preference.getClientVersion()
 			+ "&sid=" + ((reportSid == null)? "": reportSid) 
 			+ "&channel=" + channel
 			+ "&h=";

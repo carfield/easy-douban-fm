@@ -44,6 +44,8 @@ import android.graphics.BitmapFactory;
 import android.os.Message;
 import org.apache.http.params.*;
 
+import android.media.MediaScannerConnection.*;
+
 public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	// service status
@@ -126,7 +128,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	
 	// for service foreground notification
-	private static final int notId = 0;
+	private static final int serviceNotId = 1;
+	private static final int downloadDefaultNotId = 2;
 	private Notification fgNotification;
 	
 	
@@ -156,9 +159,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			updateWidgets();
 			return START_NOT_STICKY;
 		}
-		
-
-		
 		
 		
 		Debugger.warn("Intent action=\"" + intent.getAction() + "\" flags=" + flags + " startId=" + startId);
@@ -191,7 +191,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 							sid = Integer.parseInt(curMusic.sid);
 						} catch (Exception e) {
 							Debugger.error("SID is not a number: " + e.toString());
-							sid = 1;
+							sid = downloadDefaultNotId;
 						}
 						downloader.download(sid, curMusic.musicUrl, 
 								getUnixFilename(curMusic.artist, curMusic.title, curMusic.musicUrl));
@@ -206,16 +206,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 		
 		
-		//startForground();
-		fgNotification = new Notification(R.drawable.logo,
+		/*fgNotification = new Notification(R.drawable.icon,
 				getResources().getString(R.string.app_name),
                 System.currentTimeMillis());
 		
-		//notification.flags |= Notification.FLAG_NO_CLEAR;
+		fgNotification.flags |= Notification.FLAG_NO_CLEAR;
 		Intent it = new Intent(NULL_EVENT);
-		PendingIntent pi = PendingIntent.getBroadcast(this, 0, it, 0);
+		PendingIntent pi = PendingIntent.getBroadcast(this, 0, it, PendingIntent.FLAG_UPDATE_CURRENT);
+	
+		fgNotification.setLatestEventInfo(this, "",
+                   "", pi);
 		
-		startForeground(notId, fgNotification);
+		startForeground(serviceNotId, fgNotification);*/
 		
 		return START_STICKY;
 		
@@ -230,7 +232,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 			
 		try {
-			session = DoubanFmApi.login(email, passwd, 583);
+			session = DoubanFmApi.login(email, passwd, Preference.getClientVersion());
 			Preference.setLogin(this, (session != null));
 		} catch (IOException e) {
 			popNotify(getResources().getString(R.string.text_network_error));
@@ -395,9 +397,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					// get stored channel table
 					db = new Database(this);		
 					// get channel table if it's not existing
-					FmChannel[] chans = db.getChannels();
+					FmChannel[] chans = FmChannel.Channels;//db.getChannels();
 					
-					if (chans == null || chans.length <= 1) {
+					
+					// the API isn't updated by douban.com. So write it by 
+					// myself instead of fetching from douban.com
+					db.clearChannels();
+					for(FmChannel fc: FmChannel.Channels) {
+						db.saveChannel(fc);
+					}
+					/*if (chans == null || chans.length <= 1) {
 						EasyDoubanFmWidget.updateWidgetChannel(this, 
 								getResources().getString(R.string.text_channel_updating));
 						try {
@@ -414,7 +423,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 						}
 						Preference.selectChannel(this, 0);
 						
-					}
+					}*/
 					
 					// get the currently selected channel
 					int ci = Preference.getSelectedChannel(this);
@@ -441,7 +450,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 						String email = Preference.getAccountEmail(this);
 						String passwd = Preference.getAccountPasswd(this);
 						try {
-							session = DoubanFmApi.login(email, passwd, 583);
+							session = DoubanFmApi.login(email, passwd, Preference.getClientVersion());
 							if (session != null) {
 								Preference.setAccountEmail(this, email);
 								Preference.setAccountPasswd(this, passwd);
@@ -752,6 +761,23 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	    
 	    playThread.startPlay(curMusic.musicUrl);
 	    
+	    // set notification;
+		fgNotification = new Notification(R.drawable.icon,
+				//getResources().getString(R.string.app_name),
+				curMusic.artist + " -- " + curMusic.title,
+                System.currentTimeMillis());
+		
+		fgNotification.flags |= Notification.FLAG_NO_CLEAR;
+	    Intent it = new Intent(NULL_EVENT);
+		PendingIntent pi = PendingIntent.getBroadcast(this, 0, it, PendingIntent.FLAG_UPDATE_CURRENT);
+		fgNotification.setLatestEventInfo(this, curMusic.artist,
+                curMusic.title, pi);
+		notificationManager.notify(serviceNotId, fgNotification);
+		startForeground(serviceNotId, fgNotification);
+		
+		
+		
+	    
 	    EasyDoubanFmWidget.updateWidgetProgress(this, 60);
 		
 	    // update appwidget view image
@@ -813,7 +839,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         	
     		HttpGet httpGet = new HttpGet(params[0]);
     		httpGet.setHeader("User-Agent", 
-    				String.valueOf(Preference.getClientVersion(DoubanFmService.this)));
+    				String.valueOf(Preference.getClientVersion()));
     		httpGet.setHeader("Connection", "Keep-Alive");
     		HttpResponse httpResponse = null;
     		try {
@@ -906,7 +932,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	try {
     		sid = Integer.parseInt(curMusic.sid);
     	} catch (Exception e) {
-    		sid = 0;
+    		sid = downloadDefaultNotId;
     	}
     	downloader.download(sid, url, filename);
     }
@@ -1292,6 +1318,14 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				case DOWNLOAD_ERROR_OK:
 					Debugger.info("Download finish");
 					notifyDownloadOk(this.sessionId, this.url, this.filename);
+					
+					File musicfile = null;
+					musicfile = getDownloadFile(filename);
+					
+					if (musicfile != null) {
+						SingleMediaScanner scanner = new SingleMediaScanner(DoubanFmService.this, musicfile);
+					}
+					
 					break;
 				case DOWNLOAD_ERROR_IOERROR:
 				case DOWNLOAD_ERROR_CANCELLED:
@@ -1345,7 +1379,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				// Step 1. get bytes
 				HttpGet httpGet = new HttpGet(url);
 	    		httpGet.setHeader("User-Agent", 
-	    				String.valueOf(Preference.getClientVersion(DoubanFmService.this)));
+	    				String.valueOf(Preference.getClientVersion()));
 
 	    		HttpResponse httpResponse = null;
 	    		

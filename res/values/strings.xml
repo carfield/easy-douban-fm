@@ -3,7 +3,8 @@
     
     <string name="app_name">豆瓣电台</string>
     <string name="appwidget_name">豆瓣电台</string>
-    <string name="intro_main">感谢下载“豆瓣电台”！0.5版本已经支持登录调教音乐啦！请到频道列表界面进行登录/退出操作。本软件使用方法：</string>
+    <string name="intro_main">感谢下载“豆瓣电台”！0.6加入了相当震撼的“红歌”频道哦！详情请见本说明末尾的changelog。</string>
+    <string name="intro_main0">本软件必须在桌面添加小部件才可使用!!\nYou need add an appwidget to use this app!!</string>
     <string name="intro_main1">第一步，在桌面添加“豆瓣电台”小部件；\n第二步，在桌面上按小部件开关启动豆瓣电台。\n\n然后就可以按前进按钮，或者按耳机线控按钮，或者甩动手机来切换歌曲啦。\n</string>
     <string name="intro_main2">下面是小部件各个按钮的介绍：
     </string>
@@ -30,4 +31,24 @@
     <string name="notify_music_banned">这首歌曲再也不会播放了</string>
     <string name="text_killed_for_memory">因为内存不足，豆瓣电台被系统强行关闭</string>
     <string name="err_get_songs">从频道获取音乐失败</string>
+    <string name="changelog">
+    v0.6 2011-06-21\n
+    1.更新到最新频道列表\n
+    2.解决访问无效频道时的无限崩溃问题\n
+    3.尝试解决下载时程序崩溃的问题\n
+    4.加入通知栏的换曲提示\n
+    5.下载完成后立即扫描到系统音乐库\n
+    6.将豆瓣提升为前台服务减小被杀几率\n
+    7.增加稳定性\n
+    \n
+    v0.5 2011-06-10\n
+    1.添加登录和调教功能（请在频道列表界面登录）\n
+	2.来去电时暂停音乐播放\n
+	3.预读列表，加快换歌速度\n
+	4.改写下载界面，并添加进度提示\n
+	5.修正非正常退出时的状态更新问题\n
+	6.修正横竖屏切换时状态更新问题\n
+	7.改善歌曲名被按钮遮挡的问题\n
+	\n
+    </string>
 </resources>
