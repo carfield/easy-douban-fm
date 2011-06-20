@@ -43,6 +43,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Message;
 import org.apache.http.params.*;
+
 public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	// service status
@@ -124,7 +125,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private DoubanFmControlReceiver controlListener;
 	
 	
-	
+	// for service foreground notification
+	private static final int notId = 0;
+	private Notification fgNotification;
 	
 	
 	public class LocalBinder extends Binder {
@@ -148,10 +151,15 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		if (intent == null) { // it tells us the service was killed by system.
 			popNotify(getResources().getString(R.string.text_killed_for_memory));
-			closeDownloader();
-			closeFM();
+			//closeDownloader();
+			//closeFM();
+			updateWidgets();
 			return START_NOT_STICKY;
 		}
+		
+
+		
+		
 		
 		Debugger.warn("Intent action=\"" + intent.getAction() + "\" flags=" + flags + " startId=" + startId);
 		
@@ -183,7 +191,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 							sid = Integer.parseInt(curMusic.sid);
 						} catch (Exception e) {
 							Debugger.error("SID is not a number: " + e.toString());
-							sid = 0;
+							sid = 1;
 						}
 						downloader.download(sid, curMusic.musicUrl, 
 								getUnixFilename(curMusic.artist, curMusic.title, curMusic.musicUrl));
@@ -196,6 +204,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			Debugger.warn("open neither FM nor downloader");
 			return START_NOT_STICKY;
 		}
+		
+		
+		//startForground();
+		fgNotification = new Notification(R.drawable.logo,
+				getResources().getString(R.string.app_name),
+                System.currentTimeMillis());
+		
+		//notification.flags |= Notification.FLAG_NO_CLEAR;
+		Intent it = new Intent(NULL_EVENT);
+		PendingIntent pi = PendingIntent.getBroadcast(this, 0, it, 0);
+		
+		startForeground(notId, fgNotification);
 		
 		return START_STICKY;
 		
@@ -587,6 +607,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
 		if (musics == null || musics.length == 0) {
 			Debugger.error("musics == 0");
+			popNotify(getResources().getString(R.string.err_get_songs));
+			return;
 		}
 		for (MusicInfo i: musics) {
 			if (pendingMusicList.size() >= MAX_PENDING_COUNT) {
@@ -624,11 +646,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			Debugger.error("#### channel user selected is invalid");
 			id = 0;
 			Preference.selectChannel(this, id);
-			//EasyDoubanFmWidget.updateWidgetChannel(this, "公共频道");
 		}
 		else {
 			Preference.selectChannel(this, id);
-			//EasyDoubanFmWidget.updateWidgetChannel(this, chan.name);
 		}
 		
 		boolean login = Preference.getLogin(this);
@@ -706,6 +726,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		    //intent.putExtra("session", sessionid);  
 		    sendBroadcast(intent);  
 		    Debugger.verbose("curMusic == null!!");
+		    popNotify(getResources().getString(R.string.err_get_songs));
 		    return;
 		} 
 		

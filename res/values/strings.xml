@@ -29,4 +29,5 @@
     <string name="notify_rate_fail">由于网络原因，调教失败</string>
     <string name="notify_music_banned">这首歌曲再也不会播放了</string>
     <string name="text_killed_for_memory">因为内存不足，豆瓣电台被系统强行关闭</string>
+    <string name="err_get_songs">从频道获取音乐失败</string>
 </resources>

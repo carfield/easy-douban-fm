@@ -186,6 +186,14 @@ public class DoubanFmApi {
 				Debugger.verbose(c);
 				
 				JSONObject json = new JSONObject(c);
+				int r = json.getInt("r");
+				
+				if (r != 0) {
+					// error happened
+					String err = json.getString("err");
+					Debugger.error("error happened: " + err);
+					return null;
+				}
 				
 				JSONArray ja = json.getJSONArray("song");
 				MusicInfo[] musics = new MusicInfo[ja.length()];
