@@ -38,15 +38,13 @@
         </receiver> -->
         
         <receiver android:name="PhoneCallListener">
-        	<intent-filter>
+        	<intent-filter>  
         		<action android:name="android.intent.action.PHONE_STATE" />
         	</intent-filter>
         </receiver>
         
-		<service android:name="DoubanFmService"> 
-            <intent-filter> 
-                <action android:name ="com.saturdaycoder.easydoubanfm.DoubanFmService" /> 
-            </intent-filter> 
+		    <service android:name="DoubanFmService"> 
+
         </service >
         
         
