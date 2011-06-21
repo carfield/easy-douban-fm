@@ -67,6 +67,14 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			PendingIntent menuPendingIntent = PendingIntent.getBroadcast(context, 
 					0, menuIntent, 0);
 	    	updateViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
+	    	
+			Intent openIntent = new Intent(context, DoubanFmService.class);
+			openIntent.putExtra(DoubanFmService.EXTRA_BINDSERVICE_TYPE, DoubanFmService.BINDTYPE_FM);
+			openIntent.setData((android.net.Uri.parse("foobar://"+android.os.SystemClock.elapsedRealtime())));
+			//Intent openIntent = new Intent(DoubanFmService.ACTION_NULL);
+			PendingIntent openPendingIntent = PendingIntent.getService(context, 
+					0, openIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+			updateViews.setOnClickPendingIntent(R.id.buttonOff, openPendingIntent);
 	    	break;
 	    }
 	    case 0: {
@@ -93,6 +101,12 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
 					0, menuIntent, 0);
 			updateViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
+			
+			Intent closeIntent = new Intent(DoubanFmService.CONTROL_CLOSE);
+			PendingIntent closePendingIntent = PendingIntent.getBroadcast(context, 
+					0, closeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+			updateViews.setOnClickPendingIntent(R.id.buttonOn, closePendingIntent);
+			
 			break;
 	    }
 	    default:
@@ -421,6 +435,8 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds) {
 		super.onDeleted(context, appWidgetIds);
+		Intent intent = new Intent(DoubanFmService.CONTROL_CLOSE);  
+		context.sendBroadcast(intent);
 	}
 	
 	@Override
