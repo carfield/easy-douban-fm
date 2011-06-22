@@ -39,6 +39,9 @@ public class ShakeDetector implements SensorEventListener {
                 .getSystemService(Context.SENSOR_SERVICE);  
         mListeners = new ArrayList<OnShakeListener>();  
     }  
+    public void setThreshold(int threshold) {
+    	shakeThreshold = threshold;
+    }
     /** 
      * 当摇晃事件发生时，接收通知 
      */  
@@ -114,7 +117,7 @@ public class ShakeDetector implements SensorEventListener {
         float delta = FloatMath.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ  
                 * deltaZ)  
                 / diffTime * 10000;  
-        if (delta > shakeThreshold) { // 当加速度的差值大于指定的阈值，认为这是一个摇晃  
+        if (delta > Preference.getShakeThreshold(mContext)){//shakeThreshold) { // 当加速度的差值大于指定的阈值，认为这是一个摇晃  
             this.notifyListeners();  
         }  
     }  

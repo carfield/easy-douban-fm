@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -80,6 +81,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final String CONTROL_SELECT_CHANNEL = "com.saturdaycoder.easydoubanfm.control.select_channel";
 	public static final String CONTROL_UPDATE_WIDGET = "com.saturdaycoder.easydoubanfm.control.update_widget";
 	
+	
+	
 	// actions for downloader
 	public static final String ACTION_DOWNLOAD = "com.saturdaycoder.easydoubanfm.download";
 	public static final String ACTION_CANCEL_DOWNLOAD = "com.saturdaycoder.easydoubanfm.cancel_download";
@@ -116,7 +119,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private Downloader downloader;
 	
 	// variables that need synchronize
-	private boolean isFmOn;
+	private volatile boolean isFmOn;
 	private boolean isDownloaderOn;
 	
 	
@@ -224,11 +227,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         	downloadMusic();
         }
 
-        if (action.equals(DoubanFmService.CONTROL_TRASH)) {
-        	Debugger.info("Douban service starts with FAVORITE command");
-        	banMusic();
-        	nextMusic();
-        }
         if (action.equals(DoubanFmService.CONTROL_SELECT_CHANNEL)) {
         	int chann = intent.getIntExtra("channel", 0);
         	Debugger.info("Douban service starts with SELECT_CHANNEL: " + chann);
@@ -360,12 +358,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	}
 	@Override
 	public void openFM() {
-		EasyDoubanFmWidget.updateWidgetOnOffButton(this, 0);
+		//EasyDoubanFmWidget.updateWidgetOnOffButton(this, 0);
+		WidgetContent content = EasyDoubanFmWidget.getContent(this);
+		content.onState = EasyDoubanFmWidget.STATE_PREPARE;
+		EasyDoubanFmWidget.updateContent(this, content, null);
 
 		
 		if (!isFmOn) {
 			synchronized(this) {
 				if (!isFmOn) {
+
+					//picTask = new GetPictureTask();
+					
 			        if (controlListener == null)  {
 			            controlListener = new DoubanFmControlReceiver();  
 			        }
@@ -383,11 +387,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					filter.addAction(DoubanFmService.CONTROL_PLAYPAUSE);
 					filter.addAction(DoubanFmService.CONTROL_PAUSE);
 					filter.addAction(DoubanFmService.CONTROL_RESUME);
-					filter.addAction(DoubanFmService.CONTROL_CLOSE);
+					//filter.addAction(DoubanFmService.CONTROL_CLOSE);
 					filter.addAction(DoubanFmService.CONTROL_DOWNLOAD);
-					filter.addAction(DoubanFmService.CONTROL_RATE);
-					filter.addAction(DoubanFmService.CONTROL_UNRATE);
-					filter.addAction(DoubanFmService.CONTROL_TRASH);
+					//filter.addAction(DoubanFmService.CONTROL_RATE);
+					//filter.addAction(DoubanFmService.CONTROL_UNRATE);
+					//filter.addAction(DoubanFmService.CONTROL_TRASH);
 					filter.addAction(DoubanFmService.CONTROL_SELECT_CHANNEL);
 					filter.addAction(DoubanFmService.CONTROL_UPDATE_WIDGET);
 					registerReceiver(controlListener, filter); 
@@ -405,6 +409,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 						
 						@Override
 						public void onShake() {
+							if (!Preference.getShakeEnable(DoubanFmService.this)) {
+								return;
+							}
+							
 							Debugger.info("Detected SHAKING!!!");
 							Intent i = new Intent(DoubanFmService.CONTROL_NEXT);
 							sendBroadcast(i);
@@ -419,42 +427,41 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 						Debugger.error("no shake sensor: " + e.toString());
 					}
 					
+					// start foreground with notification
+					fgNotification = new Notification(R.drawable.icon,
+							getResources().getString(R.string.app_name),
+					        System.currentTimeMillis());
+					fgNotification.flags |= Notification.FLAG_NO_CLEAR;
+					Intent it = new Intent(NULL_EVENT);
+					PendingIntent pi = PendingIntent.getBroadcast(this, 0, it, PendingIntent.FLAG_UPDATE_CURRENT);
+					fgNotification.setLatestEventInfo(this, "", "", pi);		
+					startForeground(serviceNotId, fgNotification);
+					
+					
 					// get stored channel table
 					db = new Database(this);		
 					// get channel table if it's not existing
-					FmChannel[] chans = FmChannel.Channels;//db.getChannels();
+					FmChannel[] pubChans = FmChannel.AllChannels;//db.getChannels();
 					
 					
 					// the API isn't updated by douban.com. So write it by 
 					// myself instead of fetching from douban.com
 					db.clearChannels();
-					for(FmChannel fc: FmChannel.Channels) {
+					for(FmChannel fc: FmChannel.AllChannels) {
 						db.saveChannel(fc);
 					}
 
 					
-					// get the currently selected channel
-					int ci = Preference.getSelectedChannel(this);
-					int idx = 0;
-					for (; idx < chans.length; ++idx) {
-						if (ci == chans[idx].channelId) {
-							break;
-						}
-					}
-					if (idx == chans.length) {
-						// selected channel not exist
-						Preference.selectChannel(this, 0);
-						ci = 0;
-					}
-					
-					FmChannel c = db.getChannelInfo(ci);
-					
-					
+
 					// check login
 					boolean login = Preference.getLogin(this);
 					if (login) {
-						EasyDoubanFmWidget.updateWidgetChannel(this, 
-								getResources().getString(R.string.text_login_inprocess));
+						//EasyDoubanFmWidget.updateWidgetChannel(this, 
+						//		getResources().getString(R.string.text_login_inprocess));
+						content.channel = getResources().getString(R.string.text_login_inprocess);
+						EasyDoubanFmWidget.updateContent(this, content, null);
+						
+						
 						String email = Preference.getAccountEmail(this);
 						String passwd = Preference.getAccountPasswd(this);
 						try {
@@ -477,23 +484,40 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					else {
 						session = null;
 					}
+		
+					// get the currently selected channel
+					int ci = Preference.getSelectedChannel(this);
 					
-					EasyDoubanFmWidget.updateWidgetOnOffButton(this, 1);
-					EasyDoubanFmWidget.updateWidgetChannel(this, c.getDisplayName(login));
+
+					
+					// if channel not exist, or it need login but not logged in
+					// find the first public channel to select
+					if (!FmChannel.isChannelIdValid(ci)
+							|| (FmChannel.channelNeedLogin(ci) && session == null)) {
+						// selected channel not exist
+						ci = FmChannel.getFirstPublicChannel();
+						
+						Preference.selectChannel(this, ci);
+						
+					}
+					
+					
+					FmChannel c = db.getChannelInfo(ci);
+					
+					content = EasyDoubanFmWidget.getContent(this);
+					
+					//EasyDoubanFmWidget.updateWidgetOnOffButton(this, 1);
+					//EasyDoubanFmWidget.updateWidgetChannel(this, c.getDisplayName(login));
+					content.onState = EasyDoubanFmWidget.STATE_ON;
+					content.channel = c.getDisplayName(login);
+					EasyDoubanFmWidget.updateContent(this, content, null);
 					
 					isFmOn = true;
 					
 					nextMusic();
 					
 
-					fgNotification = new Notification(R.drawable.icon,
-					getResources().getString(R.string.app_name),
-			        System.currentTimeMillis());
-					fgNotification.flags |= Notification.FLAG_NO_CLEAR;
-					Intent it = new Intent(NULL_EVENT);
-					PendingIntent pi = PendingIntent.getBroadcast(this, 0, it, PendingIntent.FLAG_UPDATE_CURRENT);
-					fgNotification.setLatestEventInfo(this, "", "", pi);		
-					startForeground(serviceNotId, fgNotification);
+
 				}
 			}
 		}
@@ -506,11 +530,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		if (isFmOn) {
 			synchronized(this) {
 				if (isFmOn) {
+					isFmOn = false;
 					
 					Debugger.info("DoubanFmService closeFM");
-					EasyDoubanFmWidget.updateWidgetOnOffButton(this, 0);
-					EasyDoubanFmWidget.updateWidgetChannel(this, "正在关闭电台...");
-					EasyDoubanFmWidget.updateWidgetInfo(this, null, null);
+					//EasyDoubanFmWidget.updateWidgetOnOffButton(this, 0);
+					//EasyDoubanFmWidget.updateWidgetChannel(this, "正在关闭电台...");
+					//EasyDoubanFmWidget.updateWidgetInfo(this, null, null);
+					WidgetContent content = EasyDoubanFmWidget.getContent(this);
+					content.onState = EasyDoubanFmWidget.STATE_PREPARE;
+					content.channel = "正在关闭电台...";
+					content.artist = content.title = "";
+					content.picture = BitmapFactory.decodeResource(getResources(), R.drawable.default_album);
+					EasyDoubanFmWidget.updateContent(this, content, null);
 
 					curMusic = lastMusic = null;
 					curPic = null;
@@ -553,12 +584,21 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 						}
 					}
 					
-					EasyDoubanFmWidget.clearWidgetChannel(this);
+					/*EasyDoubanFmWidget.clearWidgetChannel(this);
 					EasyDoubanFmWidget.clearWidgetImage(this);
 					EasyDoubanFmWidget.clearWidgetInfo(this);
 					
-					EasyDoubanFmWidget.updateWidgetOnOffButton(this, -1);		
-					isFmOn = false;
+					EasyDoubanFmWidget.updateWidgetOnOffButton(this, -1);*/
+					content = EasyDoubanFmWidget.getContent(this);
+					content.channel = getResources().getString(R.string.text_channel_unselected);
+					content.picture = BitmapFactory.decodeResource(getResources(), R.drawable.default_album);
+					content.artist = "";
+					content.title = "";
+					content.onState = EasyDoubanFmWidget.STATE_OFF;
+					EasyDoubanFmWidget.updateContent(this, content, null);
+					
+					
+					
 				}
 			}
 		}
@@ -700,7 +740,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 		
 		boolean login = Preference.getLogin(this);
-		EasyDoubanFmWidget.updateWidgetChannel(this, chan.getDisplayName(login));
+		//EasyDoubanFmWidget.updateWidgetChannel(this, chan.getDisplayName(login));
+		WidgetContent content = EasyDoubanFmWidget.getContent(this);
+		content.channel = chan.getDisplayName(login);
+		EasyDoubanFmWidget.updateContent(this, content, null);
 		
 		pendingMusicList.clear();
 		//stopMusic();
@@ -716,7 +759,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		lastStopReason = DoubanFmApi.TYPE_RATE;
 		pendingMusicList.clear();
 		try {
-			EasyDoubanFmWidget.updateWidgetRated(this, true);
+			//EasyDoubanFmWidget.updateWidgetRated(this, true);
+			WidgetContent content = EasyDoubanFmWidget.getContent(this);
+			content.rated = true;
+			EasyDoubanFmWidget.updateContent(this, content, null);
+			
+			
 			fillPendingList(Preference.getSelectedChannel(this));
 			
 		} catch (Exception e) {
@@ -733,7 +781,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		lastStopReason = DoubanFmApi.TYPE_UNRATE;
 		pendingMusicList.clear();
 		try {
-			EasyDoubanFmWidget.updateWidgetRated(this, false);
+			//EasyDoubanFmWidget.updateWidgetRated(this, false);
+			WidgetContent content = EasyDoubanFmWidget.getContent(this);
+			content.rated = false;
+			EasyDoubanFmWidget.updateContent(this, content, null);
+			
 			fillPendingList(Preference.getSelectedChannel(this));
 		} catch (Exception e) {
 			
@@ -753,9 +805,14 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public void nextMusic(int channel) { 
 		playThread.stopPlay();
 		
-		EasyDoubanFmWidget.clearWidgetInfo(this);
+		//EasyDoubanFmWidget.clearWidgetInfo(this);
+		WidgetContent content = EasyDoubanFmWidget.getContent(this);
+		content.artist = content.title = "";
+		EasyDoubanFmWidget.updateContent(this, content, null);
 		
-		EasyDoubanFmWidget.updateWidgetProgress(this, 20);
+		
+		
+		EasyDoubanFmWidget.setProgress(this, 20);
 		
 		lastMusic = curMusic;
 		curMusic = getNextMusic(channel);
@@ -768,7 +825,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			Debugger.verbose("remove old history");
 		}
 		
-		EasyDoubanFmWidget.updateWidgetProgress(this, 40);
+		EasyDoubanFmWidget.setProgress(this, 40);
 		if (curMusic == null) {
 			Intent intent = new Intent(STATE_FAILED);  
 		    //intent.putExtra("session", sessionid);  
@@ -778,7 +835,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		    return;
 		} 
 		
-		
+		// there's a case that following code execute after closeFM(), so check isFmOn here
+		if (!isFmOn) {
+			return;
+		}
 		
 		// report picture ready
 		Intent intent = new Intent(STATE_STARTED);  
@@ -794,11 +854,24 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	    sendBroadcast(intent);
 	    
     	Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.progress2);
-	    EasyDoubanFmWidget.updateWidgetInfo(this, bmp, curMusic);
+	    //EasyDoubanFmWidget.updateWidgetInfo(this, bmp, curMusic);
+	    //EasyDoubanFmWidget.updateWidgetRated(this, !curMusic.like.equals("0"));
+    	content = EasyDoubanFmWidget.getContent(this);
+    	content.artist = curMusic.artist;
+    	content.title = curMusic.title;
+    	content.picture = bmp;
+    	content.rated = !curMusic.like.equals("0");
+    	EasyDoubanFmWidget.updateContent(this, content, null);
+    	
 	    
-	    EasyDoubanFmWidget.updateWidgetRated(this, !curMusic.like.equals("0"));
-	    
-	    playThread.startPlay(curMusic.musicUrl);
+		// there's a case that following code execute after closeFM(), so check isFmOn here
+		if (!isFmOn) {
+			
+			return;
+		}
+    	
+		if (playThread != null && playThread.isAlive())
+			playThread.startPlay(curMusic.musicUrl);
 	    
 	    // set notification;
 		fgNotification = new Notification(R.drawable.icon,
@@ -817,13 +890,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		
 	    
-	    EasyDoubanFmWidget.updateWidgetProgress(this, 60);
+	    EasyDoubanFmWidget.setProgress(this, 60);
 		
+		// there's a case that following code execute after closeFM(), so check isFmOn here
+		if (!isFmOn) {
+			return;
+		}
+	    
 	    // update appwidget view image
 	    if (picTask != null) {
 	    	picTask.cancel(true);
 	    }
-	    picTask = new GetPictureTask();
+		picTask = new GetPictureTask();
 	    picTask.execute(curMusic.pictureUrl);
 	    
 	    // secretly pre-fetch play list
@@ -888,6 +966,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     		HttpResponse httpResponse = null;
     		try {
     			httpResponse = new DefaultHttpClient().execute(httpGet);
+				if (isCancelled())
+					return null;
     			publishProgress(80);
     		} catch (Exception e) {
     			Debugger.error("Error getting response of downloading music: " + e.toString());
@@ -915,7 +995,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 						break;
 					l += tmpl;
 				}
-				
+				if (isCancelled())
+					return null;
 				Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, length);
 				return bmp;
 			} catch (Exception e) {
@@ -926,13 +1007,19 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	}
     	@Override
     	protected void onProgressUpdate(Integer... progress) {
-    		EasyDoubanFmWidget.updateWidgetProgress(DoubanFmService.this, progress[0].intValue());
+    		EasyDoubanFmWidget.setProgress(DoubanFmService.this, progress[0].intValue());
         }
     	@Override
         protected void onPostExecute(Bitmap bmp) {
     		curPic = bmp;
-    		EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this, bmp, null);
-    		EasyDoubanFmWidget.updateWidgetProgress(DoubanFmService.this, 100);
+    		//EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this, bmp, null);
+    		EasyDoubanFmWidget.setProgress(DoubanFmService.this, 100);
+    		
+    		WidgetContent content = EasyDoubanFmWidget.getContent(DoubanFmService.this);
+    		content.picture = bmp;
+    		EasyDoubanFmWidget.updateContent(DoubanFmService.this, content, null);
+    		
+    		
     		picTask = null;
     		
         }
@@ -952,6 +1039,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		} catch (Exception e) {
 			Debugger.error("error in banMusic: " + e.toString());
 		}
+		lastStopReason = DoubanFmApi.TYPE_NEW;
 		popNotify(getResources().getString(R.string.notify_music_banned));
 		nextMusic();
     }
@@ -1072,6 +1160,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
             	nextMusic();
             	return;
             }
+
             if (action.equals(DoubanFmService.CONTROL_TRASH)) {
             	Debugger.info("Douban service received TRASH command");
             	banMusic();
@@ -1134,12 +1223,20 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     }  
     
     private void updateWidgets() {
-    	EasyDoubanFmWidget.setWidgetButtonListeners(DoubanFmService.this, null);
-    	int selChan = Preference.getSelectedChannel(DoubanFmService.this);
+    	/*RemoteViews remoteViews = EasyDoubanFmWidget.getRemoteViews(this);
+    	if (remoteViews == null) {
+    		return;
+    	}
+    	
+    	EasyDoubanFmWidget.setWidgetButtonListeners(DoubanFmService.this, 
+    			remoteViews, null);
+    	
 
     	EasyDoubanFmWidget.updateWidgetOnOffButton(DoubanFmService.this, 
-    			(isFmOn? 1: -1));
-    	
+    			remoteViews,
+    			(isFmOn? 1: -1));*/
+    	int selChan = Preference.getSelectedChannel(DoubanFmService.this);
+    	WidgetContent content = EasyDoubanFmWidget.getContent(this);
     	if (isFmOn) {
 
     		FmChannel chan = db.getChannelInfo(selChan);
@@ -1148,37 +1245,52 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		    	String chanName = chan.name;
 	    		
 		    	Debugger.verbose("update widget channel");
-		    	EasyDoubanFmWidget.updateWidgetChannel(DoubanFmService.this, 
-		    			chanName);
+		    	//EasyDoubanFmWidget.updateWidgetChannel(DoubanFmService.this, 
+		    		//	remoteViews,
+		    			//chanName);
+		    	content.channel = chanName;
     		}
     	} else {
-    		EasyDoubanFmWidget.updateWidgetChannel(DoubanFmService.this, 
-	    			getResources().getString(R.string.text_channel_unselected));
+    		//EasyDoubanFmWidget.updateWidgetChannel(DoubanFmService.this, 
+    		//		remoteViews,
+	    	//		getResources().getString(R.string.text_channel_unselected));
+    		content.channel = getResources().getString(R.string.text_channel_unselected);
     	}
     	
     	if (isFmOn && curMusic != null) {
     		Debugger.debug("updating music info");
-	    	EasyDoubanFmWidget.updateWidgetRated(DoubanFmService.this, 
+	    	/*EasyDoubanFmWidget.updateWidgetRated(DoubanFmService.this, 
+	    			remoteViews,
 	    			(curMusic.like.equals("0")? false: true));
-	    	EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this, 
-	    			curPic, curMusic);
+	    	EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this,
+	    			remoteViews,
+	    			curPic, curMusic);*/
+    		content.rated = (curMusic.like.equals("0")? false: true);
+    		content.picture = (curPic == null)? 
+    				BitmapFactory.decodeResource(getResources(), R.drawable.default_album)
+    				: curPic;
+    		content.artist = curMusic.artist;
+    		content.title = curMusic.title;
     	} else {
-	    	EasyDoubanFmWidget.updateWidgetRated(DoubanFmService.this, false);
+	    	//EasyDoubanFmWidget.updateWidgetRated(DoubanFmService.this, remoteViews,false);
+    		content.rated = false;
 	    	MusicInfo mi = new MusicInfo();
 	    	mi.artist = mi.title = "";
-	    	EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this, null, mi);
+	    	//EasyDoubanFmWidget.updateWidgetInfo(DoubanFmService.this, remoteViews,null, mi);
+	    	content.picture = BitmapFactory.decodeResource(getResources(), R.drawable.default_album);
+    		content.artist = "";
+    		content.title = "";
     	}
-    	
+    	EasyDoubanFmWidget.updateContent(this, content, null);
     }
     
-    @Override 
+    /*@Override 
 	public void onConfigurationChanged(Configuration newConfig) {
 		Debugger.info( "ONCONFIGURATIONCHANGED: " + newConfig.toString());
-		
-    	
+  	
     	super.onConfigurationChanged(newConfig); 
     	updateWidgets();
-	}
+	}*/
     
     private class DoubanFmHandler extends Handler {
     	@Override

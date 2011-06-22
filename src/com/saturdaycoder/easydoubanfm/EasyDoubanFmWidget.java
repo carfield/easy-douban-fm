@@ -1,4 +1,5 @@
 package com.saturdaycoder.easydoubanfm;
+
 import android.app.PendingIntent;
 import android.graphics.*;
 import android.appwidget.AppWidgetProvider;
@@ -14,235 +15,144 @@ import android.content.Intent;
 
 
 public class EasyDoubanFmWidget extends AppWidgetProvider {
+	public static final int STATE_ON = 1;
+	public static final int STATE_PREPARE = 0;
+	public static final int STATE_OFF = -1;
+	
+	private static WidgetContent widgetContent = null;
+	
+	public static WidgetContent getContent(Context context) {
+		if (widgetContent == null) {
+			synchronized(EasyDoubanFmWidget.class){
+				if (widgetContent == null) {
+					widgetContent = new WidgetContent(context.getResources());
+				}
+			}
+		}
+		return widgetContent;
+	}
+	
 	synchronized
-	public static void updateWidgetChannel(Context context, String name) {
+	public static void updateContent(Context context, 
+			WidgetContent content, int[] appWidgetIds) {
 		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-							R.layout.appwidget);
+				R.layout.appwidget);
 		
-		updateViews.setTextViewText(R.id.textChannel, name);
-		
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
-	}
-	
-	synchronized
-	public static void updateWidgetProgress(Context context, int progress) {
-		if (progress >= 20
-        		&& progress < 40) {
-        	Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress1);
-        	EasyDoubanFmWidget.updateWidgetInfo(context, bmp, null);
-        }
-		if (progress >= 40
-        		&& progress < 60) {
-        	Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress2);
-        	EasyDoubanFmWidget.updateWidgetInfo(context, bmp, null);
-        }
-		if (progress >= 60
-        		&& progress < 80) {
-        	Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress3);
-        	EasyDoubanFmWidget.updateWidgetInfo(context, bmp, null);
-        }
-		if (progress >= 80
-        		&& progress < 100) {
-        	Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress4);
-        	EasyDoubanFmWidget.updateWidgetInfo(context, bmp, null);
-        }
-	}
-
-	
-	synchronized
-	public static void updateWidgetOnOffButton(Context context, int onState) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-	    
-	    switch (onState) {
-	    case -1: {
-	    	Debugger.debug("set power state as OFF");
-	    	updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.off);
-	    	
-	    	
-	    	Intent menuIntent = new Intent(DoubanFmService.NULL_EVENT);
-			PendingIntent menuPendingIntent = PendingIntent.getBroadcast(context, 
-					0, menuIntent, 0);
-	    	updateViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
-
-	    	break;
-	    }
-	    case 0: {
-	    	Debugger.debug("set power state as ON<->OFF");
-	    	updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.onoff);
-	    	
-			// Menu button
-			Intent menuIntent = new Intent(context, ChannelSelectorActivity.class);
-			PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
-					0, menuIntent, 0);
-			updateViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
+		// channel text
+		updateViews.setTextViewText(R.id.buttonChannel, content.channel);
+		// picture
+		updateViews.setImageViewBitmap(R.id.imageCover, content.picture);
+		// music artist
+		updateViews.setTextViewText(R.id.textArtist, content.artist);
+		// music title
+		updateViews.setTextViewText(R.id.textTitle, content.title);
+		// on/off state
+		switch(content.onState) {
+		case STATE_ON:
+			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.on);
 			break;
-	    }
-	    case 1: {
-	    	Debugger.debug("set power state as ON");
-	    	updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.on);
-	    	
-			// Menu button
-			Intent menuIntent = new Intent(context, ChannelSelectorActivity.class);
-			PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
-					0, menuIntent, 0);
-			updateViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
-			
+		case STATE_PREPARE:
+			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.onoff);
 			break;
-	    }
-	    default:
-	    	Debugger.error("invalid on/off state");
-	    	break;
-	    }
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
-	}
-	
-	synchronized
-	public static void updateWidgetPlayPauseButton(Context context, boolean isPlaying) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-	    
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
-	}
-	
-	synchronized
-	public static void updateWidgetRated(Context context, boolean isRated) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-	    
-		if (isRated) {
+		case STATE_OFF:
+			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.off);
+			break;
+		default:
+			break;
+		}
+		// rating
+		if (content.rated) {
 			updateViews.setViewVisibility(R.id.buttonLikeUnset, Button.GONE);
 		} else {
 			updateViews.setViewVisibility(R.id.buttonLikeUnset, Button.VISIBLE);
 		}
 		
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+		
+		// link buttons
+		linkButtons(context, updateViews, appWidgetIds);
+		
+		// appwidget manager do the update
 		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
-	}
-	
-	synchronized
-	public static void updateWidgetInfo(Context context, Bitmap bmp, MusicInfo dfm) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-	    if (bmp == null) {
-	    	updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
-	    } else {
-	    	updateViews.setImageViewBitmap(R.id.imageCover, bmp);
-	    }
-	    if (dfm != null) {
-	    	updateViews.setTextViewText(R.id.textArtist, dfm.artist);
-	    	updateViews.setTextViewText(R.id.textTitle, dfm.title);
-	    }
-	    
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
-	}
-	
-	synchronized
-	public static void clearWidgetInfo(Context context) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-	    //updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
-	    
-	    updateViews.setTextViewText(R.id.textArtist, "");
-	    updateViews.setTextViewText(R.id.textTitle, "");
-	   
-	    
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
-	}
-	
-	synchronized
-	public static void clearWidgetImage(Context context) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-	    updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
-	    
-	    //updateViews.setTextViewText(R.id.textArtist, "");
-	    //updateViews.setTextViewText(R.id.textTitle, "");
-	   
-	    
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
-	}
-	
-	synchronized
-	public static void clearWidgetChannel(Context context) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-	    updateViews.setTextViewText(R.id.textChannel, "未选定频道");
-	   
-	    
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, updateViews);
-	}
-	
-	synchronized
-	public static void updateWidgetBlurText(Context context, boolean blur) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-		if (!blur) {
-		    updateViews.setTextColor(R.id.textArtist, 0xffffff);
-		    updateViews.setTextColor(R.id.textTitle, 0xffffff);
-		    updateViews.setTextColor(R.id.textChannel, 0xffffff);
+		if (appWidgetIds == null || appWidgetIds.length == 0) {
+			ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+			
+			manager.updateAppWidget(thisWidget, updateViews);
 		} else {
-		    updateViews.setTextColor(R.id.textArtist, 0x808080);
-		    updateViews.setTextColor(R.id.textTitle, 0x808080);
-		    updateViews.setTextColor(R.id.textChannel, 0x808080);
+			for (int i: appWidgetIds) {
+				manager.updateAppWidget(i, updateViews);
+			}
 		}
-	    
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		//manager.updateAppWidget(thisWidget, updateViews);
 	}
+	
+    private static EasyDoubanFmWidget sInstance = null;
+    
+    public static synchronized EasyDoubanFmWidget getInstance() {
+    	if (sInstance == null) {
+    		synchronized(EasyDoubanFmWidget.class){
+		        if (sInstance == null) {
+		            sInstance = new EasyDoubanFmWidget();
+		        }
+    		}
+    	}
+        return sInstance;
+    }
+    
+    private static RemoteViews remoteViewsInstance = null;
+	public static RemoteViews getRemoteViews(Context context) {
+		if (remoteViewsInstance == null) {
+			synchronized(EasyDoubanFmWidget.class) {
+				if (remoteViewsInstance == null) {
+					remoteViewsInstance = new RemoteViews(context.getPackageName(),
+							R.layout.appwidget);
+				}
+			}
+		}
+		return remoteViewsInstance;
+	}
+	
 	
 	synchronized
-	public static void updateWidgetBlurInfo(Context context, boolean blur) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+	public static void setProgress(Context context, int progress) {
+		Bitmap bmp = null;
+		if (progress >= 20
+        		&& progress < 40) {
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress1);
+        	
+        }
+		if (progress >= 40
+        		&& progress < 60) {
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress2);
+        	
+        }
+		if (progress >= 60
+        		&& progress < 80) {
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress3);
+        	
+        }
+		if (progress >= 80
+        		&& progress < 100) {
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress4);
+        	
+        }
+		
+		if (bmp != null) {
+			RemoteViews updateViews = new RemoteViews(context.getPackageName(),
 					R.layout.appwidget);
-		if (!blur) {
-		    updateViews.setTextColor(R.id.textArtist, 0xffffff);
-		    updateViews.setTextColor(R.id.textTitle, 0xffffff);
-		} else {
-		    updateViews.setTextColor(R.id.textArtist, 0x808080);
-		    updateViews.setTextColor(R.id.textTitle, 0x808080);
+			updateViews.setImageViewBitmap(R.id.imageCover, bmp);
+			ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+			AppWidgetManager manager = AppWidgetManager.getInstance(context);
+			manager.updateAppWidget(thisWidget, updateViews);
 		}
-	    
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		//manager.updateAppWidget(thisWidget, updateViews);
 	}
-	
+
+
 	synchronized
-	public static void updateWidgetBlurChannel(Context context, boolean blur) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
-		if (!blur) {
-		    updateViews.setTextColor(R.id.textChannel, 0xffffff);
-		} else {
-		    updateViews.setTextColor(R.id.textChannel, 0x808080);
-		}
-	    
-		ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		//manager.updateAppWidget(thisWidget, updateViews);
-	}
+	public static void linkButtons(Context context, 
+					RemoteViews remoteViews, int widgetIds[]) {
+
 	
-	public static void setWidgetButtonListeners(Context context, int widgetIds[]) {
-		RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
-				R.layout.appwidget);
-	
+		Debugger.info("Widget re-link button listeners");
+		
 		ComponentName cn = new ComponentName(context, DoubanFmService.class);
 		// Next button
 		Intent nextIntent = new Intent(DoubanFmService.CONTROL_NEXT);
@@ -294,18 +204,20 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 				0, openIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonOnOff, openPendingIntent);
 	
-
+		// Menu button
+		Intent menuIntent = new Intent(context, PreferenceActivity.class);
 		
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		if (widgetIds == null || widgetIds.length == 0) {
-			ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-			
-			manager.updateAppWidget(thisWidget, remoteViews);
-		} else {
-			for (int i: widgetIds) {
-				manager.updateAppWidget(i, remoteViews);
-			}
-		}
+		PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
+				0, menuIntent, 0);
+		remoteViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
+
+		// channel button
+		Intent channelIntent = new Intent(context, ChannelSelectorActivity.class);
+		
+		PendingIntent channelPendingIntent = PendingIntent.getActivity(context, 
+				0, channelIntent, 0);
+		remoteViews.setOnClickPendingIntent(R.id.buttonChannel, channelPendingIntent);
+
 	}
 	
 	@Override
@@ -315,39 +227,20 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
 		
 		Debugger.debug("widget onUpdate");
+		//RemoteViews remoteViews = getRemoteViews(context); 
 		
-		setWidgetButtonListeners(context, appWidgetIds);
+		WidgetContent content = getContent(context);
+		
+		updateContent(context, content, appWidgetIds);
 		
 		Intent i = new Intent(DoubanFmService.CONTROL_UPDATE_WIDGET);
 		context.sendBroadcast(i);
 	}
-	
-	/*public static void setOnOffButton(Context context, boolean isServiceOn) {
-		serviceStarted = isServiceOn;
-		RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
-				R.layout.appwidget);
-		if (serviceStarted) {
-			Debugger.debug("set button ON/OFF as close button");
-			Intent closeIntent = new Intent(DoubanFmService.DOUBAN_FM_CLOSE);
-			PendingIntent closePendingIntent = PendingIntent.getBroadcast(context, 
-					0, closeIntent, 0);
-			remoteViews.setOnClickPendingIntent(R.id.buttonOff, closePendingIntent);
-		} else {
-			Debugger.debug("set button ON/OFF as open button");
-			Intent onIntent = new Intent(context, DoubanFmService.class);
-			PendingIntent onPendingIntent = PendingIntent.getService(context, 
-					0, onIntent, 0);
-			remoteViews.setOnClickPendingIntent(R.id.buttonOff, onPendingIntent);
-		}
-	    ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		manager.updateAppWidget(thisWidget, remoteViews);
-	}*/
-	
-	//private static boolean serviceStarted = false;
+
 	
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds) {
+		Debugger.info("widget onDeleted");
 		super.onDeleted(context, appWidgetIds);
 		Intent intent = new Intent(DoubanFmService.CONTROL_CLOSE);  
 		context.sendBroadcast(intent);
@@ -355,6 +248,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	
 	@Override
 	public void onDisabled(Context context) {
+		Debugger.info("widget onDisabled");
 		super.onDisabled(context);
 		Intent intent = new Intent(DoubanFmService.CONTROL_CLOSE);  
 		context.sendBroadcast(intent);
@@ -362,16 +256,10 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	
 	@Override
 	public void onEnabled(Context context) {
+		Debugger.info("widget onEnabled");
 		super.onEnabled(context);
 
 	}
-	
-	//private int curSession;
-	//private DoubanFmMusic curMusic;
-	
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		super.onReceive(context, intent);
-	}
+
 	
 }

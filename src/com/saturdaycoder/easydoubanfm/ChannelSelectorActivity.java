@@ -25,6 +25,7 @@ public class ChannelSelectorActivity extends Activity {
 	Button buttonLogin;
 	Button buttonLogout;
 	//bool loggedIn;
+	int pendingSelChanId;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,8 @@ public class ChannelSelectorActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);  
 		setContentView(R.layout.channelselector);
 
-
+		pendingSelChanId = -1;
+		
 		listChannels = (ListView)findViewById(R.id.lvChannels);
 		buttonLogin = (Button)findViewById(R.id.buttonLogin);
 		buttonLogout = (Button)findViewById(R.id.buttonLogout);
@@ -105,13 +107,22 @@ public class ChannelSelectorActivity extends Activity {
 
                 Debugger.info("##### User selected channel id = " + chan.channelId);
                 
-                
-                
-                Intent i = new Intent(DoubanFmService.CONTROL_SELECT_CHANNEL);
-                i.putExtra("channel", chan.channelId);
-                sendBroadcast(i);
-                
-                ChannelSelectorActivity.this.finish();
+                // if the channel need login
+                if (FmChannel.channelNeedLogin(chan.channelId)
+                		&& !Preference.getLogin(ChannelSelectorActivity.this)) {
+                	pendingSelChanId = chan.channelId;
+                	Intent intent = new Intent();
+
+        			intent.setClass(ChannelSelectorActivity.this, LoginActivity.class);
+        			startActivityForResult(intent, 0);
+                }
+                else {
+	                Intent i = new Intent(DoubanFmService.CONTROL_SELECT_CHANNEL);
+	                i.putExtra("channel", chan.channelId);
+	                sendBroadcast(i);
+	                
+	                ChannelSelectorActivity.this.finish();
+                }
         	}
 		});
 		
@@ -140,7 +151,17 @@ public class ChannelSelectorActivity extends Activity {
     	Debugger.debug( "onActivityResult: " + requestCode + ", " + resultCode );
     	switch (requestCode) {
     	case 0: {
-    		loadChannelList();
+    		if (resultCode != RESULT_OK) {
+    			return;
+    		}
+    		if (FmChannel.isChannelIdValid(pendingSelChanId)) {
+    			Intent i = new Intent(DoubanFmService.CONTROL_SELECT_CHANNEL);
+                i.putExtra("channel", pendingSelChanId);
+                sendBroadcast(i);
+                
+                ChannelSelectorActivity.this.finish();
+    		}
+    		break;
     	}
     	default:
     		break;

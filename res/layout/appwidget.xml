@@ -28,8 +28,8 @@
     android:layout_height="50dip"
     />
 
-<TextView 
-    android:id="@+id/textChannel" 
+<Button 
+    android:id="@+id/buttonChannel" 
     android:ellipsize="marquee"
     android:marqueeRepeatLimit ="marquee_forever"
     android:scrollHorizontally="true"
@@ -37,6 +37,7 @@
     android:focusableInTouchMode="true"
     android:textSize="20dip"     
     android:textColor="#ffffff"   
+    android:background="@drawable/transparent"
     android:layout_alignTop="@+id/buttonMenu"
     android:layout_alignBottom="@+id/buttonMenu"
     android:layout_centerHorizontal="true"
@@ -55,7 +56,7 @@
     android:paddingRight="5dip"
     android:layout_alignParentLeft="true"
     android:layout_alignParentBottom="true"
-    android:layout_below="@+id/textChannel"
+    android:layout_below="@+id/buttonChannel"
     android:layout_toLeftOf="@+id/buttonNext"
 	android:src="@drawable/default_album" 
 	android:layout_width="fill_parent" 

@@ -125,11 +125,14 @@ public class DoubanFmApi {
 		} 
 		url += "&type=" + reportType;
 		
-		url += "&version=" + Preference.getClientVersion()
-			+ "&sid=" + ((reportSid == null)? "": reportSid) 
-			+ "&channel=" + channel
-			+ "&h=";
+		url += "&version=" + Preference.getClientVersion();
+		
+		if (reportSid != null && !reportSid.equals(""))
+			url += "&sid=" + reportSid;
+		url += "&channel=" + channel;
+			
 		if (historySids != null) {
+			url += "&h=";
 			for (int i = 0; i < historySids.length; ++i) {
 				String h = historySids[i];
 				if (h == null)

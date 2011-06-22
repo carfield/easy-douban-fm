@@ -3,7 +3,7 @@ import android.content.res.*;
 import android.content.*;
 public class FmChannel {
 	//public static Context context;
-	private static final String publicChannelName = "随机频道";
+	//private static final String randomChannelName = "随机频道";
 	
 	public String abbrEn;
 	public String nameEn;
@@ -11,11 +11,35 @@ public class FmChannel {
 	public String name;
 	public int seqId;
 	public String getDisplayName(boolean login) {
-		if (channelId == 0) {
-			return login? name: publicChannelName;
-		}
-		else return name;
+		//if (channelId == 0) {
+		//	return login? name: randomChannelName;
+		//}
+		return name;
 	}
+	public static boolean channelNeedLogin(int chanId) {
+		return (chanId == 0);
+	}
+	public static int getFirstPublicChannel() {
+		for (int i = 0; i < AllChannels.length; ++i) {
+			if (AllChannels[i].channelId > 0) {
+				return AllChannels[i].channelId;
+			}
+		}
+		return 0;
+	}
+	public static boolean isChannelIdValid(int id) {
+		//boolean chanFound = false;
+		
+		for (int i = 0; i < AllChannels.length; ++i) {
+			if (id == AllChannels[i].channelId) {
+				//chanFound = true;
+				//break;
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public FmChannel(int channelId, String abbrEn, String nameEn, String name, int seqId) {
 		this.channelId = channelId;
 		this.seqId = seqId;
@@ -23,9 +47,10 @@ public class FmChannel {
 		this.nameEn = nameEn;
 		this.abbrEn = abbrEn;
 	}
+	public static final FmChannel PrivateChannel = new FmChannel(0, "", "Personal Radio", "私人频道", 0);
 	
-	public static final FmChannel[] Channels = new FmChannel[] {
-		new FmChannel(0, "", "Personal Radio", "私人频道", 0),
+	public static final FmChannel[] AllChannels = new FmChannel[] {
+		PrivateChannel,
 		new FmChannel(1, "CH", "Chinese", "华语", 1),
 		new FmChannel(2, "EN", "Euro-American", "欧美", 2),
 		new FmChannel(6, "HK", "Cantonese", "粤语", 3),

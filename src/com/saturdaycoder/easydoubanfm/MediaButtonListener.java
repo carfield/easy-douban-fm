@@ -2,8 +2,14 @@ package com.saturdaycoder.easydoubanfm;
 import android.content.*;
 import android.view.*;
 public class MediaButtonListener extends BroadcastReceiver {
+
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		if (!Preference.getMediaButtonEnable(context)) {
+			return;
+		}
+		
+		
 		if (intent == null) {
 			Debugger.error("null Intent");
 			return;
