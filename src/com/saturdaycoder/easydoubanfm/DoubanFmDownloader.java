@@ -17,111 +17,347 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Environment;
 
 public class DoubanFmDownloader {
-	private boolean isOn = false;
+	private boolean isOpen = false;
+	private Context context = null;
+	private Database db = null;
+	private HashMap<Integer, DownloadTask> downloadMap = new HashMap<Integer, DownloadTask>();
+	private HashMap<Integer, Notification> notificationMap = new HashMap<Integer, Notification>();
+	//private HashMap<Integer, Integer> progressMap = new HashMap<Integer, Integer>();
+	
+	private NotificationManager notManager = null;
+	
+	private static final int DOWNLOAD_ERROR_OK = 0;
+	private static final int DOWNLOAD_ERROR_IOERROR = -1;
+	private static final int DOWNLOAD_ERROR_CANCELLED = -2;
+	
+	private static final int NO_REASON = -1;
+	
+	public DoubanFmDownloader(Context context) {
+		this.context = context;
+		db = new Database(context);
+		notManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+	}
 	
 	public void open() {
-		
+		synchronized(this) {
+			if (!isOpen) {
+				isOpen = true;
+			}
+		}
 	}
 	
 	public void close() {
+		synchronized(this) {
+			if (isOpen) {
+				isOpen = false;
+			}
+		}
+	}
+	
+	public boolean isOpen() {
+		return isOpen;
+	}
+	
+	public void download(String artist, String title, String url, String filename) {
+		Debugger.verbose("Downloader.download url=\"" + url + "\"");
+		if (filename == null) {
+			filename = Utility.getUnixFilename(artist, title, url);
+		}
+		int id = db.addDownload(url, filename);
+		if (id != -1) {
+			DownloadTask task = new DownloadTask();
+			downloadMap.put(id, task);
+			task.execute(url, filename);
+			
+			notifyDownloadStateChanged(DoubanFmService.STATE_STARTED, //artist, title, 
+					filename, url, NO_REASON);
+		}
+	}
+	
+	public void cancel(String url) {
+		
+		int id = db.getDownloadIdByUrl(url);
+		Debugger.debug("cancel download of " + url);
+		DownloadTask task = downloadMap.get(id);
+		if (task != null) {
+			task.cancel(true);
+		}
+	}
+	
+	public void cancel(int id) {
+		Debugger.debug("cancel download of id " + id);
+		String url = db.getDownloadUrlById(id);
+		DownloadTask task = downloadMap.get(id);
+		if (task != null) {
+			task.cancel(true);
+		}
+	}
+	
+	public void clearNotification(String url) {
 		
 	}
 	
-	public boolean isOn() {
-		return isOn;
+	public void clearNotification(int id) {
+		
+	}
+	private File getDownloadFile(String filename) {
+        
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                return null;
+        }
+        
+        File dir = new File(android.os.Environment.getExternalStorageDirectory(), 
+                        Preference.getDownloadDirectory(context));
+        if (!dir.exists()) {
+                dir.mkdirs();
+        }
+        File file = new File(Environment.getExternalStorageDirectory(), 
+                        Preference.getDownloadDirectory(context) + "/" + filename);
+        return file;
+	}
+
+	private void notifyDownloadStateChanged(int downloadState, //String artist, String title,
+											String filename, String url, int reason) {
+		int id = db.getDownloadIdByUrl(url);
+		
+		if (id == -1)
+			return;
+		
+		switch(downloadState) {
+		case DoubanFmService.STATE_STARTED: {
+			Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_CANCEL);
+			if (filename == null) {
+				filename = db.getFilenameByUrl(url);
+			}
+			i.putExtra(DoubanFmService.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
+			i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+			ComponentName cn = new ComponentName(context, DoubanFmService.class);
+			i.setComponent(cn);
+			
+			PendingIntent pi = PendingIntent.getService(context, 
+					0, i, 0);
+
+			Notification notification = new Notification(android.R.drawable.stat_sys_download, 
+					context.getResources().getString(R.string.text_downloading),
+	                System.currentTimeMillis());
+			
+			notificationMap.put(id, notification);
+			
+			notification.contentView = new android.widget.RemoteViews(context.getPackageName(),
+					R.layout.download_notification_1); 
+			notification.contentView.setTextViewText(R.id.textDownloadFilename, filename);
+			notification.contentView.setTextViewText(R.id.textDownloadSize, 
+					context.getResources().getString(R.string.text_download_cancel));
+			notification.contentView.setProgressBar(R.id.progressDownloadNotification, 100,0, false);
+
+			notification.contentIntent = pi;      
+
+			notManager.notify(id, notification);
+			break;
+		}
+		case DoubanFmService.STATE_CANCELLED: {
+			Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+			if (filename == null) {
+				filename = db.getFilenameByUrl(url);
+			}
+			i.putExtra(DoubanFmService.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
+			i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+
+			PendingIntent pi = PendingIntent.getService(context, 
+					0, i, 0);
+
+			Notification notification = new Notification(android.R.drawable.stat_notify_error, 
+					context.getResources().getString(R.string.text_download_cancelled),
+	                System.currentTimeMillis());
+	        notification.setLatestEventInfo(context, 
+	        		context.getResources().getString(R.string.text_download_cancelled_long), 
+	        		filename, pi);
+	        notManager.notify(id, notification);
+	        
+	        break;	
+		}
+		case DoubanFmService.STATE_FINISHED: {
+			Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+			if (filename == null) {
+				filename = db.getFilenameByUrl(url);
+			}
+			i.putExtra(DoubanFmService.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
+			i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+
+			PendingIntent pi = PendingIntent.getService(context, 
+					0, i, 0);
+
+			Notification notification = new Notification(R.drawable.stat_sys_install_complete, 
+					context.getResources().getString(R.string.text_download_ok),
+	                System.currentTimeMillis());
+	        notification.setLatestEventInfo(context, 
+	        		context.getResources().getString(R.string.text_download_ok_long), 
+	        		filename, pi);
+	        notManager.notify(id, notification);
+	        
+	        break;			
+		}
+		case DoubanFmService.STATE_ERROR: {
+			Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+			if (filename == null) {
+				filename = db.getFilenameByUrl(url);
+			}
+			i.putExtra(DoubanFmService.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
+			i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+
+			PendingIntent pi = PendingIntent.getService(context, 
+					0, i, 0);
+
+			Notification notification = new Notification(android.R.drawable.stat_notify_error, 
+					context.getResources().getString(R.string.text_download_fail),
+	                System.currentTimeMillis());
+	        notification.setLatestEventInfo(context, 
+	        		context.getResources().getString(R.string.text_download_fail_long), 
+	        		filename, pi);
+	        notManager.notify(id, notification);
+	        
+	        break;				
+		}
+		default:
+			break;
+		}
+	}
+	
+	private void notifyDownloadProgress(String url, int progress, String detail) {
+		Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_CANCEL);
+		i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+		ComponentName cn = new ComponentName(context, DoubanFmService.class);
+		i.setComponent(cn);
+		
+		PendingIntent pi = PendingIntent.getService(context, 
+				0, i, 0);
+
+		int id = db.getDownloadIdByUrl(url);
+		if (id == -1)
+			return;
+		
+		Notification n = notificationMap.get(id);
+		if (n == null) {
+			return;
+		}
+		
+		n.contentView.setProgressBar(R.id.progressDownloadNotification, 
+				100, progress, false);
+		//String text = String.valueOf(progress) + "%";
+		//if (totalBytes != -1 && downloadedBytes != -1)
+		//	text += " (" + downloadedBytes/1024 + "K/" + totalBytes/1024 + "K)";
+		n.contentView.setTextViewText(R.id.textDownloadSize, detail);
+				//context.getResources().getString(R.string.text_download_cancel)+ detail);
+		
+		//Intent i = new Intent(ACTION_DOWNLOADER_CANCEL);
+		//i.putExtra(EXTRA_DOWNLOADER_SESSION_ID, sessionId);
+		//PendingIntent pi = PendingIntent.getBroadcast(DoubanFmService.this, 
+		//		0, i, PendingIntent.FLAG_CANCEL_CURRENT);
+		n.contentIntent = pi;
+		
+		notManager.notify(id, n);
+		
+		
+	}
+	
+	private void notifyDownloadProgress(int id, int progress, String detail) {
+		String url = db.getDownloadUrlById(id);
+		notifyDownloadProgress(url, progress, detail);
 	}
 	
 	private static final int DOWNLOAD_BUFFER = 102400;
-	/*private class DownloadTask extends AsyncTask<String, Integer, Integer> {
-		private int sessionId;
+	private class DownloadTask extends AsyncTask<String, Integer, Integer> {
+		//private int sessionId;
 		private int lastProgress;
-		private int progress;
+		//private int progress;
 		private String url;
 		private String filename;
-		public DownloadTask(int sessionId) {
-			this.sessionId = sessionId;
-			progress = -1;
+		private long totalBytes = -1;
+		private long downloadedBytes = -1;
+		
+		public DownloadTask() {
+			//this.sessionId = sessionId;
+			//progress = -1;
 			lastProgress = 0;
-		}
-		public int getProgress() {
-			return progress;
 		}
 		@Override
     	protected void onProgressUpdate(Integer... progress) {
-			this.progress = progress[0];
-			Debugger.verbose("Download progress: " + this.progress);
+			if (progress.length < 1)
+				return;
+			
+			int prog = progress[0];
+			Debugger.verbose("Download progress: " + prog);
 			
 			if (isCancelled()) {
 				return;
 			}
 			
-			Notification n = notifications.get(this.sessionId);
-			if (n == null) {
-				return;
-			}
-			
-			if (this.progress == 0 || this.progress == 100
-					|| this.progress - lastProgress > 3
-					) {
-				n.contentView.setProgressBar(R.id.progressDownloadNotification, 
-						100, this.progress, false);
-				String text = String.valueOf(this.progress) + "%";
+			if (prog == 0 || prog == 100
+					|| prog - lastProgress > 4) {
+				String detail = context.getResources().getString(R.string.text_download_cancel);
 				if (totalBytes != -1 && downloadedBytes != -1)
-					text += " (" + downloadedBytes/1024 + "K/" + totalBytes/1024 + "K)";
-				n.contentView.setTextViewText(R.id.textDownloadSize, 
-						getResources().getString(R.string.text_download_cancel)+ text);
+					detail += " (" + downloadedBytes/1024 + "K/" + totalBytes/1024 + "K)";
 				
-				Intent i = new Intent(ACTION_DOWNLOADER_CANCEL);
-				i.putExtra(EXTRA_DOWNLOADER_SESSION_ID, sessionId);
-				PendingIntent pi = PendingIntent.getBroadcast(DoubanFmService.this, 
-						0, i, PendingIntent.FLAG_CANCEL_CURRENT);
-				n.contentIntent = pi;
-				
-				notificationManager.notify(this.sessionId, n);
-				
-				this.lastProgress = this.progress;
+				notifyDownloadProgress(url, prog, detail);
+				lastProgress = prog;
 			}
-			
-			
 		}
 		
 		@Override
         protected void onPostExecute(Integer result) {
+			int id = db.getDownloadIdByUrl(url);
+			File musicfile = null;
+			musicfile = getDownloadFile(filename);
+			
 			switch (result) {
 			case DOWNLOAD_ERROR_OK:
 				Debugger.info("Download finish");
-				notifyDownloadOk(this.sessionId, this.url, this.filename);
 				
-				File musicfile = null;
-				musicfile = getDownloadFile(filename);
+				notifyDownloadStateChanged(DoubanFmService.STATE_FINISHED, filename, url, NO_REASON);
+				
 				
 				if (musicfile != null) {
-					SingleMediaScanner scanner = new SingleMediaScanner(DoubanFmService.this, musicfile);
+					SingleMediaScanner scanner = new SingleMediaScanner(context, musicfile);
 				}
 				
 				break;
 			case DOWNLOAD_ERROR_IOERROR:
-			case DOWNLOAD_ERROR_CANCELLED:
-				File f = getDownloadFile(filename);
-				if (f.exists()) {
-					f.delete();
+				Debugger.info("Download error");
+				
+				notifyDownloadStateChanged(DoubanFmService.STATE_ERROR, filename, url, NO_REASON);
+
+				if (musicfile.exists()) {
+					musicfile.delete();
 				}
-				Debugger.info("Download failed");
-				notifyDownloadFail(this.sessionId, this.url, this.filename);
+				break;
+			case DOWNLOAD_ERROR_CANCELLED:
+				Debugger.info("Download cancelled");
+				
+				notifyDownloadStateChanged(DoubanFmService.STATE_CANCELLED, filename, url, NO_REASON);
+
+				if (musicfile.exists()) {
+					musicfile.delete();
+				}
+				
 				break;
 			default:
 				break;
 			}
-			tasks.remove(this.sessionId);
-			Debugger.info("remaining task " + tasks.size());
+			downloadMap.remove(id);
+			Debugger.info("remaining task " + downloadMap.size());
 
+			if (downloadMap.size() == 0) {
+				close();
+			}
 		}
 		
 		@Override
@@ -130,13 +366,16 @@ public class DoubanFmDownloader {
 			if (f.exists()) {
 				f.delete();
 			}
-			
-			tasks.remove(this.sessionId);
-			notifyDownloadFail(this.sessionId, this.url, this.filename);
+			int id = db.getDownloadIdByUrl(url);
+			downloadMap.remove(id);
+			Debugger.info("remaining task " + downloadMap.size());
+			notifyDownloadStateChanged(DoubanFmService.STATE_CANCELLED, filename, url, NO_REASON);
 
+			if (downloadMap.size() == 0) {
+				close();
+			}
 		}
-		private long totalBytes = -1;
-		private long downloadedBytes = -1;
+
 		@Override
     	protected Integer doInBackground(String... params) {
 			// param 0: url of music
@@ -153,7 +392,7 @@ public class DoubanFmDownloader {
 			// Step 1. get bytes
 			HttpGet httpGet = new HttpGet(url);
     		httpGet.setHeader("User-Agent", 
-    				String.valueOf(Preference.getClientVersion()));
+    				String.valueOf(Utility.getSdkVersionName()));
 
     		HttpResponse httpResponse = null;
     		
@@ -232,89 +471,5 @@ public class DoubanFmDownloader {
 			
 		}
 	}
-	private Context context;
-	private Map<Integer, DownloadTask> tasks;
-	private boolean writable;
-*/	
-	
-	/*public boolean isRunning() {
-		Debugger.info("downloader task list size: " + tasks.size());
-		return tasks.size() > 0;
-	}
-	
-	public Downloader(Context context) {
-		this.context = context;
-		Debugger.info("DOWNLOADER CREATE");
-		tasks = new HashMap<Integer, DownloadTask>();
-		//sessionId = 1;
-	}
 
-	
-	private File getDownloadFile(String filename) {
-		
-		if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-			return null;
-		}
-		
-		File dir = new File(android.os.Environment.getExternalStorageDirectory(), 
-				Preference.getDownloadDirectory(context));
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-		File file = new File(Environment.getExternalStorageDirectory(), 
-				Preference.getDownloadDirectory(context) + "/" + filename);
-		return file;
-	}
-	
-
-	private boolean getExternalStorageState() {
-		return writable;
-	}
-
-	public int download(int sid, String url, String filename) {
-		Debugger.debug("DownloadService.download(" + url + ", " + filename + ")");
-		DownloadTask task = null;
-		//int ret = -1;
-		//synchronized(this) {
-		task = new DownloadTask(sid);
-		tasks.put(sid, task);
-		//ret = sessionId;
-		//++sessionId;
-		//}
-		Debugger.debug("execute task " + sid);
-		notifyDownloading(sid, url, filename);
-		task.execute(url, filename);
-		return sid;
-	}
-	
-
-	public int getProgress(int sessionId) {
-		DownloadTask task = tasks.get(sessionId);
-		if (task != null) {
-			return task.getProgress();
-		}
-		else {
-			return -1;
-		}
-	}
-	
-	//@Override
-	public void cancel(int sessionId) {
-		DownloadTask task = tasks.get(sessionId);
-		if (task != null) {
-			task.cancel(true);
-			tasks.remove(sessionId);
-		}
-	}
-	
-	public void cancelAll() {
-		Set<Integer> keyset = tasks.keySet();
-		Iterator<Integer> it = keyset.iterator();
-		while (it.hasNext()) {
-			Integer sid = it.next();
-			DownloadTask t = tasks.get(sid);
-			t.cancel(true);
-		}
-		tasks.clear();
-	}*/
 }

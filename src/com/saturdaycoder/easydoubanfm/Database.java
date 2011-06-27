@@ -9,7 +9,7 @@ import android.content.ContentValues;
 //import android.content.SharedPreferences.Editor;
 public class Database extends SQLiteOpenHelper {
 	private static final String DATABASE_NAME = "userdb.sqlite";
-	private static final int DB_VERSION = 1;
+	private static final int DB_VERSION = 2;
 	protected Database(Context context) {
 		super(context, DATABASE_NAME, null, DB_VERSION);
 		//this.context = context;
@@ -21,6 +21,9 @@ public class Database extends SQLiteOpenHelper {
 				+ " name_en TEXT DEFAULT '', "
 				+ " name TEXT DEFAULT '', "
 				+ " seq_id INTEGER)");
+		db.execSQL("CREATE TABLE downloads (id INTEGER primary key, "
+				+ " url TEXT DEFAULT '', "
+				+ " filename TEXT DEFAULT '')");
 		//selectChannel(0);
 	}
 	
@@ -28,12 +31,140 @@ public class Database extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) 
 	{
 		db.execSQL("DROP TABLE IF EXISTS channels");
+		db.execSQL("DROP TABLE IF EXISTS downloads");
 		onCreate(db);
+	}
+	
+	public void clearDownloads() {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.execSQL("delete from downloads");
 	}
 	
 	public void clearChannels() {
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.execSQL("delete from channels");
+	}
+	
+	public int addDownload(String url, String filename) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		Cursor cursor = db.rawQuery("select id from downloads order by id asc", null);
+		if (cursor.moveToFirst()) 
+		{
+			do {
+				list.add(cursor.getInt(0));
+			} while(cursor.moveToNext());
+			int[] ids = new int[list.size()];
+			for (int i = 0; i < ids.length; ++i) {
+				ids[i] = list.get(i);
+			}
+		}
+		
+		int i = 2;
+		for (; i < Integer.MAX_VALUE; ++i) {
+			if (!list.contains(i)) {
+				break;
+			}
+		}
+		
+		if (i == Integer.MAX_VALUE)
+			return -1;
+		
+		ContentValues values = new ContentValues();
+		values.put("id", i);
+		values.put("url", url);
+		values.put("filename", filename);
+		
+		long res = db.insertOrThrow("downloads", null, values);		
+		
+		if (res == -1)
+			return -1;
+		else
+			return i;
+	}
+	
+	public void removeDownload(int id) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.execSQL("delete from downloads where id=" + id);
+	}
+	
+	public void removeDownload(String url) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.execSQL("delete from downloads where url='" + url + "'");
+	}
+	
+	public int[] getDownloadIds() {
+		SQLiteDatabase db = this.getWritableDatabase();
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		Cursor cursor = db.rawQuery("select id from downloads order by id asc", null);
+		if (cursor.moveToFirst()) 
+		{
+			do {
+				list.add(cursor.getInt(0));
+			} while(cursor.moveToNext());
+			int[] ids = new int[list.size()];
+			for (int i = 0; i < ids.length; ++i)
+				ids[i] = list.get(i);
+			return ids;
+		}
+		return null;
+	}
+	
+	public String[] getDownloadUrls() {
+		SQLiteDatabase db = this.getWritableDatabase();
+		ArrayList<String> list = new ArrayList<String>();
+		Cursor cursor = db.rawQuery("select url from downloads order by id asc", null);
+		if (cursor.moveToFirst()) 
+		{
+			do {
+				list.add(cursor.getString(0));
+			} while(cursor.moveToNext());
+			String[] urls = new String[list.size()];
+			return list.toArray(urls);
+		}
+		return null;
+	}
+	
+	public int getDownloadIdByUrl(String url) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		//ArrayList<String> list = new ArrayList<String>();
+		Cursor cursor = db.rawQuery("select id from downloads where url='" + url + "'", null);
+		if (cursor.moveToFirst()) 
+		{
+			return cursor.getInt(0);
+		}
+		return 0;
+	}
+	public String getFilenameByUrl(String url) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		//ArrayList<String> list = new ArrayList<String>();
+		Cursor cursor = db.rawQuery("select filename from downloads where url='" + url + "'", null);
+		if (cursor.moveToFirst()) 
+		{
+			return cursor.getString(0);
+		}
+		return null;
+	}
+	
+	public String getFilenameById(int id) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		//ArrayList<String> list = new ArrayList<String>();
+		Cursor cursor = db.rawQuery("select filename from downloads where id=" + id, null);
+		if (cursor.moveToFirst()) 
+		{
+			return cursor.getString(0);
+		}
+		return null;
+	}
+	public String getDownloadUrlById(int id) {
+		SQLiteDatabase db = this.getWritableDatabase();
+		//ArrayList<String> list = new ArrayList<String>();
+		Cursor cursor = db.rawQuery("select url from downloads where id=" + id, null);
+		if (cursor.moveToFirst()) 
+		{
+			return cursor.getString(0);
+		}
+		return null;
 	}
 	
 	public int saveChannel(FmChannel dfc) {

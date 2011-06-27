@@ -189,6 +189,9 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		
 		// Download button
 		Intent downloadIntent = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+		//downloadIntent.putExtra(DoubanFmService.EXTRA_MUSIC_ARTIST, widgetContent.artist);
+		//downloadIntent.putExtra(DoubanFmService.EXTRA_MUSIC_ARTIST, widgetContent.artist);
+		//downloadIntent.putExtra(DoubanFmService.EXTRA_MUSIC_ARTIST, widgetContent.);
 		downloadIntent.setComponent(cn);
 		PendingIntent downloadPendingIntent = PendingIntent.getService(context, 
 				0, downloadIntent, 0);

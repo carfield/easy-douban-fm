@@ -24,6 +24,8 @@
     <string name="text_download_ok_long">下载完成</string>
     <string name="text_download_fail">下载失败</string>
     <string name="text_download_fail_long">下载失败，点击重试</string>
+    <string name="text_download_cancelled">下载被取消</string>
+    <string name="text_download_cancelled_long">下载被取消，点击重试</string>
     <string name="text_login_inprocess">正在登录</string>
     <string name="text_login_idle">未登录</string>
     <string name="text_login_ok">已登录</string>

@@ -49,7 +49,7 @@ public class ShakeDetector implements SensorEventListener {
         /** 
          * 当手机摇晃时被调用 
          */  
-        void onShake();  
+        void onShake(Context context);  
     }  
     /** 
      * 注册OnShakeListener，当摇晃时接收通知 
@@ -126,7 +126,7 @@ public class ShakeDetector implements SensorEventListener {
      */  
     private void notifyListeners() {  
         for (OnShakeListener listener : mListeners) {  
-            listener.onShake();  
+            listener.onShake(mContext);  
         }  
     }  
 }  

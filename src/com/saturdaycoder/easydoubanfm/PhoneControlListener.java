@@ -1,9 +1,9 @@
 package com.saturdaycoder.easydoubanfm;
 import android.content.*;
 import android.view.*;
-public class PhoneControlListener extends BroadcastReceiver {
-								 //implements ShakeDetector.OnShakeListener{
-	/*@Override
+public class PhoneControlListener extends BroadcastReceiver 
+								 implements ShakeDetector.OnShakeListener{
+	@Override
 	public void onShake(Context context) {
 		if (!Preference.getShakeEnable(context)) {
 			return;
@@ -11,8 +11,10 @@ public class PhoneControlListener extends BroadcastReceiver {
 		
 		Debugger.info("Detected SHAKING!!!");
 		Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SKIP);
-		context.sendBroadcast(i);
-	}*/
+		i.setComponent(new ComponentName(context, DoubanFmService.class));
+		//context.sendBroadcast(i);
+		context.startService(i);
+	}
 	
 	@Override
 	public void onReceive(Context context, Intent intent) {
