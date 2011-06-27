@@ -37,16 +37,28 @@
         	</intent-filter>
         </receiver> -->
         
-        <receiver android:name="PhoneCallListener">
+        <!-- <receiver android:name="PhoneCallListener">
         	<intent-filter>  
         		<action android:name="android.intent.action.PHONE_STATE" />
         	</intent-filter>
-        </receiver>
+        </receiver> -->
         
-		    <service android:name="DoubanFmService"> 
-
-        </service >
+        <!-- <receiver android:name="WidgetUpdater">
+        	<intent-filter>
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.PLAYER_MUSIC_PREPARE_PROGRESS" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.PLAYER_POWER_STATE_CHANGED" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.PLAYER_MUSIC_STATE_CHANGED" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.PLAYER_MUSIC_PROGRESS" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.PLAYER_PICTURE_STATE_CHANGED" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.CHANNEL_CHANGED" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.LOGIN_STATE_CHANGED" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.PLAYER_MUSIC_RATED" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.PLAYER_MUSIC_UNRATED" />
+        		<action android:name="com.saturdaycoder.easydoubanfm.event.PLAYER_MUSIC_BANNED" />
+        	</intent-filter>
+        </receiver> -->
         
+		<service android:name="DoubanFmService" />        
         
         <activity android:name="ChannelSelectorActivity" 
                   android:theme="@android:style/Theme.Dialog"

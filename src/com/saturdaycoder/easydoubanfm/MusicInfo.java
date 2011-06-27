@@ -13,6 +13,13 @@ public class MusicInfo {
 	String pictureUrl;
 	String musicUrl;
 	//Bitmap bmp;
+	public boolean isRated() {
+		return !like.equals("0");
+	}
+	
+	public void rate(boolean rate) {
+		like = rate? "1": "0";
+	}
 	
 	@Override
 	public String toString() {

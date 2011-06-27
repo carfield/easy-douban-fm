@@ -1,8 +1,19 @@
 package com.saturdaycoder.easydoubanfm;
 import android.content.*;
 import android.view.*;
-public class MediaButtonListener extends BroadcastReceiver {
-
+public class PhoneControlListener extends BroadcastReceiver {
+								 //implements ShakeDetector.OnShakeListener{
+	/*@Override
+	public void onShake(Context context) {
+		if (!Preference.getShakeEnable(context)) {
+			return;
+		}
+		
+		Debugger.info("Detected SHAKING!!!");
+		Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SKIP);
+		context.sendBroadcast(i);
+	}*/
+	
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		if (!Preference.getMediaButtonEnable(context)) {
@@ -38,7 +49,7 @@ public class MediaButtonListener extends BroadcastReceiver {
 	        if(context != null) {
 	        	switch (keyaction) {
 	        	case KeyEvent.ACTION_DOWN: {
-	        		Intent i = new Intent(DoubanFmService.CONTROL_NEXT);
+	        		Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SKIP);
 	        		context.sendBroadcast(i);
 	        		break;
 	        	}

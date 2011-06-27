@@ -117,7 +117,7 @@ public class ChannelSelectorActivity extends Activity {
         			startActivityForResult(intent, 0);
                 }
                 else {
-	                Intent i = new Intent(DoubanFmService.CONTROL_SELECT_CHANNEL);
+	                Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SELECT_CHANNEL);
 	                i.putExtra("channel", chan.channelId);
 	                sendBroadcast(i);
 	                
@@ -155,7 +155,7 @@ public class ChannelSelectorActivity extends Activity {
     			return;
     		}
     		if (FmChannel.isChannelIdValid(pendingSelChanId)) {
-    			Intent i = new Intent(DoubanFmService.CONTROL_SELECT_CHANNEL);
+    			Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SELECT_CHANNEL);
                 i.putExtra("channel", pendingSelChanId);
                 sendBroadcast(i);
                 

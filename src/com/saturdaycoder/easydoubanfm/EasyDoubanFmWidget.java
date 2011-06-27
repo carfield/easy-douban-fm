@@ -19,6 +19,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	public static final int STATE_PREPARE = 0;
 	public static final int STATE_OFF = -1;
 	
+	
 	private static WidgetContent widgetContent = null;
 	
 	public static WidgetContent getContent(Context context) {
@@ -62,11 +63,14 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		}
 		// rating
 		if (content.rated) {
-			updateViews.setViewVisibility(R.id.buttonLikeUnset, Button.GONE);
+			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.like_set);
 		} else {
-			updateViews.setViewVisibility(R.id.buttonLikeUnset, Button.VISIBLE);
+			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.like_unset);
 		}
-		
+		// pause
+		if (content.paused) {
+			// update pause button image
+		}
 		
 		// link buttons
 		linkButtons(context, updateViews, appWidgetIds);
@@ -117,22 +121,22 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		if (progress >= 20
         		&& progress < 40) {
         	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress1);
-        	
+        	widgetContent.picture = bmp;
         }
 		if (progress >= 40
         		&& progress < 60) {
         	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress2);
-        	
+        	widgetContent.picture = bmp;
         }
 		if (progress >= 60
         		&& progress < 80) {
         	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress3);
-        	
+        	widgetContent.picture = bmp;
         }
 		if (progress >= 80
         		&& progress < 100) {
         	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress4);
-        	
+        	widgetContent.picture = bmp;
         }
 		
 		if (bmp != null) {
@@ -154,51 +158,44 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		Debugger.info("Widget re-link button listeners");
 		
 		ComponentName cn = new ComponentName(context, DoubanFmService.class);
+		
 		// Next button
-		Intent nextIntent = new Intent(DoubanFmService.CONTROL_NEXT);
+		Intent nextIntent = new Intent(DoubanFmService.ACTION_PLAYER_SKIP);
 		nextIntent.setComponent(cn);
 		PendingIntent nextPendingIntent = PendingIntent.getService(context, 
 				0, nextIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonNext, nextPendingIntent);
 		
 		// RATE button
-		Intent rateIntent = new Intent(DoubanFmService.CONTROL_RATE);
+		Intent rateIntent = new Intent(DoubanFmService.ACTION_PLAYER_RATE);
 		rateIntent.setComponent(cn);
 		PendingIntent ratePendingIntent = PendingIntent.getService(context, 
 				0, rateIntent, 0);
-		remoteViews.setOnClickPendingIntent(R.id.buttonLikeUnset, ratePendingIntent);
-		
-		// UNRATE button
-		Intent unrateIntent = new Intent(DoubanFmService.CONTROL_UNRATE);
-		unrateIntent.setComponent(cn);
-		PendingIntent unratePendingIntent = PendingIntent.getService(context, 
-				0, unrateIntent, 0);
-		remoteViews.setOnClickPendingIntent(R.id.buttonLikeSet, unratePendingIntent);
+		remoteViews.setOnClickPendingIntent(R.id.buttonLike, ratePendingIntent);
 		
 		// TRASH button
-		Intent trashIntent = new Intent(DoubanFmService.CONTROL_TRASH);
+		Intent trashIntent = new Intent(DoubanFmService.ACTION_PLAYER_TRASH);
 		trashIntent.setComponent(cn);
 		PendingIntent trashPendingIntent = PendingIntent.getService(context, 
 				0, trashIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonHate, trashPendingIntent);
-	
-		
+			
 		// Play/Pause button
-		Intent stopIntent = new Intent(DoubanFmService.CONTROL_PLAYPAUSE);
+		/*Intent stopIntent = new Intent(DoubanFmService.ACTION_PLAYER_PLAYPAUSE);
 		stopIntent.setComponent(cn);
 		PendingIntent stopPendingIntent = PendingIntent.getService(context, 
 				0, stopIntent, 0);
-		remoteViews.setOnClickPendingIntent(R.id.buttonPlaypause, stopPendingIntent);	
+		remoteViews.setOnClickPendingIntent(R.id.buttonPlaypause, stopPendingIntent);*/	
 		
 		// Download button
-		Intent downloadIntent = new Intent(DoubanFmService.CONTROL_DOWNLOAD);
+		Intent downloadIntent = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
 		downloadIntent.setComponent(cn);
 		PendingIntent downloadPendingIntent = PendingIntent.getService(context, 
 				0, downloadIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonDownload, downloadPendingIntent);
 		
 		// On/Off button
-		Intent openIntent = new Intent(DoubanFmService.CONTROL_ONOFF);
+		Intent openIntent = new Intent(DoubanFmService.ACTION_PLAYER_ONOFF);
 		openIntent.setComponent(cn);
 		PendingIntent openPendingIntent = PendingIntent.getService(context, 
 				0, openIntent, 0);
@@ -233,7 +230,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		
 		updateContent(context, content, appWidgetIds);
 		
-		Intent i = new Intent(DoubanFmService.CONTROL_UPDATE_WIDGET);
+		Intent i = new Intent(DoubanFmService.ACTION_WIDGET_UPDATE);
 		context.sendBroadcast(i);
 	}
 
@@ -242,7 +239,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	public void onDeleted(Context context, int[] appWidgetIds) {
 		Debugger.info("widget onDeleted");
 		super.onDeleted(context, appWidgetIds);
-		Intent intent = new Intent(DoubanFmService.CONTROL_CLOSE);  
+		Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);  
 		context.sendBroadcast(intent);
 	}
 	
@@ -250,7 +247,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	public void onDisabled(Context context) {
 		Debugger.info("widget onDisabled");
 		super.onDisabled(context);
-		Intent intent = new Intent(DoubanFmService.CONTROL_CLOSE);  
+		Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);  
 		context.sendBroadcast(intent);
 	}
 	

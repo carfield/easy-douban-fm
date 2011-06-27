@@ -133,8 +133,9 @@ public class LoginActivity extends Activity {
     		}
     		boolean succ = false;
     		try {
-    			succ = mDoubanFm.login(params[0], params[1]);
-    			return succ;
+    			//succ = mDoubanFm.login(params[0], params[1]);
+    			//return succ;
+    			return false;
     		} catch (Exception e) {
     			return false;
     		}

@@ -5,10 +5,12 @@
     android:layout_height="fill_parent"
     android:background="@drawable/appwidget_bg"
     >
-<Button 
+<ImageButton 
     android:paddingLeft="5dip"
     android:paddingTop="5dip"
-    android:background="@drawable/menu"
+    android:src="@drawable/menu"
+    android:background="@drawable/transparent"
+    android:scaleType="fitCenter"
     android:layout_alignParentTop="true"
     android:layout_alignParentLeft="true"
     android:text="" 
@@ -16,11 +18,13 @@
     android:layout_width="50dip" 
     android:layout_height="50dip"
     />
-<Button 
-    android:paddingLeft="5dip"
-    android:paddingTop="5dip"
-    android:background="@drawable/hate"
+<ImageButton 
+    android:paddingLeft="3dip"
+    android:paddingTop="3dip"
+    android:src="@drawable/hate"
+    android:background="@drawable/transparent"
     android:layout_alignParentTop="true"
+    android:scaleType="fitCenter"
     android:layout_toRightOf="@+id/buttonMenu"
     android:text="" 
     android:id="@+id/buttonHate" 
@@ -115,9 +119,9 @@
 </TextView>
 
 <ImageButton 
-    android:paddingRight="0dip"
-    android:paddingTop="0dip"
-    android:background="@drawable/off"
+    android:paddingRight="3dip"
+    android:paddingTop="3dip"
+    android:background="@drawable/transparent"
     android:src="@drawable/off"
     android:layout_alignParentRight="true"
     android:layout_alignParentTop="true"
@@ -151,20 +155,23 @@
 	android:layout_height="62dip"
 	
 	/>  -->
-<Button 
-    android:paddingRight="5dip"
-    android:paddingBottom="5dip"
+<ImageButton 
+    android:paddingRight="3dip"
+    android:paddingBottom="3dip"
     android:layout_alignParentBottom="true"
-    android:background="@drawable/player"
+    android:src="@drawable/player"
+    android:background="@drawable/transparent"
+    android:scaleType="fitCenter"
     android:layout_alignParentRight="true"
     android:text="" 
     android:id="@+id/buttonDownload" 
     android:layout_width="50dip" 
     android:layout_height="50dip"
     />
-<Button 
+<!-- <ImageButton 
     android:paddingRight="5dip"
     android:paddingBottom="5dip"
+    android:src="@drawable/playpause"
     android:layout_alignParentBottom="true"
     android:background="@drawable/playpause"
     android:layout_toLeftOf="@+id/buttonDownload"
@@ -172,37 +179,28 @@
     android:id="@+id/buttonPlaypause" 
     android:layout_width="50dip" 
     android:layout_height="50dip"
-    />
-
-<Button 
-    android:paddingRight="5dip"
-    android:paddingBottom="5dip"
-    android:background="@drawable/like_set"
+    /> -->
+<ImageButton 
+    android:paddingRight="3dip"
+    android:paddingBottom="3dip"
+    android:src="@drawable/like_unset"
+    android:background="@drawable/transparent"
 	android:layout_alignParentBottom="true"
+	android:scaleType="fitCenter"
     android:layout_toLeftOf="@+id/buttonDownload"
     android:text="" 
-    android:id="@+id/buttonLikeSet" 
+    android:id="@+id/buttonLike" 
     android:layout_width="50dip" 
     android:layout_height="50dip"
     />
-<Button 
-    android:paddingRight="5dip"
-    android:paddingBottom="5dip"
-    android:background="@drawable/like_unset"
+<ImageButton 
+    android:paddingRight="3dip"
+    android:paddingBottom="3dip"
+    android:scaleType="fitCenter"
+    android:src="@drawable/start"
+	android:background="@drawable/transparent"
 	android:layout_alignParentBottom="true"
-    android:layout_toLeftOf="@+id/buttonDownload"
-    android:text="" 
-    android:id="@+id/buttonLikeUnset" 
-    android:layout_width="50dip" 
-    android:layout_height="50dip"
-    />
-<Button 
-    android:paddingRight="5dip"
-    android:paddingBottom="5dip"
-    android:paddingTop="10dip"
-	android:background="@drawable/start"
-	android:layout_alignParentBottom="true"
-	android:layout_toLeftOf="@+id/buttonLikeSet"
+	android:layout_toLeftOf="@+id/buttonLike"
 	android:text="" 
 	android:id="@+id/buttonNext" 
 	android:layout_width="50dip" 

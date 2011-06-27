@@ -14,6 +14,7 @@
     <string name="text_login_passwd">密码</string>
     <string name="text_channel_unselected">未选择频道</string>
     <string name="text_channel_updating">正在更新频道列表</string>
+    <string name="text_channel_closing">正在关闭电台...</string>
     <string name="public_channel_name">公共频道</string>
     <string name="notify_login_succ">登录成功！</string>
     <string name="notify_login_fail">登录失败</string>
@@ -24,6 +25,8 @@
     <string name="text_download_fail">下载失败</string>
     <string name="text_download_fail_long">下载失败，点击重试</string>
     <string name="text_login_inprocess">正在登录</string>
+    <string name="text_login_idle">未登录</string>
+    <string name="text_login_ok">已登录</string>
     <string name="button_confirm_logout_text">退出登录</string>
     <string name="notify_logout_succ">您已退出登录</string>
     <string name="text_download_cancel">点击取消下载</string>
@@ -36,6 +39,7 @@
     <string name="radio_media_button">使用耳机线控按钮换曲</string>
     <string name="radio_camera_button">使用相机键快速下载</string>
     <string name="radio_volume_button">使用上下音量键切换频道</string>
+    <string name="text_error_network">由于网络原因登录失败</string>
     <string name="changelog">
     v0.6 2011-06-21\n
     1.更新到最新频道列表\n

@@ -1,6 +1,6 @@
 package com.saturdaycoder.easydoubanfm;
 
-public class Session {
+public class LoginSession {
 	public User user;
 	public Cookie cookie;
 }

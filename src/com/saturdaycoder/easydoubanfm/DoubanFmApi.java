@@ -33,7 +33,7 @@ public class DoubanFmApi {
 		String uri = "http://www.douban.com:80/j/app/radio/channels?";
 		HttpGet httpGet = new HttpGet(uri);
 		httpGet.setHeader("Connection", "Keep-Alive");
-		httpGet.setHeader("User-Agent", Preference.getSdkVersion());
+		httpGet.setHeader("User-Agent", Utility.getSdkVersionName());
 		try {
 			Debugger.verbose("request is:");
 			Debugger.verbose(httpGet.getRequestLine().toString());
@@ -107,7 +107,7 @@ public class DoubanFmApi {
 		}
 	}
 	
-	public static MusicInfo[] report(Session session, int channel, 
+	public static MusicInfo[] report(LoginSession session, int channel, 
 									String reportSid, char reportType, 
 									String[] historySids) throws IOException {
 		String url = "http://www.douban.com:80/j/app/radio/people?app_name=radio_android";
@@ -125,7 +125,7 @@ public class DoubanFmApi {
 		} 
 		url += "&type=" + reportType;
 		
-		url += "&version=" + Preference.getClientVersion();
+		url += "&version=" + Utility.getClientVersion();
 		
 		if (reportSid != null && !reportSid.equals(""))
 			url += "&sid=" + reportSid;
@@ -144,7 +144,7 @@ public class DoubanFmApi {
 		}
 		HttpGet httpGet = new HttpGet(url);
 		httpGet.setHeader("Connection", "Keep-Alive");
-		httpGet.setHeader("User-Agent", Preference.getSdkVersion());
+		httpGet.setHeader("User-Agent", Utility.getSdkVersionName());
 		if (user != null) {
 			httpGet.setHeader("Cookie", "bid=\"" + cookie.bid + "\"");
 			//httpGet.setHeader("Cookie2", "$Version=1");
@@ -283,7 +283,7 @@ public class DoubanFmApi {
 	public static String getLoginError() {
 		return lastLoginErr;
 	}
-	public static Session login(String email, String passwd, int cliVer) throws IOException{
+	public static LoginSession login(String email, String passwd, int cliVer) throws IOException{
 		if (email == null || email.equals("") || passwd == null || passwd.equals(""))
 			return null;
 		
@@ -291,7 +291,7 @@ public class DoubanFmApi {
 				+ cliVer + "&email=" + encodeUrl(email) + "&password=" + encodeUrl(passwd);
 		HttpGet httpGet = new HttpGet(url);
 		httpGet.setHeader("Connection", "Keep-Alive");
-		httpGet.setHeader("User-Agent", Preference.getSdkVersion());
+		httpGet.setHeader("User-Agent", Utility.getSdkVersionName());
 		
 		//DoubanFmSession session = new DoubanFmSession();
 		
@@ -367,7 +367,7 @@ public class DoubanFmApi {
 					user.userId = json.getString("user_id");
 					user.token = json.getString("token");
 					user.expire = json.getString("expire");
-					Session session = new Session();
+					LoginSession session = new LoginSession();
 					session.user = user;
 					session.cookie = cookie;
 					return session;
