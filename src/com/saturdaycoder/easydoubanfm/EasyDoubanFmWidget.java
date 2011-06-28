@@ -37,7 +37,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	public static void updateContent(Context context, 
 			WidgetContent content, int[] appWidgetIds) {
 		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-				R.layout.appwidget);
+				R.layout.appwidget_linear_layout);
 		
 		// channel text
 		updateViews.setTextViewText(R.id.buttonChannel, content.channel);
@@ -107,7 +107,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			synchronized(EasyDoubanFmWidget.class) {
 				if (remoteViewsInstance == null) {
 					remoteViewsInstance = new RemoteViews(context.getPackageName(),
-							R.layout.appwidget);
+							R.layout.appwidget_linear_layout);
 				}
 			}
 		}
@@ -141,7 +141,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		
 		if (bmp != null) {
 			RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget);
+					R.layout.appwidget_linear_layout);
 			updateViews.setImageViewBitmap(R.id.imageCover, bmp);
 			ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
 			AppWidgetManager manager = AppWidgetManager.getInstance(context);
