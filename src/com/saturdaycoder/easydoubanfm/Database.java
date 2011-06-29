@@ -8,6 +8,8 @@ import android.content.ContentValues;
 //import android.content.SharedPreferences;
 //import android.content.SharedPreferences.Editor;
 public class Database extends SQLiteOpenHelper {
+	private static final int INVALID_DOWNLOAD_ID = -1;
+	
 	private static final String DATABASE_NAME = "userdb.sqlite";
 	private static final int DB_VERSION = 2;
 	protected Database(Context context) {
@@ -48,6 +50,12 @@ public class Database extends SQLiteOpenHelper {
 	public int addDownload(String url, String filename) {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ArrayList<Integer> list = new ArrayList<Integer>();
+		
+		int existId = getDownloadIdByUrl(url);
+		if (existId != INVALID_DOWNLOAD_ID) {
+			return existId;
+		}
+		
 		Cursor cursor = db.rawQuery("select id from downloads order by id asc", null);
 		if (cursor.moveToFirst()) 
 		{
@@ -68,7 +76,7 @@ public class Database extends SQLiteOpenHelper {
 		}
 		
 		if (i == Integer.MAX_VALUE)
-			return -1;
+			return INVALID_DOWNLOAD_ID;
 		
 		ContentValues values = new ContentValues();
 		values.put("id", i);
@@ -78,7 +86,7 @@ public class Database extends SQLiteOpenHelper {
 		long res = db.insertOrThrow("downloads", null, values);		
 		
 		if (res == -1)
-			return -1;
+			return INVALID_DOWNLOAD_ID;
 		else
 			return i;
 	}
@@ -133,7 +141,7 @@ public class Database extends SQLiteOpenHelper {
 		{
 			return cursor.getInt(0);
 		}
-		return 0;
+		return INVALID_DOWNLOAD_ID;
 	}
 	public String getFilenameByUrl(String url) {
 		SQLiteDatabase db = this.getWritableDatabase();

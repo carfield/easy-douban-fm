@@ -40,6 +40,7 @@ public class DoubanFmDownloader {
 	private static final int DOWNLOAD_ERROR_CANCELLED = -2;
 	
 	private static final int NO_REASON = -1;
+	private static final int INVALID_DOWNLOAD_ID = -1;
 	
 	public DoubanFmDownloader(Context context) {
 		this.context = context;
@@ -67,26 +68,34 @@ public class DoubanFmDownloader {
 		return isOpen;
 	}
 	
-	public void download(String artist, String title, String url, String filename) {
+	public int download(String url, String filename) {
 		Debugger.verbose("Downloader.download url=\"" + url + "\"");
-		if (filename == null) {
-			filename = Utility.getUnixFilename(artist, title, url);
+		if (filename == null || filename.equals("") || url == null || url.equals("")) {
+			return INVALID_DOWNLOAD_ID;
 		}
+		
 		int id = db.addDownload(url, filename);
-		if (id != -1) {
+		if (id != INVALID_DOWNLOAD_ID) {
 			DownloadTask task = new DownloadTask();
 			downloadMap.put(id, task);
 			task.execute(url, filename);
 			
-			notifyDownloadStateChanged(DoubanFmService.STATE_STARTED, //artist, title, 
+			notifyDownloadStateChanged(DoubanFmService.STATE_STARTED,  
 					filename, url, NO_REASON);
 		}
+		return id;
 	}
 	
 	public void cancel(String url) {
 		
 		int id = db.getDownloadIdByUrl(url);
-		Debugger.debug("cancel download of " + url);
+		
+		if (id == INVALID_DOWNLOAD_ID) {
+			Debugger.debug("can not get invalid download id by url: " + url);
+			return;
+		}
+		
+		Debugger.debug("cancel download of url " + url);
 		DownloadTask task = downloadMap.get(id);
 		if (task != null) {
 			task.cancel(true);
@@ -96,6 +105,9 @@ public class DoubanFmDownloader {
 	public void cancel(int id) {
 		Debugger.debug("cancel download of id " + id);
 		String url = db.getDownloadUrlById(id);
+		if (url == null) {
+			return;
+		}
 		DownloadTask task = downloadMap.get(id);
 		if (task != null) {
 			task.cancel(true);
@@ -129,7 +141,7 @@ public class DoubanFmDownloader {
 											String filename, String url, int reason) {
 		int id = db.getDownloadIdByUrl(url);
 		
-		if (id == -1)
+		if (id == INVALID_DOWNLOAD_ID)
 			return;
 		
 		switch(downloadState) {
@@ -382,7 +394,8 @@ public class DoubanFmDownloader {
 			// param 1: download filename
 			
 			if (params.length < 2) {
-				Debugger.error("Download task requires more arguments than " + params.length);
+				Debugger.error("Download task requires more arguments than " 
+						+ params.length);
 				return DOWNLOAD_ERROR_CANCELLED;
 			}
 			this.url = params[0];
@@ -452,7 +465,7 @@ public class DoubanFmDownloader {
 					if (tmpl == -1)
 						break;
 					
-					Debugger.debug("writing file " + tmpl + ", " + downloadedBytes + "/" + totalBytes);
+					Debugger.verbose("writing file " + tmpl + ", " + downloadedBytes + "/" + totalBytes);
 					os.write(b, 0, tmpl);
 					downloadedBytes += tmpl;
 					

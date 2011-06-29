@@ -282,9 +282,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		mDelayedStopHandler.removeCallbacksAndMessages(null);
 		
 		if (intent == null) { // it tells us the service was killed by system.
-			popNotify(getResources().getString(R.string.text_killed_for_memory));
+			//popNotify(getResources().getString(R.string.text_killed_for_memory));
 			Debugger.warn("null intent");
 			updateWidgets();
+	        mDelayedStopHandler.removeCallbacksAndMessages(null);
+	        Message msg = mDelayedStopHandler.obtainMessage();
+	        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
 			return START_NOT_STICKY;
 		}
 		
@@ -351,13 +354,13 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         
         
         if (action.equals(ACTION_DOWNLOADER_DOWNLOAD)) {
-        	String artist = intent.getStringExtra(EXTRA_MUSIC_ARTIST);
-        	String title = intent.getStringExtra(EXTRA_MUSIC_TITLE);
+        	//String artist = intent.getStringExtra(EXTRA_MUSIC_ARTIST);
+        	//String title = intent.getStringExtra(EXTRA_MUSIC_TITLE);
         	String url = intent.getStringExtra(EXTRA_MUSIC_URL);
         	String filename = intent.getStringExtra(EXTRA_DOWNLOADER_DOWNLOAD_FILENAME);
         	Debugger.info("Douban service starts with DOWNLOAD command");
         	openDownloader();
-        	downloadMusic(artist, title, url, filename);
+        	downloadMusic(url, filename);
         }
         if (action.equals(ACTION_DOWNLOADER_CANCEL)) {
         	String url = intent.getStringExtra(EXTRA_MUSIC_URL);
@@ -570,29 +573,30 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
     
     //@Override
-    private void downloadMusic(String artist, String title, String url, String filename) {
-    	
-    	if (url == null) {
-    		if (dPlayer.isOpen()) {
-    			url = dPlayer.getCurMusic().musicUrl;
-    			artist = dPlayer.getCurMusic().artist;
-    			title = dPlayer.getCurMusic().title;
-    		}
+    private void downloadMusic(String url, String filename) {
+    	MusicInfo curMusic = null;
+    	if (dPlayer.isOpen()) {
+    		curMusic = dPlayer.getCurMusic();
     	}
     	
+    	if (url == null || url.equals("")) {
+    		url = curMusic.musicUrl;
+    	}
+    	
+    	if (filename == null || filename.equals(""))  {
+    		filename = Utility.getUnixFilename(curMusic.artist, curMusic.title, url);
+    		if (filename == null || filename.equals("")) {
+	    		Debugger.error("can't generate valid file name, abort");
+	    		return;
+    		}
+    	}
     	Debugger.verbose("download filename should be \"" + filename + "\"");
-    	if (filename == null) {
-    		filename = Utility.getUnixFilename(artist, title, url);
-    		if (filename == null) {
-    			Debugger.error("can't generate valid file name, abort");
-    			return;
-    		}
-    	}
+    	
     	
     	Debugger.verbose("download filename is \"" + filename + "\"");
 
     	if (dDownloader.isOpen()) {
-    		dDownloader.download(artist, title, url, filename);
+    		dDownloader.download(url, filename);
     	}
     	//pDownloader.download(0, url, filename);
     }
