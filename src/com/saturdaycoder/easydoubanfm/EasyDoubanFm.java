@@ -17,7 +17,7 @@ public class EasyDoubanFm extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.main);
-        setContentView(R.layout.appwidget_linear_layout);
+        setContentView(R.layout.appwidget4x2);
         
     }
     
