@@ -21,7 +21,7 @@
 	    		android:src="@drawable/btn_trash" 
 	    		android:background="@drawable/transparent"
 	    		android:id="@+id/buttonHate" 
-	    		android:layout_width="wrap_content"
+	    		android:layout_width="fill_parent"
 	    		android:layout_weight="1" 
 	    		android:layout_height="fill_parent" android:layout_gravity="center">
 	    		</ImageButton>
@@ -35,7 +35,7 @@
 	    		android:background="@drawable/transparent" 
 	    		android:id="@+id/buttonLike"
 	    		android:layout_weight="1" 
-	    		android:layout_width="wrap_content" 
+	    		android:layout_width="fill_parent" 
 	    		android:layout_height="fill_parent" android:layout_gravity="center">
 	    		</ImageButton>
 	    <ImageButton 
@@ -48,7 +48,7 @@
 	    		android:background="@drawable/transparent"
 	    		android:id="@+id/buttonMenu"
 	    		android:layout_weight="1" 
-	    		android:layout_width="wrap_content" 
+	    		android:layout_width="fill_parent" 
 	    		android:layout_height="fill_parent" android:layout_gravity="center">
 	    		</ImageButton>
     </LinearLayout>
@@ -70,9 +70,9 @@
 		    android:scrollHorizontally="true"
 		    android:focusable="true"
 		    android:focusableInTouchMode="true"
-		    android:textSize="12dip"     
+		    android:textSize="18dip"     
 		    android:textColor="#ffffff"   
-		    android:background="@drawable/transparent"		    
+		    android:background="@drawable/btn_channel"		    
 		    android:text="@string/text_channel_unselected" 
 		    android:layout_height="fill_parent" 
 		    android:layout_width="fill_parent"
@@ -85,7 +85,7 @@
 	   		android:paddingLeft="1px"
 	   		android:paddingRight="1px"
 			android:id="@+id/imageCover" 
-			android:src="@drawable/transparent"
+			android:src="@drawable/default_album"
 		    android:layout_width="fill_parent" 
 			android:layout_height="fill_parent"
 			android:layout_weight="1" 
@@ -102,7 +102,7 @@
 	   		android:paddingLeft="1px"
 	   		android:paddingRight="1px"
 		    android:id="@+id/textArtist" 
-		    android:textSize="12dip"     
+		    android:textSize="16dip"     
 		    android:textColor="#ffd030"  
 		    android:layout_weight="2" 
 		    android:layout_toRightOf="@+id/imageCover" 
@@ -128,7 +128,7 @@
 	   		android:paddingLeft="1px"
 	   		android:paddingRight="1px"
 		    android:id="@+id/textTitle" 
-		    android:textSize="12dip"     
+		    android:textSize="16dip"     
 		    android:textColor="#ffffff"   
 		    android:layout_alignLeft="@+id/textArtist" 
 		    android:layout_alignParentRight="true"
@@ -156,7 +156,7 @@
 	    		android:src="@drawable/btn_next" 
 	    		android:background="@drawable/transparent"
 	    		android:id="@+id/buttonNext" 
-	    		android:layout_width="wrap_content"
+	    		android:layout_width="fill_parent"
 	    		android:layout_weight="1" 
 	    		android:layout_height="fill_parent" android:clickable="true" android:focusable="true" android:layout_gravity="center">
 	    		</ImageButton>
@@ -170,8 +170,9 @@
 	    		android:background="@drawable/transparent" 
 	    		android:id="@+id/buttonOnOff"
 	    		android:layout_weight="1" 
-	    		android:layout_width="wrap_content" 
-	    		android:layout_height="fill_parent" android:layout_gravity="center">
+	    		android:layout_width="fill_parent" 
+	    		android:layout_height="fill_parent"
+	    		android:layout_gravity="center">
 	    		</ImageButton>
 	    <ImageButton 
 	    		android:paddingBottom="1px"
@@ -183,7 +184,7 @@
 	    		android:background="@drawable/transparent"
 	    		android:id="@+id/buttonDownload"
 	    		android:layout_weight="1" 
-	    		android:layout_width="wrap_content" 
+	    		android:layout_width="fill_parent" 
 	    		android:layout_height="fill_parent" android:layout_gravity="center">
 	    		</ImageButton>
     </LinearLayout>

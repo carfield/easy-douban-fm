@@ -15,7 +15,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:drawable="@drawable/button_ban" />
+    <item android:state_pressed="true" android:drawable="@drawable/button_ban_on" />
     <item android:state_focused="true" android:state_enabled="true" android:drawable="@drawable/button_ban" />
     <item android:drawable="@drawable/button_ban" />
 </selector>

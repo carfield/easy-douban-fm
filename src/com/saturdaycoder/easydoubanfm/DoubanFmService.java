@@ -338,7 +338,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         }
         if (action.equals(ACTION_PLAYER_RATEUNRATE)) {
         	Debugger.info("Douban service starts with RATE/UNRATE command");
-        	if (dPlayer.isMusicRated())
+        	if (!dPlayer.isMusicRated())
         		rateMusic();
         	else 
         		unrateMusic();
