@@ -37,7 +37,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	public static void updateContent(Context context, 
 			WidgetContent content, int[] appWidgetIds) {
 		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-				R.layout.appwidget_linear_layout);
+				R.layout.appwidget4x2);
 		
 		// channel text
 		updateViews.setTextViewText(R.id.buttonChannel, content.channel);
@@ -50,22 +50,22 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		// on/off state
 		switch(content.onState) {
 		case STATE_ON:
-			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.on);
+			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
 			break;
 		case STATE_PREPARE:
-			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.onoff);
+			//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.onoff);
 			break;
 		case STATE_OFF:
-			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.off);
+			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_play);
 			break;
 		default:
 			break;
 		}
 		// rating
 		if (content.rated) {
-			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.like_set);
+			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.btn_rated);
 		} else {
-			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.like_unset);
+			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.btn_unrated);
 		}
 		// pause
 		if (content.paused) {
@@ -107,7 +107,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			synchronized(EasyDoubanFmWidget.class) {
 				if (remoteViewsInstance == null) {
 					remoteViewsInstance = new RemoteViews(context.getPackageName(),
-							R.layout.appwidget_linear_layout);
+							R.layout.appwidget4x2);
 				}
 			}
 		}
@@ -141,7 +141,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		
 		if (bmp != null) {
 			RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-					R.layout.appwidget_linear_layout);
+					R.layout.appwidget4x2);
 			updateViews.setImageViewBitmap(R.id.imageCover, bmp);
 			ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
 			AppWidgetManager manager = AppWidgetManager.getInstance(context);

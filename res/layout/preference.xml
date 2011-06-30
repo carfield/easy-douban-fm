@@ -10,11 +10,20 @@ android:id="@+id/scroll"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
+
     <CheckBox 
     	android:text="@string/radio_swipe_song" 
     	android:id="@+id/cbShakeEnable" 
+    	android:textColor="#ffffff"
     	android:layout_width="wrap_content" 
     	android:layout_height="wrap_content"></CheckBox>
+    <Spinner 
+    	android:layout_width="wrap_content" 
+    	android:layout_height="wrap_content" 
+    	android:id="@+id/spinnerActionSwipe"
+    	android:prompt="@string/options_act"
+    	>
+    	</Spinner>
    	<LinearLayout
    		xmlns:android="http://schemas.android.com/apk/res/android" 
    		android:orientation="horizontal"
@@ -24,6 +33,7 @@ android:id="@+id/scroll"
    		<TextView 
    			android:layout_height="wrap_content"
    			android:singleLine="true" 
+   			android:textColor="#ffffff"
    			android:textAppearance="?android:attr/textAppearanceMedium" 
    			android:layout_width="wrap_content" 
    			android:text="@string/text_swipe_accuracy" 
@@ -38,17 +48,62 @@ android:id="@+id/scroll"
     <CheckBox 
     	android:text="@string/radio_media_button" 
     	android:id="@+id/cbMediaButtonEnable" 
+    	android:textColor="#ffffff"
     	android:layout_width="wrap_content" 
     	android:layout_height="wrap_content"></CheckBox>
+    <Spinner 
+    	android:layout_width="wrap_content" 
+    	android:layout_height="wrap_content" 
+    	android:id="@+id/spinnerActionMediaButton"
+    	android:prompt="@string/options_act"
+    	>
+    	</Spinner>
     <CheckBox 
     	android:text="@string/radio_camera_button" 
     	android:id="@+id/cbCameraButtonEnable" 
+    	android:textColor="#ffffff"
     	android:layout_width="wrap_content" 
     	android:layout_height="wrap_content"></CheckBox>
-    <CheckBox 
-    	android:text="@string/radio_volume_button" 
-    	android:id="@+id/cbVolumeButtonEnable" 
+    <Spinner 
     	android:layout_width="wrap_content" 
-    	android:layout_height="wrap_content"></CheckBox>
+    	android:layout_height="wrap_content" 
+    	android:id="@+id/spinnerActionCameraButton"
+    	android:prompt="@string/options_act"
+    	>
+    	</Spinner>
+    <LinearLayout
+   		xmlns:android="http://schemas.android.com/apk/res/android" 
+   		android:orientation="vertical"
+   		android:layout_width="fill_parent"
+   		android:layout_height="wrap_content"
+   		>
+	    <CheckBox 
+	    	android:text="@string/radio_shutdown_on_idle_1" 
+	    	android:id="@+id/cbShutdownOnIdleEnable" 
+	    	android:singleLine="true" 
+	    	android:textColor="#ffffff"
+	    	android:layout_weight="1"
+	    	android:layout_width="wrap_content" 
+	    	android:layout_height="wrap_content"></CheckBox>
+		<EditText 
+			android:paddingLeft="50dip"
+			android:singleLine="true" 
+		   	android:layout_height="wrap_content" 
+		   	android:id="@+id/editShutdownIdleTime"
+		   	android:layout_weight="1" 
+		   	android:layout_width="200dip" 
+		   	android:numeric="integer">
+		    </EditText>
+		<TextView 
+			android:paddingLeft="50dip"
+			android:singleLine="true" 
+			android:text="@string/radio_shutdown_on_idle_2" 
+		   	android:textColor="#ffffff"
+	    	android:layout_weight="1"
+	    	android:layout_height="wrap_content" 
+		   	android:id="@+id/text10" 
+		   	android:layout_width="wrap_content" >
+		    </TextView>
+	</LinearLayout>
 </LinearLayout>
 </ScrollView>

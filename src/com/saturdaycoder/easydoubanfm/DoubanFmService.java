@@ -176,6 +176,15 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final int SERVICE_NOTIFICATION_ID = 1;
 	public static final int DOWNLOAD_DEFAULT_SESSIONID = 2;
 	
+	
+	
+	
+	
+	public static final int QUICKACT_NEXT_MUSIC = 0;
+	public static final int QUICKACT_NEXT_CHANNEL = 1;
+	public static final int QUICKACT_NEXT_DOWNLOAD_MUSIC = 2;
+	public static final int QUICKACT_NEXT_PLAY_PAUSE = 3;
+	
 	private final IBinder mBinder = new LocalBinder();
 	//private GetPictureTask picTask = null;
 	

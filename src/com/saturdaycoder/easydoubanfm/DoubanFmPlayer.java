@@ -293,7 +293,7 @@ public class DoubanFmPlayer {
 	
 	public void rateMusic() {
 		synchronized(musicSessionLock) {
-			if (curMusic == null || !curMusic.isRated())
+			if (curMusic == null || curMusic.isRated())
 				return;			
 			
 			synchronized(stopReasonLock) {
@@ -315,7 +315,7 @@ public class DoubanFmPlayer {
 	
 	public void unrateMusic() {
 		synchronized(musicSessionLock) {
-			if (curMusic == null || curMusic.isRated())
+			if (curMusic == null || !curMusic.isRated())
 				return;
 			
 			synchronized(stopReasonLock) {
