@@ -586,10 +586,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	MusicInfo curMusic = null;
     	if (dPlayer.isOpen()) {
     		curMusic = dPlayer.getCurMusic();
-    	}
+    	} 
+
     	
     	if (url == null || url.equals("")) {
+    		if (curMusic == null || curMusic.musicUrl == null) {
+    			Debugger.warn("Player not open and URL invalid, halt downloading");
+    			return;
+    		}
     		url = curMusic.musicUrl;
+
     	}
     	
     	if (filename == null || filename.equals(""))  {
