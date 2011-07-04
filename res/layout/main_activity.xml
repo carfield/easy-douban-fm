@@ -4,7 +4,7 @@
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/appwidget_bg"
+    android:background="@drawable/transparent"
     >
     <!-- the 3 buttons at left side  -->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -23,12 +23,6 @@
 	    		android:layout_weight="1" 
 	    		android:layout_height="fill_parent" android:layout_gravity="center">
 	    		</ImageButton>
-			<TextView
-		    	android:id="@+id/border01"
-		    	android:background="@drawable/divider_horizontal"
-		    	android:layout_width="fill_parent"
-		    	android:layout_height="1dp"
-		    	/>
 	    <ImageButton 
 	    		android:scaleType="fitCenter"
 	    		android:src="@drawable/btn_unrated"
@@ -38,12 +32,7 @@
 	    		android:layout_width="fill_parent" 
 	    		android:layout_height="fill_parent" android:layout_gravity="center">
 	    		</ImageButton>
-			<TextView
-		    	android:id="@+id/border02"
-		    	android:background="@drawable/divider_horizontal"
-		    	android:layout_width="fill_parent"
-		    	android:layout_height="1dp"
-		    	/>	    
+ 
 		  <ImageButton 
 	    		android:scaleType="fitCenter"
 	    		android:src="@drawable/btn_menu"
@@ -55,12 +44,7 @@
 	    		</ImageButton>
     </LinearLayout>
     <!-- divider -->
-		<TextView
-		    	android:id="@+id/border06"
-		    	android:background="@drawable/divider_vertical"
-		    	android:layout_width="1dp"
-		    	android:layout_height="fill_parent"
-		    	/>    
+ 
 		 <!-- the channel button, image and info text -->
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:orientation="vertical"
@@ -86,12 +70,7 @@
 		    android:layout_weight="2" 		    
 		    android:singleLine="true"
 		    android:gravity="center"/>
-		<TextView
-		    	android:id="@+id/border05"
-		    	android:background="@drawable/divider_horizontal"
-		    	android:layout_width="fill_parent"
-		    	android:layout_height="1dp"
-		    	/>
+
 
 		<ImageView
 
@@ -147,12 +126,7 @@
 		    >
 		</TextView>
     </LinearLayout>
-		<TextView
-		    	android:id="@+id/border07"
-		    	android:background="@drawable/divider_vertical"
-		    	android:layout_width="1dp"
-		    	android:layout_height="fill_parent"
-		    	/>   
+
 		<!-- the 3 buttons at right side -->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:orientation="vertical"
@@ -171,12 +145,7 @@
 	    		android:layout_weight="1" 
 	    		android:layout_height="fill_parent" android:clickable="true" android:focusable="true" android:layout_gravity="center">
 	    		</ImageButton>
-			<TextView
-		    	android:id="@+id/border03"
-		    	android:background="@drawable/divider_horizontal"
-		    	android:layout_width="fill_parent"
-		    	android:layout_height="1dp"
-		    	/>
+
 	    <ImageButton 
 
 	    		android:scaleType="fitCenter"
@@ -188,12 +157,7 @@
 	    		android:layout_height="fill_parent"
 	    		android:layout_gravity="center">
 	    		</ImageButton>
-			<TextView
-		    	android:id="@+id/border04"
-		    	android:background="@drawable/divider_horizontal"
-		    	android:layout_width="fill_parent"
-		    	android:layout_height="1dp"
-		    	/>
+
 	    <ImageButton 
 	    		android:scaleType="fitCenter"
 	    		android:src="@drawable/btn_download"

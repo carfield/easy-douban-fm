@@ -5,133 +5,228 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 public class Preference {
+	private static final int VALUE_DEFAULT_AUTO_CLOSE_MINUTES = 60;
+	private static final int VALUE_DEFAULT_MAX_IDLE_MINUTES = 30;
+	private static final int VALUE_DEFAULT_SHAKE_THRESHOLD = 5000;
+	private static final int VALUE_DEFAULT_SOCKET_TIMEOUT = 5000;
+	private static final int VALUE_DEFAULT_CONNECTION_TIMEOUT = 3000;
+	private static final int VALUE_DEFAULT_SELECTED_CHANNEL = 0;
+	private static final String VALUE_DEFAULT_DOWNLOAD_DIR = "/easydoubanfm";
 
+	private static final String KEY_AUTO_CLOSE_TIME = "auto_close_time";
+	private static final String KEY_MAX_IDLE_TIME = "max_idle_time";
+	private static final String KEY_DOWNLOAD_DIR = "download_dir";
+	private static final String KEY_SHUTDOWN_ON_IDLE_ENABLE = "shutdown_on_idle_enable";
+	private static final String KEY_CAMERA_BUTTON_ENABLE = "camera_button_enable";
+	private static final String KEY_MEDIA_BUTTON_ENABLE = "media_button_enable";
+	private static final String KEY_SHAKE_THRESHOLD = "shake_threshold";
+	private static final String KEY_SHAKE_ENABLE = "shake_enable";
+	private static final String KEY_LOGIN_ENABLE = "login";
+	private static final String KEY_ACCOUNT_PASSWD = "passwd";
+	private static final String KEY_ACCOUNT_EMAIL = "email";
+	private static final String KEY_SOCKET_TIMEOUT = "socket_timeout";
+	private static final String KEY_CONNECT_TIMEOUT = "connect_timeout";
+	private static final String KEY_SELECTED_CHANNEL = "selected_channel";
+	private static final String PREF_SETTINGS_FILENAME = "settings";
+	private static final String KEY_AUTO_CLOSE_ENABLE = "auto_close_enable";
 
 	//private static SharedPreferences pref = null;
 	public static int getSelectedChannel(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getInt("selected_channel", 0);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getInt(KEY_SELECTED_CHANNEL, VALUE_DEFAULT_SELECTED_CHANNEL);
 	}
 	
 
 	
 	public static boolean selectChannel(Context context, int c) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
-		ed.putInt("selected_channel", c);
+		ed.putInt(KEY_SELECTED_CHANNEL, c);
 		ed.commit();
 		//Debugger.info("##### saved channel = " + c);
 		return true;
 	}
 	
 	public static int getConnectTimeout(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getInt("connect_timeout", 3000);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getInt(KEY_CONNECT_TIMEOUT, VALUE_DEFAULT_CONNECTION_TIMEOUT);
 	}
 	
 	public static int getSocketTimeout(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getInt("socket_timeout", 5000);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getInt(KEY_SOCKET_TIMEOUT, VALUE_DEFAULT_SOCKET_TIMEOUT);
 	}
 	
 	public static void saveAccount(Context context, String email, String passwd) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
-		ed.putString("email", email);
-		ed.putString("passwd", passwd);
+		ed.putString(KEY_ACCOUNT_EMAIL, email);
+		ed.putString(KEY_ACCOUNT_PASSWD, passwd);
 		ed.commit();
 		//Debugger.info("##### saved channel = " + c);
 	}
 	
 	public static void setLogin(Context context, boolean login) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
-		ed.putBoolean("login", login);
+		ed.putBoolean(KEY_LOGIN_ENABLE, login);
 		ed.commit();
 	}
 	
 	public static boolean getLogin(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getBoolean("login", false);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getBoolean(KEY_LOGIN_ENABLE, false);
 	}
 	
 	public static String getAccountEmail(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getString("email", null);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getString(KEY_ACCOUNT_EMAIL, null);
 	}
 	public static void setAccountEmail(Context context, String email) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
-		ed.putString("email", email);
+		ed.putString(KEY_ACCOUNT_EMAIL, email);
 		ed.commit();
 	}
 	
 	public static void setAccountPasswd(Context context, String passwd) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
-		ed.putString("passwd", passwd);
+		ed.putString(KEY_ACCOUNT_PASSWD, passwd);
 		ed.commit();
 	}
 	
 	public static String getAccountPasswd(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getString("passwd", null);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getString(KEY_ACCOUNT_PASSWD, null);
 	}
 	
 	public static void setShakeEnable(Context context, boolean enable) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
-		ed.putBoolean("shake_enable", enable);
+		ed.putBoolean(KEY_SHAKE_ENABLE, enable);
 		ed.commit();
 	}
 	
 	public static boolean getShakeEnable(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getBoolean("shake_enable", true);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getBoolean(KEY_SHAKE_ENABLE, true);
 	}
 	
 	public static void setShakeThreshold(Context context, int value) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
-		ed.putInt("shake_threshold", value);
+		ed.putInt(KEY_SHAKE_THRESHOLD, value);
 		ed.commit();
 	}
 	
 	public static int getShakeThreshold(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getInt("shake_threshold", 5000);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getInt(KEY_SHAKE_THRESHOLD, VALUE_DEFAULT_SHAKE_THRESHOLD);
 	}
 	
 	public static void setMediaButtonEnable(Context context, boolean enable) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
-		ed.putBoolean("media_button_enable", enable);
+		ed.putBoolean(KEY_MEDIA_BUTTON_ENABLE, enable);
 		ed.commit();
 	}
 	
 	public static boolean getMediaButtonEnable(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getBoolean("media_button_enable", true);
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getBoolean(KEY_MEDIA_BUTTON_ENABLE, true);
 	}
 	
 	public static void setCameraButtonEnable(Context context, boolean enable) {
-		
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putBoolean(KEY_CAMERA_BUTTON_ENABLE, enable);
+		ed.commit();
 	}
 	
 	public static boolean getCameraButtonEnable(Context context) {
-		return false;
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getBoolean(KEY_CAMERA_BUTTON_ENABLE, true);
 	}
 	
-	public static void setVolumeButtonEnable(Context context, boolean enable) {
-		
+	public static void setShutdownOnIdleEnable(Context context, boolean enable) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putBoolean(KEY_SHUTDOWN_ON_IDLE_ENABLE, enable);
+		ed.commit();
 	}
 	
-	public static boolean getVolumeButtonEnable(Context context) {
-		return false;
+	public static boolean getAutoCloseEnable(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getBoolean(KEY_AUTO_CLOSE_ENABLE, false);
+	}
+	
+	public static void setAutoCloseEnable(Context context, boolean enable) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putBoolean(KEY_AUTO_CLOSE_ENABLE, enable);
+		ed.commit();
+	}
+	
+	
+	public static boolean getShutdownOnIdleEnable(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getBoolean(KEY_SHUTDOWN_ON_IDLE_ENABLE, true);
 	}
 	
 	public static String getDownloadDirectory(Context context) {
-		SharedPreferences pref = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-		return pref.getString("download_dir", "/easydoubanfm");
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getString(KEY_DOWNLOAD_DIR, VALUE_DEFAULT_DOWNLOAD_DIR);
+	}
+	
+	public static int getQuickAction(Context context, String control) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		
+		int res = DoubanFmService.QUICKACT_NONE;
+		if (control.equals(DoubanFmService.QUICKCONTROL_SHAKE))
+			res = pref.getInt(control, DoubanFmService.QUICKACT_NEXT_MUSIC);
+		else if (control.equals(DoubanFmService.QUICKCONTROL_MEDIA_BUTTON))
+			res = pref.getInt(control, DoubanFmService.QUICKACT_PLAY_PAUSE);
+		else if (control.equals(DoubanFmService.QUICKCONTROL_CAMERA_BUTTON))
+			res = pref.getInt(control, DoubanFmService.QUICKACT_DOWNLOAD_MUSIC);
+		else
+			res = pref.getInt(control, DoubanFmService.QUICKACT_NONE);
+		
+		if (res < 0 || res > DoubanFmService.QUICKACT_NONE)
+			res = DoubanFmService.QUICKACT_NONE;
+		
+		return res;
+	}
+	
+	public static void setQuickAction(Context context, String control, int action) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putInt(control, action);
+		ed.commit();
+	}
+	
+	public static int getMaxIdleTime(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getInt(KEY_MAX_IDLE_TIME, VALUE_DEFAULT_MAX_IDLE_MINUTES);
+	}
+	
+	public static void setMaxIdleTime(Context context, int minutes) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putInt(KEY_MAX_IDLE_TIME, minutes);
+		ed.commit();
+	}
+	
+	public static int getAutoCloseTime(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getInt(KEY_AUTO_CLOSE_TIME, VALUE_DEFAULT_AUTO_CLOSE_MINUTES);
+		
+	}
+	
+	public static void setAutoCloseTime(Context context, int minutes) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putInt(KEY_AUTO_CLOSE_TIME, minutes);
+		ed.commit();
 	}
 }

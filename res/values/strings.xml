@@ -36,19 +36,23 @@
     <string name="notify_music_banned">这首歌曲再也不会播放了</string>
     <string name="text_killed_for_memory">因为内存不足，豆瓣电台被系统强行关闭</string>
     <string name="err_get_songs">从频道获取音乐失败</string>
-    <string name="radio_swipe_song">激活甩动操作</string>
-    <string name="text_swipe_accuracy">甩动换曲所需力度</string>
+    <string name="radio_shake">激活甩动操作</string>
+    <string name="text_shake_accuracy">甩动换曲所需力度</string>
     <string name="radio_media_button">激活耳机按钮</string>
     <string name="radio_camera_button">激活相机键</string>
     <string name="radio_volume_button">使用上下音量键切换频道</string>
-    <string name="radio_shutdown_on_idle_1">暂停超过</string>
-    <string name="radio_shutdown_on_idle_2">分钟后退出服务(节省电量)</string>
+    <string name="radio_shutdown_on_idle_1">暂停超时后关闭进程</string>
+    <string name="radio_shutdown_on_idle_2">分钟</string>
+    <string name="radio_shutdown_on_idle_3">(关闭闲置进程可节省电量)</string>
+    <string name="radio_auto_close_1">定时关闭(睡觉模式)</string>
+    <string name="radio_auto_close_2">分钟</string>
     <string name="options_act">快捷操作</string>
     <string-array name="options_act">
 	    <item>切换曲目</item>
 	    <item>切换频道</item>
 	    <item>下载曲目</item>
 	    <item>暂停/继续</item>
+	    <item>什么都不做</item>
     </string-array>
     <string name="text_error_network">由于网络原因登录失败</string>
     <string name="changelog">

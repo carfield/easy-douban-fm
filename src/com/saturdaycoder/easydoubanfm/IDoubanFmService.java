@@ -1,6 +1,8 @@
 package com.saturdaycoder.easydoubanfm;
 
 public interface IDoubanFmService {
+	void selectChannel(int id);
+	boolean login(String email, String passwd);
 	/*void nextMusic();
 	void nextMusic(int channel);
 	void pauseMusic();

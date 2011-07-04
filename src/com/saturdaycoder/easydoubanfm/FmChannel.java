@@ -19,6 +19,18 @@ public class FmChannel {
 	public static boolean channelNeedLogin(int chanId) {
 		return (chanId == 0);
 	}
+	public static int getChannelIndex(int chanId) {
+		int i = 0;
+		for (; i < AllChannels.length; ++i) {
+			if (AllChannels[i].channelId == chanId) {
+				return i;
+			}
+		}
+		
+		return -1;
+		
+		
+	}
 	public static int getFirstPublicChannel() {
 		for (int i = 0; i < AllChannels.length; ++i) {
 			if (AllChannels[i].channelId > 0) {
@@ -79,8 +91,10 @@ public class FmChannel {
 		new FmChannel(20, "FEM", "Female", "女声", 20),
 		new FmChannel(28, "Ani", "Anime", "动漫", 21),
 		new FmChannel(32, "Caf", "Cafe", "咖啡", 22),
-		new FmChannel(38, "Grad", "Graduation", "毕业生", 23),
-		new FmChannel(41, "Red", "Red", "红歌", 24),
+		//new FmChannel(38, "Grad", "Graduation", "毕业生", 23),
+		new FmChannel(41, "Red", "Red", "红歌", 23),
+		new FmChannel(40, "Jiaju", "Jiaju Huang", "纪念家驹", 24),
+		
 		new FmChannel(36, "Samsung", "Samsung", "三星时光", 25),
 		new FmChannel(34, "Lee", "Lee", "Lee", 26),
 	};

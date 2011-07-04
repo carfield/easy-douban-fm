@@ -13,12 +13,22 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 public class PreferenceActivity extends Activity {
+
+	CheckBox boxShake;
+	Spinner spinnerShake;
+	EditText editShakeThreshold;
 	
 	CheckBox boxMediaButton;
-	CheckBox boxShake;
-	EditText editShakeThreshold;
+	Spinner spinnerMediaButton;
+
 	CheckBox boxCameraButton;
+	Spinner spinnerCameraButton;
+	
 	CheckBox boxShutdownOnIdleButton;
+	EditText editShutdownOnIdle;
+	
+	//CheckBox boxAutoClose;
+	//EditText editAutoCloseMinutes;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -30,14 +40,22 @@ public class PreferenceActivity extends Activity {
 		boxMediaButton = (CheckBox)findViewById(R.id.cbMediaButtonEnable);
 		boxCameraButton = (CheckBox)findViewById(R.id.cbCameraButtonEnable);
 		boxShutdownOnIdleButton = (CheckBox)findViewById(R.id.cbShutdownOnIdleEnable);
+		spinnerShake = (Spinner)findViewById(R.id.spinnerActionShake);
+		spinnerMediaButton = (Spinner)findViewById(R.id.spinnerActionMediaButton);
+		spinnerCameraButton = (Spinner)findViewById(R.id.spinnerActionCameraButton);
+		editShutdownOnIdle = (EditText)findViewById(R.id.editShutdownIdleTime);
+		//boxAutoClose = (CheckBox)findViewById(R.id.cbAutoCloseEnable);
+		//editAutoCloseMinutes = (EditText)findViewById(R.id.editAutoCloseTime);
 		
 		// get stored value
 		boxShake.setChecked(Preference.getShakeEnable(this));
 		editShakeThreshold.setText(String.valueOf(Preference.getShakeThreshold(this)));
 		boxMediaButton.setChecked(Preference.getMediaButtonEnable(this));
 		boxCameraButton.setChecked(Preference.getCameraButtonEnable(this));
-		boxShutdownOnIdleButton.setChecked(Preference.getVolumeButtonEnable(this));
-		
+		boxShutdownOnIdleButton.setChecked(Preference.getShutdownOnIdleEnable(this));
+		editShutdownOnIdle.setText(String.valueOf(Preference.getMaxIdleTime(this)));
+		//boxAutoClose.setChecked(Preference.getAutoCloseEnable(this));
+		//editAutoCloseMinutes.setText(String.valueOf(Preference.getAutoCloseTime(this)));
 		
 		
 		boxShake.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
@@ -74,6 +92,30 @@ public class PreferenceActivity extends Activity {
 			}
 		});
 		
+		editShutdownOnIdle.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence str, int i, int j, int k) {
+				
+			}
+			@Override
+			public void onTextChanged(CharSequence str, int i, int j, int k) {
+				
+			}
+			@Override
+			public void afterTextChanged(Editable editable) {
+				String s = editable.toString();
+				Debugger.info("MAX IDLE TIME set to " + s);
+				try {
+					int i = Integer.parseInt(s);
+					if (i >= 0) {
+						Preference.setMaxIdleTime(PreferenceActivity.this, i);
+					}
+				} catch (Exception e) {
+					
+				}
+			}
+		});
+		
 		boxMediaButton.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
@@ -91,11 +133,18 @@ public class PreferenceActivity extends Activity {
 		boxShutdownOnIdleButton.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
-				Preference.setVolumeButtonEnable(PreferenceActivity.this, checked);
+				Preference.setShutdownOnIdleEnable(PreferenceActivity.this, checked);
 			}
 		});
 		
-		Spinner spinnerSwipe = (Spinner)findViewById(R.id.spinnerActionSwipe);
+		/*boxAutoClose.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
+				Preference.setAutoCloseEnable(PreferenceActivity.this, checked);
+			}
+		});*/
+		
+
         //准备一个数组适配器
         ArrayAdapter adapter = ArrayAdapter.createFromResource(
                 this, R.array.options_act, android.R.layout.simple_spinner_item);
@@ -103,26 +152,61 @@ public class PreferenceActivity extends Activity {
         
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //为下拉列表设置适配器
-        spinnerSwipe.setAdapter(adapter);
+        spinnerShake.setAdapter(adapter);
+        spinnerMediaButton.setAdapter(adapter);
+        spinnerCameraButton.setAdapter(adapter);
   
-        //定义子元素选择监听器
-        OnItemSelectedListener oislSwipe =  new OnItemSelectedListener() {
+        spinnerShake.setSelection(Preference.getQuickAction(this, 
+        		DoubanFmService.QUICKCONTROL_SHAKE), false);
+        spinnerMediaButton.setSelection(Preference.getQuickAction(this, 
+        		DoubanFmService.QUICKCONTROL_MEDIA_BUTTON), false);
+        spinnerCameraButton.setSelection(Preference.getQuickAction(this, 
+        		DoubanFmService.QUICKCONTROL_CAMERA_BUTTON), false);
+        
+        OnItemSelectedListener oislShake =  new OnItemSelectedListener() {
   
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
-                  Toast.makeText(PreferenceActivity.this,"选择的血型： " +
-                  parent.getItemAtPosition(position).toString(), Toast.LENGTH_LONG).show();
-  
+                  Preference.setQuickAction(PreferenceActivity.this, 
+                		  DoubanFmService.QUICKCONTROL_SHAKE, position);
             }
   
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         };
-        //为下拉列表绑定事件监听器
-        spinnerSwipe.setOnItemSelectedListener(oislSwipe);
+        spinnerShake.setOnItemSelectedListener(oislShake);
 		
+        OnItemSelectedListener oislMediaButton =  new OnItemSelectedListener() {
+        	  
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int position, long id) {
+                  Preference.setQuickAction(PreferenceActivity.this, 
+                		  DoubanFmService.QUICKCONTROL_MEDIA_BUTTON, position);
+            }
+  
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        };
+        spinnerMediaButton.setOnItemSelectedListener(oislMediaButton);
+        
+        OnItemSelectedListener oislCameraButton =  new OnItemSelectedListener() {
+        	  
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int position, long id) {
+                  Preference.setQuickAction(PreferenceActivity.this, 
+                		  DoubanFmService.QUICKCONTROL_CAMERA_BUTTON, position);
+            }
+  
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        };
+        spinnerCameraButton.setOnItemSelectedListener(oislCameraButton);
 	}
 	
 	@Override

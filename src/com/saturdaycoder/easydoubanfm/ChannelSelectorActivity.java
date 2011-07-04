@@ -42,17 +42,7 @@ public class ChannelSelectorActivity extends Activity {
 		FmChannel[] channels = db.getChannels();
 		channelList = new ArrayList<FmChannel>();
 
-		/*mServiceConn = new ServiceConnection(){
-        	public void onServiceConnected(ComponentName className, IBinder service) {
-        		mDoubanFm = (IDoubanFmService)((DoubanFmService.LocalBinder)service).getService();
-        	}
-        	public void onServiceDisconnected(ComponentName className) {
-        		mDoubanFm = null;
-        	}
-        };
-        bindService(new Intent(ChannelSelectorActivity.this, DoubanFmService.class), 
-        		mServiceConn, 0);*/
-		
+	
 		if (channels != null) {
 			for (int i = 0; i < channels.length; ++i) {
 				channelList.add(channels[i]);
@@ -118,8 +108,9 @@ public class ChannelSelectorActivity extends Activity {
                 }
                 else {
 	                Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SELECT_CHANNEL);
-	                i.putExtra("channel", chan.channelId);
-	                sendBroadcast(i);
+	                i.setComponent(new ComponentName(ChannelSelectorActivity.this, DoubanFmService.class));
+	                i.putExtra(DoubanFmService.EXTRA_CHANNEL, chan.channelId);
+	                startService(i);
 	                
 	                ChannelSelectorActivity.this.finish();
                 }
@@ -156,8 +147,8 @@ public class ChannelSelectorActivity extends Activity {
     		}
     		if (FmChannel.isChannelIdValid(pendingSelChanId)) {
     			Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SELECT_CHANNEL);
-                i.putExtra("channel", pendingSelChanId);
-                sendBroadcast(i);
+                i.putExtra(DoubanFmService.EXTRA_CHANNEL, pendingSelChanId);
+                startService(i);
                 
                 ChannelSelectorActivity.this.finish();
     		}

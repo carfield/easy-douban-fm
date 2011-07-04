@@ -41,7 +41,7 @@ public class DoubanFmPlayer {
 	private final Object musicSessionLock = new Object();
 	
 	private Bitmap curPic = null;
-	private Bitmap defaultAlbumPic = null;
+	//private Bitmap defaultAlbumPic = null;
 	private GetPictureTask picTask = null;
 	
 	private char lastStopReason = DoubanFmApi.TYPE_NEW;
@@ -83,7 +83,7 @@ public class DoubanFmPlayer {
 			}
 		}
 		
-		defaultAlbumPic = BitmapFactory.decodeResource(context.getResources(), R.drawable.default_album);
+		//defaultAlbumPic = BitmapFactory.decodeResource(context.getResources(), R.drawable.default_album);
 	}
 	
 	public boolean isOpen() {
@@ -225,6 +225,9 @@ public class DoubanFmPlayer {
 	}
 	
 	public void close() {
+		synchronized(loginLock) {
+			this.loginSession = null;
+		}
 		if (isOpen) {
 			synchronized(this) {
 				if (isOpen) {
@@ -269,6 +272,7 @@ public class DoubanFmPlayer {
 		} catch (IllegalStateException e) {
 			mPlayer.reset();
 		}
+		Debugger.debug("player playing is " + mPlayer.isPlaying());
 		notifyMusicPaused();
 	}
 	
@@ -388,7 +392,31 @@ public class DoubanFmPlayer {
 	}
 	
 	public void forwardChannel() {
+		int chanId = Preference.getSelectedChannel(context);
+		int idx = FmChannel.getChannelIndex(chanId);
+		FmChannel chan = null;
 		
+		while(true) {
+			idx = (idx + 1) % FmChannel.AllChannels.length;
+			chan = FmChannel.AllChannels[idx];
+			if (chan == null)
+				return;
+			if (FmChannel.channelNeedLogin(chan.channelId)){
+				Debugger.debug("forward channel needs login, loginSession = "
+						+ ((loginSession == null)? "y": "n"));
+				if (loginSession == null) {
+					
+					continue;
+				}
+				else {
+					break;
+				}
+			} else {
+				break;
+			}
+		} 
+		Debugger.debug("forwarded to channel " + chan.channelId);
+		selectChannel(chan.channelId);
 	}
 	
 	public void backwardChannel() {
@@ -399,13 +427,13 @@ public class DoubanFmPlayer {
 		
 	}
 	
-	public void login(String username, String passwd) {
+	public boolean login(String username, String passwd) {
 		if (username == null || username.equals("") 
 				|| passwd == null || passwd.equals("")) {
 			
 			notifyLoginStateChanged(DoubanFmService.STATE_ERROR, DoubanFmService.REASON_API_REQUEST_ERROR);
 			
-			return;
+			return false;
 		}
 			
 		synchronized(loginLock) {
@@ -419,14 +447,14 @@ public class DoubanFmPlayer {
 					Preference.setLogin(context, true);
 					
 					notifyLoginStateChanged(DoubanFmService.STATE_STARTED, NO_REASON);
-					
+					return true;
 				} else {
 					Preference.setAccountEmail(context, username);
 					Preference.setAccountPasswd(context, null);
 					Preference.setLogin(context, false);
 					
 					notifyLoginStateChanged(DoubanFmService.STATE_ERROR, DoubanFmService.REASON_API_REQUEST_ERROR);
-					
+					return false;
 				}
 				
 				
@@ -437,6 +465,7 @@ public class DoubanFmPlayer {
 												DoubanFmService.REASON_NETWORK_IO_ERROR);
 				
 				loginSession = null;
+				return false;
 			}
 		}
 		//return (session != null);		
@@ -452,27 +481,39 @@ public class DoubanFmPlayer {
 	}
 	
 	private void notifyMusicPrepareProgress(int progress) {
+		// update widgets
 		EasyDoubanFmWidget.setProgress(context, progress);
+		
+		// broadcast
+		//Intent i = new Intent(DoubanFmService.EVENT_PLAYER_MUSIC_PREPARE_PROGRESS);
+		//i.putExtra(DoubanFmService.EXTRA_PROGRESS, progress);
+		//context.sendBroadcast(i);
 	}
 	
 	private void notifyPowerStateChanged(int powerState) {
+		// update widgets
 		WidgetContent wc = EasyDoubanFmWidget.getContent(context);
+		//Intent intent = new Intent(DoubanFmService.EVENT_PLAYER_POWER_STATE_CHANGED);
 		switch(powerState) {
 		case DoubanFmService.STATE_PREPARE:
 			wc.onState = EasyDoubanFmWidget.STATE_PREPARE;
 			EasyDoubanFmWidget.updateContent(context, wc, null);
+			EasyDoubanFm.updateContents(wc);
 			break;
 		case DoubanFmService.STATE_IDLE:
 			wc.onState = EasyDoubanFmWidget.STATE_OFF;
 			wc.channel = context.getResources().getString(R.string.text_channel_unselected);
 			wc.rated = false;
 			wc.artist = wc.title = "";
-			wc.picture = defaultAlbumPic;
+			wc.picture = null;//defaultAlbumPic;
 			EasyDoubanFmWidget.updateContent(context, wc, null);
+			EasyDoubanFm.updateContents(wc);
+			
 			break;
 		case DoubanFmService.STATE_STARTED:
 			wc.onState = EasyDoubanFmWidget.STATE_ON;
 			EasyDoubanFmWidget.updateContent(context, wc, null);
+			EasyDoubanFm.updateContents(wc);
 			break;
 		default:
 			break;
@@ -490,8 +531,9 @@ public class DoubanFmPlayer {
 		case DoubanFmService.STATE_PREPARE:
 			content.artist = content.title = "";
 			content.rated = false;
-			content.picture = defaultAlbumPic;
+			content.picture = null;//defaultAlbumPic;
 			EasyDoubanFmWidget.updateContent(context, content, null);
+			EasyDoubanFm.updateContents(content);
 			break;
 		case DoubanFmService.STATE_STARTED:	 {
 			if (musicInfo != null) {
@@ -500,10 +542,11 @@ public class DoubanFmPlayer {
 				content.title = musicInfo.title;
 			}
 			EasyDoubanFmWidget.updateContent(context, content, null);
+			EasyDoubanFm.updateContents(content);
 			Notification fgNotification = new Notification(R.drawable.icon,
 					content.artist + " -- " + content.title,
 			        System.currentTimeMillis());
-			fgNotification.flags |= Notification.FLAG_NO_CLEAR;
+			//fgNotification.flags |= Notification.FLAG_NO_CLEAR;
 			Intent it = new Intent(DoubanFmService.ACTION_NULL);
 			PendingIntent pi = PendingIntent.getBroadcast(context, 0, it, 0);
 			fgNotification.setLatestEventInfo(context, content.artist, content.title, pi);	
@@ -513,8 +556,9 @@ public class DoubanFmPlayer {
 		case DoubanFmService.STATE_FINISHED: {
 			content.artist = content.title = "";
 			content.rated = false;
-			content.picture = BitmapFactory.decodeResource(context.getResources(), R.drawable.default_album);
+			content.picture = null;//BitmapFactory.decodeResource(context.getResources(), R.drawable.default_album);
 			EasyDoubanFmWidget.updateContent(context, content, null);
+			EasyDoubanFm.updateContents(content);
 			break;
 		}
 		
@@ -543,14 +587,15 @@ public class DoubanFmPlayer {
 		case DoubanFmService.STATE_IDLE:
 			//break;
 		case DoubanFmService.STATE_PREPARE:
-			content.picture = defaultAlbumPic;
-			EasyDoubanFmWidget.updateContent(context, content, null);
+			//content.picture = defaultAlbumPic;
+			//EasyDoubanFmWidget.updateContent(context, content, null);
 			break;
 		case DoubanFmService.STATE_STARTED:
 		case DoubanFmService.STATE_FINISHED:
 			if (pic != null) {
 				content.picture = pic;
 				EasyDoubanFmWidget.updateContent(context, content, null);
+				EasyDoubanFm.updateContents(content);
 			}
 			break;
 		default:
@@ -567,6 +612,7 @@ public class DoubanFmPlayer {
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		content.channel = chanName;
 		EasyDoubanFmWidget.updateContent(context, content, null);
+		EasyDoubanFm.updateContents(content);
 	}
 	
 	private void notifyLoginStateChanged(int loginState, int reason) {
@@ -574,28 +620,34 @@ public class DoubanFmPlayer {
 		switch (loginState) {
 		case DoubanFmService.STATE_ERROR:
 		case DoubanFmService.STATE_IDLE:
-			content.channel = context.getResources().getString(R.string.text_login_idle);
+			//content.channel = context.getResources().getString(R.string.text_login_idle);
 			break;
 		case DoubanFmService.STATE_PREPARE:
 			content.channel = context.getResources().getString(R.string.text_login_inprocess);
 			break;
 		case DoubanFmService.STATE_STARTED:
 		case DoubanFmService.STATE_FINISHED:
-			content.channel = context.getResources().getString(R.string.text_login_ok);
+			//content.channel = context.getResources().getString(R.string.text_login_ok);
 			break;
 		}
 		EasyDoubanFmWidget.updateContent(context, content, null);
+		EasyDoubanFm.updateContents(content);
 	}
 	
 	private void notifyMusicRated(boolean rated) {
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		content.rated = rated;
 		EasyDoubanFmWidget.updateContent(context, content, null);
+		EasyDoubanFm.updateContents(content);
 	}
 	
 	private void notifyMusicPaused() {
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.cancel(DoubanFmService.SERVICE_NOTIFICATION_ID);
+		WidgetContent content = EasyDoubanFmWidget.getContent(context);
+		content.paused = true;
+		EasyDoubanFmWidget.updateContent(context, content, null);
+		EasyDoubanFm.updateContents(content);
 	}
 	
 	private void notifyMusicResumed() {
@@ -610,6 +662,10 @@ public class DoubanFmPlayer {
 			fgNotification.setLatestEventInfo(context, curMusic.artist, curMusic.title, pi);	
 			notificationManager.notify(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
 		}
+		WidgetContent content = EasyDoubanFmWidget.getContent(context);
+		content.paused = false;
+		EasyDoubanFmWidget.updateContent(context, content, null);
+		EasyDoubanFm.updateContents(content);
 	}
 	
 	private void notifyMusicBanned() {

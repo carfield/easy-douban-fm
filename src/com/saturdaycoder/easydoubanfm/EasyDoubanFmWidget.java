@@ -42,21 +42,38 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		// channel text
 		updateViews.setTextViewText(R.id.buttonChannel, content.channel);
 		// picture
-		updateViews.setImageViewBitmap(R.id.imageCover, content.picture);
+		if (content.picture == null) {
+			updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
+		}
+		else {
+			updateViews.setImageViewBitmap(R.id.imageCover, content.picture);
+		}
 		// music artist
 		updateViews.setTextViewText(R.id.textArtist, content.artist);
 		// music title
 		updateViews.setTextViewText(R.id.textTitle, content.title);
+		
+		// pause
+		if (content.paused) {
+			// update pause button image
+			updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_play);
+		}
+		else {
+			updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_pause);
+		}
+		
 		// on/off state
 		switch(content.onState) {
 		case STATE_ON:
-			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
+			//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
+
 			break;
 		case STATE_PREPARE:
-			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
+			//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
 			break;
 		case STATE_OFF:
-			updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_play);
+			//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_play);
+			updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_play);
 			break;
 		default:
 			break;
@@ -67,10 +84,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		} else {
 			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.btn_unrated);
 		}
-		// pause
-		if (content.paused) {
-			// update pause button image
-		}
+
 		
 		// link buttons
 		linkButtons(context, updateViews, appWidgetIds);
@@ -156,7 +170,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 					RemoteViews remoteViews, int widgetIds[]) {
 
 	
-		Debugger.info("Widget re-link button listeners");
+		Debugger.debug("Widget re-link button listeners");
 		
 		ComponentName cn = new ComponentName(context, DoubanFmService.class);
 		
@@ -164,21 +178,21 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		Intent nextIntent = new Intent(DoubanFmService.ACTION_PLAYER_SKIP);
 		nextIntent.setComponent(cn);
 		PendingIntent nextPendingIntent = PendingIntent.getService(context, 
-				0, nextIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+				0, nextIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonNext, nextPendingIntent);
 		
 		// RATE button
 		Intent rateIntent = new Intent(DoubanFmService.ACTION_PLAYER_RATEUNRATE);
 		rateIntent.setComponent(cn);
 		PendingIntent ratePendingIntent = PendingIntent.getService(context, 
-				0, rateIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+				0, rateIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonLike, ratePendingIntent);
 		
 		// TRASH button
 		Intent trashIntent = new Intent(DoubanFmService.ACTION_PLAYER_TRASH);
 		trashIntent.setComponent(cn);
 		PendingIntent trashPendingIntent = PendingIntent.getService(context, 
-				0, trashIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+				0, trashIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonHate, trashPendingIntent);
 			
 		// Play/Pause button
@@ -192,28 +206,35 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		Intent downloadIntent = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
 		downloadIntent.setComponent(cn);
 		PendingIntent downloadPendingIntent = PendingIntent.getService(context, 
-				0, downloadIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+				0, downloadIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonDownload, downloadPendingIntent);
 		
 		// On/Off button
 		Intent openIntent = new Intent(DoubanFmService.ACTION_PLAYER_ONOFF);
 		openIntent.setComponent(cn);
 		PendingIntent openPendingIntent = PendingIntent.getService(context, 
-				0, openIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-		remoteViews.setOnClickPendingIntent(R.id.buttonOnOff, openPendingIntent);
+				0, openIntent, 0);
+		//remoteViews.setOnClickPendingIntent(R.id.buttonOnOff, openPendingIntent);
+		
+		// PLAY/PAUSE button
+		Intent playPauseIntent = new Intent(DoubanFmService.ACTION_PLAYER_PLAYPAUSE);
+		playPauseIntent.setComponent(cn);
+		PendingIntent playPausePendingIntent = PendingIntent.getService(context, 
+				0, playPauseIntent, 0);
+		remoteViews.setOnClickPendingIntent(R.id.buttonPlayPause, playPausePendingIntent);
 	
 		// Menu button
 		Intent menuIntent = new Intent(context, PreferenceActivity.class);
 		
 		PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
-				0, menuIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+				0, menuIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
 
 		// channel button
 		Intent channelIntent = new Intent(context, ChannelSelectorActivity.class);
 		
 		PendingIntent channelPendingIntent = PendingIntent.getActivity(context, 
-				0, channelIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+				0, channelIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonChannel, channelPendingIntent);
 
 	}
@@ -239,7 +260,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds) {
-		Debugger.info("widget onDeleted");
+		Debugger.debug("widget onDeleted");
 		super.onDeleted(context, appWidgetIds);
 		//Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);  
 		//context.sendBroadcast(intent);
@@ -247,10 +268,10 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	
 	@Override
 	public void onDisabled(Context context) {
-		Debugger.info("widget onDisabled");
+		Debugger.debug("widget onDisabled");
 		super.onDisabled(context);
-		Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);  
-		context.sendBroadcast(intent);
+		//Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);  
+		//context.sendBroadcast(intent);
 	}
 	
 	@Override
