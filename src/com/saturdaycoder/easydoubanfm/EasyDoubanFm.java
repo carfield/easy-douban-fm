@@ -129,14 +129,16 @@ public class EasyDoubanFm extends Activity {
 		buttonChannel.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				
+				Intent i = new Intent(EasyDoubanFm.this, ChannelSelectorActivity.class);
+				startActivity(i);
 			}
 		});
 		
 		buttonMenu.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				
+				Intent i = new Intent(EasyDoubanFm.this, PreferenceActivity.class);
+				startActivity(i);
 			}
 			
 		});

@@ -19,6 +19,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	public static final int STATE_PREPARE = 0;
 	public static final int STATE_OFF = -1;
 	
+	private static boolean enabled = false;
 	
 	private static WidgetContent widgetContent = null;
 	
@@ -33,72 +34,80 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		return widgetContent;
 	}
 	
-	synchronized
+	//synchronized
 	public static void updateContent(Context context, 
 			WidgetContent content, int[] appWidgetIds) {
-		RemoteViews updateViews = new RemoteViews(context.getPackageName(),
-				R.layout.appwidget4x2);
 		
-		// channel text
-		updateViews.setTextViewText(R.id.buttonChannel, content.channel);
-		// picture
-		if (content.picture == null) {
-			updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
-		}
-		else {
-			updateViews.setImageViewBitmap(R.id.imageCover, content.picture);
-		}
-		// music artist
-		updateViews.setTextViewText(R.id.textArtist, content.artist);
-		// music title
-		updateViews.setTextViewText(R.id.textTitle, content.title);
-		
-		// pause
-		if (content.paused) {
-			// update pause button image
-			updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_play);
-		}
-		else {
-			updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_pause);
-		}
-		
-		// on/off state
-		switch(content.onState) {
-		case STATE_ON:
-			//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
-
-			break;
-		case STATE_PREPARE:
-			//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
-			break;
-		case STATE_OFF:
-			//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_play);
-			updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_play);
-			break;
-		default:
-			break;
-		}
-		// rating
-		if (content.rated) {
-			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.btn_rated);
-		} else {
-			updateViews.setImageViewResource(R.id.buttonLike, R.drawable.btn_unrated);
-		}
-
-		
-		// link buttons
-		linkButtons(context, updateViews, appWidgetIds);
-		
-		// appwidget manager do the update
-		AppWidgetManager manager = AppWidgetManager.getInstance(context);
-		if (appWidgetIds == null || appWidgetIds.length == 0) {
-			ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
-			Debugger.verbose("all widgets updated by manager");
-			manager.updateAppWidget(thisWidget, updateViews);
-		} else {
-			for (int i: appWidgetIds) {
-				Debugger.verbose("widget " + i + " updated by manager");
-				manager.updateAppWidget(i, updateViews);
+		synchronized(EasyDoubanFmWidget.class) {
+			if (!enabled) {
+				Debugger.debug("No active widgets, skip updating");
+				return;
+			}
+			
+			RemoteViews updateViews = new RemoteViews(context.getPackageName(),
+					R.layout.appwidget4x2);
+			
+			// channel text
+			updateViews.setTextViewText(R.id.buttonChannel, content.channel);
+			// picture
+			if (content.picture == null) {
+				updateViews.setImageViewResource(R.id.imageCover, R.drawable.default_album);
+			}
+			else {
+				updateViews.setImageViewBitmap(R.id.imageCover, content.picture);
+			}
+			// music artist
+			updateViews.setTextViewText(R.id.textArtist, content.artist);
+			// music title
+			updateViews.setTextViewText(R.id.textTitle, content.title);
+			
+			// pause
+			if (content.paused) {
+				// update pause button image
+				updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_play);
+			}
+			else {
+				updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_pause);
+			}
+			
+			// on/off state
+			switch(content.onState) {
+			case STATE_ON:
+				//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
+	
+				break;
+			case STATE_PREPARE:
+				//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
+				break;
+			case STATE_OFF:
+				//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_play);
+				updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_play);
+				break;
+			default:
+				break;
+			}
+			// rating
+			if (content.rated) {
+				updateViews.setImageViewResource(R.id.buttonLike, R.drawable.btn_rated);
+			} else {
+				updateViews.setImageViewResource(R.id.buttonLike, R.drawable.btn_unrated);
+			}
+	
+			
+			// link buttons
+			linkButtons(context, updateViews, appWidgetIds);
+			
+			// appwidget manager do the update
+			AppWidgetManager manager = AppWidgetManager.getInstance(context);
+			if (appWidgetIds == null || appWidgetIds.length == 0) {
+				ComponentName thisWidget = new ComponentName(context, EasyDoubanFmWidget.class);
+				Debugger.verbose("all widgets updated by manager");
+				manager.updateAppWidget(thisWidget, updateViews);
+			} else {
+				for (int i: appWidgetIds) {
+					Debugger.verbose("widget " + i + " updated by manager");
+					manager.updateAppWidget(i, updateViews);
+				}
 			}
 		}
 	}
@@ -245,16 +254,20 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			int[] appWidgetIds) {
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
 		
-		for (int i = 0; i < appWidgetIds.length; ++i)
-			Debugger.debug("widget " + appWidgetIds[i] + " onUpdate");
-		//RemoteViews remoteViews = getRemoteViews(context); 
-		
-		WidgetContent content = getContent(context);
-		
-		updateContent(context, content, appWidgetIds);
-		
-		Intent i = new Intent(DoubanFmService.ACTION_WIDGET_UPDATE);
-		context.sendBroadcast(i);
+		synchronized(EasyDoubanFmWidget.class) {
+			enabled = true;
+			
+			for (int i = 0; i < appWidgetIds.length; ++i)
+				Debugger.debug("widget " + appWidgetIds[i] + " onUpdate");
+			//RemoteViews remoteViews = getRemoteViews(context); 
+			
+			WidgetContent content = getContent(context);
+			
+			updateContent(context, content, appWidgetIds);
+			
+			Intent i = new Intent(DoubanFmService.ACTION_WIDGET_UPDATE);
+			context.sendBroadcast(i);
+		}
 	}
 
 	
@@ -270,6 +283,11 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	public void onDisabled(Context context) {
 		Debugger.debug("widget onDisabled");
 		super.onDisabled(context);
+		
+		synchronized(EasyDoubanFmWidget.class) {
+			enabled = false;
+		}
+		
 		//Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);  
 		//context.sendBroadcast(intent);
 	}

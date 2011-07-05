@@ -35,6 +35,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.client.methods.*;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -176,6 +177,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	// 
 	DoubanFmPlayer dPlayer;
 	DoubanFmDownloader dDownloader;
+	
+	private Handler mHandler = new Handler();
 	
 	private static final int IDLE_DELAY = 60000;
     private Handler mDelayedStopHandler = new Handler() {
@@ -494,10 +497,15 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		dDownloader.close();
 	}
 
+	private Runnable mUpdateTimeTask = new Runnable() {
+		   public void run() {
+			   dPlayer.open();
+		     
+		       //mHandler.postAtTime(this, System.currentTimeMillis() + 100);
+		   }
+		};
+	
 	private void openPlayer() {
-
-
-
 		// start foreground with notification
 		Notification fgNotification = new Notification(R.drawable.icon,
 				getResources().getString(R.string.app_name),
@@ -508,10 +516,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		fgNotification.setLatestEventInfo(this, "", "", pi);		
 		startForeground(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
 		
-		
-		dPlayer.open();
-		
-
+		/*try {
+			TimerPlayerTask t = new TimerPlayerTask(dPlayer.getClass().getDeclaredMethod("open"));
+			Timer timer = new Timer();
+			timer.schedule(t, 100);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}*/
+		//dPlayer.open();
+		mHandler.removeCallbacks(mUpdateTimeTask);
+        mHandler.postDelayed(mUpdateTimeTask, 100);
 	}
 	
 	
@@ -576,7 +590,13 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				pauseMusic();
 			}
 			else {
-				resumeMusic();
+				if (dPlayer.isPreparing()) {
+					Debugger.warn("Player is still preparing");
+					return;
+				}
+				else {
+					resumeMusic();
+				}
 			}
 		}
 	}
@@ -860,6 +880,40 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
 		return doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_CAMERA_BUTTON));
 	}
+	
+	
+	private class AsyncPlayerTask extends AsyncTask<Object, Integer, Integer> {
+		@Override
+		public Integer doInBackground(Object...params) {
+			try {
+				DoubanFmPlayer object = (DoubanFmPlayer)params[0];
+				Method method = (Method)params[1];
+				method.invoke(object);
+			} catch (Exception e) {
+				Debugger.error("error doInBackground: " + e.toString());
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+	
+	private class TimerPlayerTask extends TimerTask {
+		private Method method;
+		public TimerPlayerTask(Method method) {
+			this.method = method;
+		}
+		@Override
+		public void run() {
+			
+			try {
+				method.invoke(dPlayer);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
 	
 	private class PhoneControlListener extends BroadcastReceiver 
 			 implements ShakeDetector.OnShakeListener {

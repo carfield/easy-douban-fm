@@ -38,6 +38,7 @@ public class DoubanFmPlayer {
 	
 	private MusicInfo curMusic = null;
 	private MusicInfo lastMusic = null;
+	private boolean isPreparing = false;
 	private final Object musicSessionLock = new Object();
 	
 	private Bitmap curPic = null;
@@ -97,6 +98,10 @@ public class DoubanFmPlayer {
 			return mPlayer.isPlaying();
 	}
 	
+	public boolean isPreparing() {
+		return isPreparing;
+	}
+	
 	public MusicInfo getCurMusic() {
 		return curMusic;
 	}
@@ -127,6 +132,7 @@ public class DoubanFmPlayer {
 					mPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
 						@Override
 						public void onBufferingUpdate(MediaPlayer mp, int percent) {
+							isPreparing = false;
 							Debugger.verbose("media player progress " + percent);
 							
 						}
@@ -134,6 +140,7 @@ public class DoubanFmPlayer {
 					mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
 						@Override
 						public boolean onError(MediaPlayer mp, int what, int extra) {
+							isPreparing = false;
 							//reportState(PlayState.ERROR);
 							Debugger.error("media player onError: what=" + what + " extra=" + extra);
 							nextMusic();
@@ -152,6 +159,7 @@ public class DoubanFmPlayer {
 						
 						@Override
 						public void onSeekComplete(MediaPlayer mp) {
+							isPreparing = false;
 							Debugger.info("media player onSeekComplete");
 							
 						}
@@ -160,6 +168,7 @@ public class DoubanFmPlayer {
 						
 						@Override
 						public void onPrepared(MediaPlayer mp) {
+							isPreparing = false;
 							Debugger.info("media player onPrepare");
 							mPlayer.seekTo(0);
 							mPlayer.start();
@@ -168,6 +177,7 @@ public class DoubanFmPlayer {
 					mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 						@Override
 						public void onCompletion(MediaPlayer mp) {
+							isPreparing = false;
 							Debugger.info("media player onCompletion");
 							//reportState(PlayState.COMPLETED);
 							nextMusic();
@@ -231,6 +241,8 @@ public class DoubanFmPlayer {
 		if (isOpen) {
 			synchronized(this) {
 				if (isOpen) {
+					isPreparing = false;
+					
 					mPlayer.reset();
 					mPlayer.release();
 					mPlayer = null;
@@ -289,8 +301,14 @@ public class DoubanFmPlayer {
 	
 	public void playPauseMusic() {
 		if (mPlayer.isPlaying()) {
+			Debugger.debug("player switched to PAUSE state");
 			pauseMusic();
 		} else {
+			if (isPreparing) {
+				Debugger.warn("player is preparing");
+				return;
+			}
+			Debugger.debug("player switched to RESUME state");
 			resumeMusic();
 		}
 	}
@@ -706,6 +724,7 @@ public class DoubanFmPlayer {
 			
 			// mPlayer prepare
 			mPlayer.reset();
+			isPreparing = true;
 			try {
 				mPlayer.setDataSource(curMusic.musicUrl);
 			} catch (IOException e) {
