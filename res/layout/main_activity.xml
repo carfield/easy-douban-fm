@@ -4,7 +4,7 @@
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/transparent"
+    android:background="@drawable/audio_player_default_show_bg_dark"
     >
     <!-- the 3 buttons at left side  -->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,6 +14,14 @@
     	android:layout_weight="2"
     	android:background="@drawable/transparent"
     	>
+	    <Button 
+	    		android:scaleType="fitCenter"
+	    		android:background="@drawable/transparent"
+	    		android:id="@+id/buttonNull" 
+	    		android:layout_width="fill_parent"
+	    		android:layout_weight="1" 
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
+	    		</Button>
 	    <ImageButton 
 	    		android:scaleType="fitCenter"
 	    		android:src="@drawable/btn_trash" 
@@ -21,8 +29,22 @@
 	    		android:id="@+id/buttonHate" 
 	    		android:layout_width="fill_parent"
 	    		android:layout_weight="1" 
-	    		android:layout_height="fill_parent" android:layout_gravity="center">
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
 	    		</ImageButton>
+	    <TextView android:text="@string/button_name_ban" 
+	    		android:id="@+id/textView1"
+	    		android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content" 
+	    		android:gravity="center"></TextView>
+	    <Button 
+	    		android:scaleType="fitCenter"
+	    		android:background="@drawable/transparent"
+	    		android:id="@+id/buttonNull" 
+	    		android:layout_width="fill_parent"
+	    		android:layout_weight="1" 
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
+	    		</Button>
+
 	    <ImageButton 
 	    		android:scaleType="fitCenter"
 	    		android:src="@drawable/btn_unrated"
@@ -30,19 +52,47 @@
 	    		android:id="@+id/buttonLike"
 	    		android:layout_weight="1" 
 	    		android:layout_width="fill_parent" 
-	    		android:layout_height="fill_parent" android:layout_gravity="center">
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
 	    		</ImageButton>
- 
-		  <ImageButton 
+	    <TextView android:text="@string/button_name_rate" 
+	    		android:id="@+id/textButtonRateUnrate"
+	    		android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content" 
+	    		android:gravity="center"></TextView> 
+	    <Button 
+	    		android:scaleType="fitCenter"
+	    		android:background="@drawable/transparent"
+	    		android:id="@+id/buttonNull" 
+	    		android:layout_width="fill_parent"
+	    		android:layout_weight="1" 
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
+	    		</Button>
+
+		<ImageButton 
 	    		android:scaleType="fitCenter"
 	    		android:src="@drawable/btn_menu"
 	    		android:background="@drawable/transparent"
 	    		android:id="@+id/buttonMenu"
 	    		android:layout_weight="1" 
 	    		android:layout_width="fill_parent" 
-	    		android:layout_height="fill_parent" android:layout_gravity="center">
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
 	    		</ImageButton>
-    </LinearLayout>
+	    <TextView android:text="@string/button_name_menu" 
+	    		android:id="@+id/textView3"
+	    		android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content" 
+	    		android:gravity="center"></TextView>    
+	    <Button 
+	    		android:scaleType="fitCenter"
+	    		android:background="@drawable/transparent"
+	    		android:id="@+id/buttonNull" 
+	    		android:layout_width="fill_parent"
+	    		android:layout_weight="1" 
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
+	    		</Button>
+	    		
+	    </LinearLayout>
+
     <!-- divider -->
  
 		 <!-- the channel button, image and info text -->
@@ -70,10 +120,12 @@
 		    android:layout_weight="2" 		    
 		    android:singleLine="true"
 		    android:gravity="center"/>
-
-
+	    <ProgressBar 
+	    	style="?android:attr/progressBarStyleLarge" 
+	    	android:layout_height="wrap_content" 
+	    	android:id="@+id/progressBar" 
+	    	android:layout_width="wrap_content" android:layout_gravity="center"></ProgressBar>
 		<ImageView
-
 			android:id="@+id/imageCover" 
 			android:src="@drawable/default_album"
 		    android:layout_width="fill_parent" 
@@ -125,6 +177,13 @@
 		    android:background="@drawable/transparent"
 		    >
 		</TextView>
+		<TextView 
+			android:textAppearance="?android:attr/textAppearanceLarge" 
+			android:id="@+id/textMusicPosition" 
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" 
+			android:text="TextView" android:gravity="center"></TextView>
+		<TextView android:textAppearance="?android:attr/textAppearanceLarge" android:id="@+id/textViewDummy" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="  " android:gravity="center"></TextView>
     </LinearLayout>
 
 		<!-- the 3 buttons at right side -->
@@ -135,6 +194,15 @@
 	    android:layout_weight="2"
 	    android:background="@drawable/transparent"
 	    >
+	    <Button 
+	    		android:scaleType="fitCenter"
+	    		android:background="@drawable/transparent"
+	    		android:id="@+id/buttonNull" 
+	    		android:layout_width="fill_parent"
+	    		android:layout_weight="1" 
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
+	    		</Button>
+
 	    <ImageButton 
 
 	    		android:scaleType="fitCenter"
@@ -143,8 +211,21 @@
 	    		android:id="@+id/buttonNext" 
 	    		android:layout_width="fill_parent"
 	    		android:layout_weight="1" 
-	    		android:layout_height="fill_parent" android:clickable="true" android:focusable="true" android:layout_gravity="center">
+	    		android:layout_height="fill_parent" android:clickable="true" android:focusable="true" android:layout_gravity="center|bottom">
 	    		</ImageButton>
+	    <TextView android:text="@string/button_name_skip" 
+	    		android:id="@+id/textView4"
+	    		android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content" 
+	    		android:gravity="center"></TextView>
+	    <Button 
+	    		android:scaleType="fitCenter"
+	    		android:background="@drawable/transparent"
+	    		android:id="@+id/buttonNull" 
+	    		android:layout_width="fill_parent"
+	    		android:layout_weight="1" 
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
+	    		</Button>
 
 	    <ImageButton 
 
@@ -154,9 +235,21 @@
 	    		android:id="@+id/buttonPlayPause"
 	    		android:layout_weight="1" 
 	    		android:layout_width="fill_parent" 
-	    		android:layout_height="fill_parent"
-	    		android:layout_gravity="center">
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
 	    		</ImageButton>
+	    <TextView android:text="@string/button_name_play" 
+	    		android:id="@+id/textButtonPlayPause"
+	    		android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content" 
+	    		android:gravity="center"></TextView>
+	    <Button 
+	    		android:scaleType="fitCenter"
+	    		android:background="@drawable/transparent"
+	    		android:id="@+id/buttonNull" 
+	    		android:layout_width="fill_parent"
+	    		android:layout_weight="1" 
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
+	    		</Button>
 
 	    <ImageButton 
 	    		android:scaleType="fitCenter"
@@ -165,7 +258,22 @@
 	    		android:id="@+id/buttonDownload"
 	    		android:layout_weight="1" 
 	    		android:layout_width="fill_parent" 
-	    		android:layout_height="fill_parent" android:layout_gravity="center">
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
 	    		</ImageButton>
-    </LinearLayout>
+	    <TextView android:text="@string/button_name_download" 
+	    		android:id="@+id/textView6"
+	    		android:layout_width="fill_parent" 
+	    		android:layout_height="wrap_content" 
+	    		android:gravity="center"></TextView>    
+	    <Button 
+	    		android:scaleType="fitCenter"
+	    		android:background="@drawable/transparent"
+	    		android:id="@+id/buttonNull" 
+	    		android:layout_width="fill_parent"
+	    		android:layout_weight="1" 
+	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
+	    		</Button>
+
+
+	    </LinearLayout>
 </LinearLayout>

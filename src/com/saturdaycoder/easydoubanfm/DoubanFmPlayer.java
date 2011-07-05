@@ -3,6 +3,7 @@ package com.saturdaycoder.easydoubanfm;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.TimerTask;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -161,7 +162,7 @@ public class DoubanFmPlayer {
 						public void onSeekComplete(MediaPlayer mp) {
 							isPreparing = false;
 							Debugger.info("media player onSeekComplete");
-							
+							EasyDoubanFm.updatePosition(getCurPosition(), getCurDuration());
 						}
 					});
 					mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -500,7 +501,9 @@ public class DoubanFmPlayer {
 	
 	private void notifyMusicPrepareProgress(int progress) {
 		// update widgets
-		EasyDoubanFmWidget.setProgress(context, progress);
+		EasyDoubanFmWidget.setPrepareProgress(context, progress);
+		
+		EasyDoubanFm.setPrepareProgress(progress);
 		
 		// broadcast
 		//Intent i = new Intent(DoubanFmService.EVENT_PLAYER_MUSIC_PREPARE_PROGRESS);
@@ -549,9 +552,10 @@ public class DoubanFmPlayer {
 		case DoubanFmService.STATE_PREPARE:
 			content.artist = content.title = "";
 			content.rated = false;
-			content.picture = null;//defaultAlbumPic;
+			//content.picture = null;//defaultAlbumPic;
 			EasyDoubanFmWidget.updateContent(context, content, null);
 			EasyDoubanFm.updateContents(content);
+			EasyDoubanFm.updatePosition(0, 0);
 			break;
 		case DoubanFmService.STATE_STARTED:	 {
 			if (musicInfo != null) {
@@ -560,13 +564,14 @@ public class DoubanFmPlayer {
 				content.title = musicInfo.title;
 			}
 			EasyDoubanFmWidget.updateContent(context, content, null);
-			EasyDoubanFm.updateContents(content);
+			EasyDoubanFm.updateContents(content);			
+			
 			Notification fgNotification = new Notification(R.drawable.icon,
 					content.artist + " -- " + content.title,
 			        System.currentTimeMillis());
 			//fgNotification.flags |= Notification.FLAG_NO_CLEAR;
-			Intent it = new Intent(DoubanFmService.ACTION_NULL);
-			PendingIntent pi = PendingIntent.getBroadcast(context, 0, it, 0);
+			Intent it = new Intent(context, EasyDoubanFm.class);
+			PendingIntent pi = PendingIntent.getActivity(context, 0, it, 0);
 			fgNotification.setLatestEventInfo(context, content.artist, content.title, pi);	
 			notificationManager.notify(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
 			break;
@@ -675,8 +680,8 @@ public class DoubanFmPlayer {
 					curMusic.artist + " -- " + curMusic.title,
 			        System.currentTimeMillis());
 			fgNotification.flags |= Notification.FLAG_NO_CLEAR;
-			Intent it = new Intent(DoubanFmService.ACTION_NULL);
-			PendingIntent pi = PendingIntent.getBroadcast(context, 0, it, 0);
+			Intent it = new Intent(context, EasyDoubanFm.class);
+			PendingIntent pi = PendingIntent.getActivity(context, 0, it, 0);
 			fgNotification.setLatestEventInfo(context, curMusic.artist, curMusic.title, pi);	
 			notificationManager.notify(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
 		}
@@ -696,13 +701,16 @@ public class DoubanFmPlayer {
 		
 		notifyMusicStateChanged( DoubanFmService.STATE_PREPARE, null, NO_REASON);
 		
-		notifyMusicPrepareProgress(20);
+		notifyMusicPrepareProgress(10);
 		
 		int chan = Preference.getSelectedChannel(context);
 		
 		synchronized(musicSessionLock) {
 			lastMusic = curMusic;
 			curMusic = getNextMusic();
+			
+			notifyMusicPrepareProgress(20);
+			
 			if (lastMusic != null) {
 				musicHistory.add(0, lastMusic);
 				Debugger.verbose("adding music to history");
@@ -712,7 +720,7 @@ public class DoubanFmPlayer {
 				Debugger.verbose("remove old history");
 			}
 			
-			notifyMusicPrepareProgress(40);
+			
 			
 			if (curMusic == null) {
 			    Debugger.error("curMusic == null!!");
@@ -721,6 +729,8 @@ public class DoubanFmPlayer {
 								DoubanFmService.REASON_NETWORK_IO_ERROR);
 			    return;
 			} 
+			
+			notifyMusicPrepareProgress(30);
 			
 			// mPlayer prepare
 			mPlayer.reset();
@@ -732,12 +742,15 @@ public class DoubanFmPlayer {
 								DoubanFmService.REASON_NETWORK_IO_ERROR);
 			    return;
 			}
+			
+			notifyMusicPrepareProgress(40);
+			
 			mPlayer.prepareAsync();
 
 			// report music info (artist, title, rated)
 	    	notifyMusicStateChanged( DoubanFmService.STATE_STARTED, curMusic, NO_REASON);
 	    	
-			notifyMusicPrepareProgress( 60);
+			notifyMusicPrepareProgress(50);
 			
 			
 			// report picture ready
@@ -748,7 +761,11 @@ public class DoubanFmPlayer {
 		    	picTask.cancel(true);
 		    }
 			picTask = new GetPictureTask();
+			
+			notifyMusicPrepareProgress(60);
+			
 		    picTask.execute(curMusic.pictureUrl);
+
 		    
 		    // secretly pre-fetch play list
 		    if (pendingMusicList.size() < 1) {
@@ -790,6 +807,22 @@ public class DoubanFmPlayer {
 		
 	}
 	
+	public int getCurPosition() {
+		if (isOpen() && mPlayer.isPlaying()) {
+			return mPlayer.getCurrentPosition();
+		}
+		
+		else return 0;
+	}
+	
+	public int getCurDuration() {
+		if (isOpen() && mPlayer.isPlaying()) {
+			return mPlayer.getDuration();
+		}
+		
+		else return 0;		
+	}
+	
 	private MusicInfo getNextMusic() {
 		if (pendingMusicList.size() == 0) {
 			// pre-fetch
@@ -806,7 +839,7 @@ public class DoubanFmPlayer {
 		else return null;
 	}
 	
-	
+
 	
     private class GetPictureTask extends AsyncTask<String, Integer, Bitmap> {
     	public GetPictureTask(){
@@ -831,7 +864,7 @@ public class DoubanFmPlayer {
     			httpResponse = new DefaultHttpClient().execute(httpGet);
 				if (isCancelled())
 					return null;
-    			publishProgress(80);
+    			publishProgress(70);
     		} catch (Exception e) {
     			Debugger.error("Error getting response of downloading music: " + e.toString());
     			return null;
@@ -847,6 +880,9 @@ public class DoubanFmPlayer {
 			try {
 				InputStream is = httpResponse.getEntity().getContent();
 				long len = httpResponse.getEntity().getContentLength();
+				
+				publishProgress(80);
+				
 				int length = (int)(len);
 				b = new byte[length];
 				int l = 0;
@@ -858,9 +894,15 @@ public class DoubanFmPlayer {
 						break;
 					l += tmpl;
 				}
+				
+				publishProgress(90);
+				
 				if (isCancelled())
 					return null;
 				Bitmap bmp = BitmapFactory.decodeByteArray(b, 0, length);
+				
+				publishProgress(100);
+				
 				return bmp;
 			} catch (Exception e) {
 				Debugger.error("Error getting picture: " + e.toString());
@@ -872,7 +914,7 @@ public class DoubanFmPlayer {
     	protected void onProgressUpdate(Integer... progress) {
     		if (progress.length < 1)
     			return;
-    		
+    		notifyMusicPrepareProgress(progress[0]);
         }
     	@Override
         protected void onPostExecute(Bitmap bmp) {

@@ -46,6 +46,17 @@
     <string name="radio_shutdown_on_idle_3">(关闭闲置进程可节省电量)</string>
     <string name="radio_auto_close_1">定时关闭(睡觉模式)</string>
     <string name="radio_auto_close_2">分钟</string>
+    
+    <string name="button_name_ban">禁播</string>
+    <string name="button_name_rate">加心</string>
+    <string name="button_name_unrate">去心</string>
+    <string name="button_name_menu">设定</string>
+    <string name="button_name_skip">换曲</string>
+    <string name="button_name_play">开始</string>
+    <string name="button_name_pause">暂停</string>
+    <string name="button_name_download">下载</string>
+    
+    
     <string name="options_act">快捷操作</string>
     <string-array name="options_act">
 	    <item>切换曲目</item>

@@ -40,8 +40,8 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		
 		synchronized(EasyDoubanFmWidget.class) {
 			if (!enabled) {
-				Debugger.debug("No active widgets, skip updating");
-				return;
+				//Debugger.debug("No active widgets, skip updating");
+				//return;
 			}
 			
 			RemoteViews updateViews = new RemoteViews(context.getPackageName(),
@@ -140,26 +140,46 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	
 	
 	synchronized
-	public static void setProgress(Context context, int progress) {
+	public static void setPrepareProgress(Context context, int progress) {
 		Bitmap bmp = null;
-		if (progress >= 20
-        		&& progress < 40) {
+		if (progress >= 10
+        		&& progress < 20) {
         	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress1);
         	widgetContent.picture = bmp;
         }
-		if (progress >= 40
-        		&& progress < 60) {
+		if (progress >= 20
+        		&& progress < 30) {
         	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress2);
         	widgetContent.picture = bmp;
         }
-		if (progress >= 60
-        		&& progress < 80) {
+		if (progress >= 30
+        		&& progress < 40) {
         	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress3);
+        	widgetContent.picture = bmp;
+        }
+		if (progress >= 40
+        		&& progress < 50) {
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress4);
+        	widgetContent.picture = bmp;
+        }
+		if (progress >= 50
+        		&& progress < 60) {
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress5);
+        	widgetContent.picture = bmp;
+        }
+		if (progress >= 60
+        		&& progress < 70) {
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress6);
+        	widgetContent.picture = bmp;
+        }
+		if (progress >= 70
+        		&& progress < 80) {
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress7);
         	widgetContent.picture = bmp;
         }
 		if (progress >= 80
         		&& progress < 100) {
-        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress4);
+        	bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.progress8);
         	widgetContent.picture = bmp;
         }
 		
@@ -296,7 +316,9 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 	public void onEnabled(Context context) {
 		Debugger.info("widget onEnabled");
 		super.onEnabled(context);
-
+		synchronized(EasyDoubanFmWidget.class) {
+			enabled = true;
+		}
 	}
 
 	
