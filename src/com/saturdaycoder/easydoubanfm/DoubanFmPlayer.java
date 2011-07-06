@@ -134,7 +134,7 @@ public class DoubanFmPlayer {
 						@Override
 						public void onBufferingUpdate(MediaPlayer mp, int percent) {
 							isPreparing = false;
-							Debugger.verbose("media player progress " + percent);
+							//Debugger.verbose("media player progress " + percent);
 							
 						}
 					});
