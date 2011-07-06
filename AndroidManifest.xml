@@ -46,8 +46,14 @@
                   android:label="" >
         </activity>
         
+        <activity android:name="IntroductionActivity" 
+                  android:launchMode="singleTask"
+                  android:label="" >
+        </activity>
+        
         <activity android:name="LoginActivity" 
                   android:theme="@android:style/Theme.Dialog"
+                  android:launchMode="singleTask"
                   android:label="" >
         </activity>
         

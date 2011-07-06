@@ -508,36 +508,44 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
 	private Runnable mOpenPlayerTask = new Runnable() {
 	   public void run() {
+
+		   	Notification fgNotification = new Notification(R.drawable.icon,
+					getResources().getString(R.string.app_name),
+			        System.currentTimeMillis());
+			fgNotification.flags |= Notification.FLAG_NO_CLEAR;
+			Intent it = new Intent(DoubanFmService.this, EasyDoubanFm.class);
+			PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 0, it, 0);
+			fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
+			startForeground(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
+			
 		   dPlayer.open();
+
 	   }
 	};
 	
 	private void openPlayer() {
 		// start foreground with notification
-		Notification fgNotification = new Notification(R.drawable.icon,
-				getResources().getString(R.string.app_name),
-		        System.currentTimeMillis());
-		fgNotification.flags |= Notification.FLAG_NO_CLEAR;
-		Intent it = new Intent(this, EasyDoubanFm.class);
-		PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
-		fgNotification.setLatestEventInfo(this, "", "", pi);		
-		startForeground(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
+		   if (!dPlayer.isOpen()) {
 		
-		mHandler.removeCallbacks(mOpenPlayerTask);
-        mHandler.postDelayed(mOpenPlayerTask, 50);
+				mHandler.removeCallbacks(mOpenPlayerTask);
+		        mHandler.postDelayed(mOpenPlayerTask, 50);
+		   }
 	}
 	
 	private Runnable mClosePlayerTask = new Runnable() {
 	   public void run() {
+			stopForeground(true);
 		   dPlayer.close();
 	   }
 	};
 	private void closePlayer() {
-		stopForeground(true);
+
 		
 		Debugger.debug("DoubanFm Control Service unregistered");
+		//if (dPlayer.isOpen()) {
 		mHandler.removeCallbacks(mClosePlayerTask);
         mHandler.postDelayed(mClosePlayerTask, 50);
+		//}
 	}
 	
 	private void closeService() {

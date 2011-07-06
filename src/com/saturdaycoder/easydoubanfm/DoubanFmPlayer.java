@@ -22,6 +22,7 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.Toast;
 
 
 public class DoubanFmPlayer {
@@ -536,6 +537,8 @@ public class DoubanFmPlayer {
 			EasyDoubanFmWidget.updateContent(context, wc, null);
 			EasyDoubanFm.updateContents(wc);
 			break;
+
+			
 		default:
 			break;
 		}
@@ -586,11 +589,14 @@ public class DoubanFmPlayer {
 		}
 		
 		case DoubanFmService.STATE_CANCELLED:
-		case DoubanFmService.STATE_IDLE:
-		case DoubanFmService.STATE_FAILED:
 			break;
+		case DoubanFmService.STATE_IDLE:
+			break;
+		case DoubanFmService.STATE_FAILED:
+
 		case DoubanFmService.STATE_ERROR:
-			
+			popNotify("无法获得音乐信息");
+			break;		
 		case DoubanFmService.STATE_MUSIC_SKIPPED:
 			break;
 		case DoubanFmService.STATE_MUSIC_PAUSED:
@@ -931,5 +937,11 @@ public class DoubanFmPlayer {
     		notifyPictureStateChanged(DoubanFmService.STATE_STARTED, bmp, NO_REASON);
     		
         }
+    }
+    
+    private void popNotify(String msg)
+    {
+        Toast.makeText(context, msg,
+                Toast.LENGTH_LONG).show();
     }
 }

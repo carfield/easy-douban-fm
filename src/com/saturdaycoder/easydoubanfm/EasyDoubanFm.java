@@ -3,6 +3,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.text.format.DateFormat;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.app.Activity;
 import android.os.Bundle;
@@ -18,6 +20,8 @@ import android.graphics.BitmapFactory;
 import android.widget.*;
 
 public class EasyDoubanFm extends Activity {
+	private static final int MENU_CLOSE_ID = Menu.FIRST;  	 
+	private static final int MENU_ABOUT_ID = Menu.FIRST + 1;  
 	//private WidgetContent widgetContent;
 
 	private static EasyDoubanFm _this = null;
@@ -38,6 +42,8 @@ public class EasyDoubanFm extends Activity {
 	
 	int curPos;
 	int duration;
+	
+	
 	
 	public static void setPrepareProgress(int progress) {
 		Debugger.debug("EasyDoubanFm.setPrepareProgress");
@@ -100,11 +106,28 @@ public class EasyDoubanFm extends Activity {
 		_this.buttonRateUnrate.setImageResource(content.rated? R.drawable.btn_rated: R.drawable.btn_unrated);
 		_this.textButtonRateUnrate.setText(content.rated? _this.getResources().getString(R.string.button_name_unrate): _this.getResources().getString(R.string.button_name_rate));
 		// on/off
-		if (content.onState == EasyDoubanFmWidget.STATE_OFF) {
+		switch(content.onState) {
+		case EasyDoubanFmWidget.STATE_OFF: {
+			//_this.imageCover.setVisibility(ImageView.VISIBLE);
+			//_this.progressBar.setVisibility(ProgressBar.GONE);
 			_this.buttonPlayPause.setImageResource(R.drawable.btn_play);
 			_this.textButtonPlayPause.setText(_this.getResources().getString(R.string.button_name_play));
 			_this.mHandler.removeCallbacks(_this.mPositionTask);
-			
+			break;
+		}
+		case EasyDoubanFmWidget.STATE_ON: {
+			//_this.imageCover.setVisibility(ImageView.VISIBLE);
+			//_this.progressBar.setVisibility(ProgressBar.GONE);
+			break;
+		}
+		case EasyDoubanFmWidget.STATE_PREPARE: {
+			//_this.imageCover.setVisibility(ImageView.GONE);
+			//_this.progressBar.setVisibility(ProgressBar.VISIBLE);
+			//_this.mHandler.removeCallbacks(_this.mPositionTask);
+			break;
+		}
+		default:
+			break;
 		}
 	}
 	
@@ -205,6 +228,7 @@ public class EasyDoubanFm extends Activity {
     	super.onStart();    	
  	
     	_this = this;
+    	
     	Intent i = new Intent(DoubanFmService.ACTION_ACTIVITY_UPDATE);
     	i.setComponent(new ComponentName(this, DoubanFmService.class));
     	startService(i);
@@ -213,6 +237,21 @@ public class EasyDoubanFm extends Activity {
     	//positionTimer.schedule(positionTask, 0, 1000);
 		mHandler.removeCallbacks(mPositionTask);
         //mHandler.postDelayed(mPositionTask, 1000);
+		mHandler.removeCallbacks(mOpenPlayerTask);
+        mHandler.postDelayed(mOpenPlayerTask, 500);
+    }
+
+	private Runnable mOpenPlayerTask = new Runnable() {
+		   public void run() {
+		    	Intent i = new Intent(DoubanFmService.ACTION_PLAYER_ON);
+		    	i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
+		    	startService(i);
+		   }
+		};
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
     }
     
     @Override
@@ -253,6 +292,40 @@ public class EasyDoubanFm extends Activity {
 		}
 	}
 	
-
-      
+    @Override
+    public boolean onCreateOptionsMenu (Menu aMenu) {  
+        
+        super.onCreateOptionsMenu(aMenu);  
+        aMenu.add(0, MENU_CLOSE_ID, 0, "退出");  
+        aMenu.add(0, MENU_ABOUT_ID, 0, "关于");  
+        return true;  
+          
+    }  
+    @Override
+    public boolean onOptionsItemSelected (MenuItem aMenuItem) {  
+        
+        switch (aMenuItem.getItemId()) {  
+            case MENU_CLOSE_ID: { 
+            	Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);
+				intent.setComponent(new ComponentName(this, DoubanFmService.class));
+				startService(intent);
+				this.finish();
+                break;  
+            }
+            case MENU_ABOUT_ID: {  
+                //popNotify("一个可以暂停、下载、设置多种快捷操作的豆瓣电台客户端。");
+            	Intent intent = new Intent(this, IntroductionActivity.class);
+            	startActivity(intent);
+                break;  
+            }
+            default:
+            	break;
+        }  
+        return super.onOptionsItemSelected(aMenuItem);
+    }  
+    private void popNotify(String msg)
+    {
+        Toast.makeText(this, msg,
+                Toast.LENGTH_LONG).show();
+    }
 }

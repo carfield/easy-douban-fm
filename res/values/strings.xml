@@ -12,7 +12,7 @@
     <string name="button_confirm_login_text">登录</string>
     <string name="text_login_email">E-Mail地址</string>
     <string name="text_login_passwd">密码</string>
-    <string name="text_channel_unselected">未选择频道</string>
+    <string name="text_channel_unselected">点击选择频道</string>
     <string name="text_channel_updating">正在更新频道列表</string>
     <string name="text_channel_closing">正在关闭电台...</string>
     <string name="public_channel_name">公共频道</string>
