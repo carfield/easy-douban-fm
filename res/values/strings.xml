@@ -3,8 +3,8 @@
     
     <string name="app_name">豆瓣电台</string>
     <string name="appwidget_name">豆瓣电台</string>
-    <string name="intro_main">感谢下载“豆瓣电台”！0.6加入了相当震撼的“红歌”频道哦！详情请见本说明末尾的changelog。</string>
-    <string name="intro_main0">本软件必须在桌面添加小部件才可使用!!\nYou need add an appwidget to use this app!!</string>
+    <string name="intro_main"></string>
+    <string name="intro_main0"></string>
     <string name="intro_main1">第一步，在桌面添加“豆瓣电台”小部件；\n第二步，在桌面上按小部件开关启动豆瓣电台。\n\n然后就可以按前进按钮，或者按耳机线控按钮，或者甩动手机来切换歌曲啦。\n</string>
     <string name="intro_main2">下面是小部件各个按钮的介绍：
     </string>
@@ -67,7 +67,17 @@
     </string-array>
     <string name="text_error_network">由于网络原因登录失败</string>
     <string name="changelog">
-    
+    v0.7 2011-07-08\n
+    1.新增主程序界面（点击豆瓣电台程序图标进入）\n
+    2.恢复暂停按钮（可设置暂停超时后关闭进程）\n
+    3.新增自定义多种快捷操作\n
+    4.新增相机按钮绑定到快捷操作\n
+    5.修复按钮不响应等问题\n
+    6.用户界面更改，重新设计桌面小部件\n
+    7.新增点击豆瓣电台通知图标进入主界面\n
+    8.改善下载实现，保证下载正确进行\n
+    9.更新频道列表\n    
+    \n
     v0.6 2011-06-21\n
     1.更新到最新频道列表\n
     2.解决访问无效频道时的无限崩溃问题\n

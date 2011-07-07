@@ -256,14 +256,14 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		Intent menuIntent = new Intent(context, PreferenceActivity.class);
 		
 		PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
-				0, menuIntent, 0);
+				(int)System.currentTimeMillis(), menuIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonMenu, menuPendingIntent);
 
 		// channel button
 		Intent channelIntent = new Intent(context, ChannelSelectorActivity.class);
 		
 		PendingIntent channelPendingIntent = PendingIntent.getActivity(context, 
-				0, channelIntent, 0);
+				(int)System.currentTimeMillis(), channelIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonChannel, channelPendingIntent);
 
 	}

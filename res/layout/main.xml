@@ -5,7 +5,7 @@ android:id="@+id/scroll"
             android:layout_height="fill_parent"
             android:background="@drawable/audio_player_default_show_bg_dark" 
             >
-<RelativeLayout 
+<LinearLayout 
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -15,9 +15,6 @@ android:id="@+id/scroll"
     android:paddingLeft="10dip"
     android:paddingTop="10dip"
     android:paddingBottom="10dip"
-    android:layout_alignParentTop="true" 
-    android:layout_alignParentLeft="true" 
-    android:layout_alignParentRight="true" 
     android:paddingRight="10dip" 
     android:text="@string/intro_main"
     android:textSize="16dip"
@@ -26,46 +23,6 @@ android:id="@+id/scroll"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     />
-<TextView
-    android:paddingLeft="10dip"
-    android:paddingTop="10dip"
-    android:paddingBottom="10dip"
-    android:layout_below="@+id/textIntro" 
-    android:layout_alignParentLeft="true" 
-    android:layout_alignParentRight="true" 
-    android:paddingRight="10dip" 
-    android:text="@string/intro_main0"
-    android:textSize="22dip"
-    android:textColor="#ff4040"
-    android:id="@+id/textIntro1"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    />
-<TextView
-    android:paddingLeft="10dip"
-    android:paddingTop="10dip"
-    android:paddingBottom="10dip"
-    android:layout_below="@+id/textIntro1" 
-    android:layout_alignParentLeft="true" 
-    android:layout_alignParentRight="true" 
-    android:paddingRight="10dip" 
-    android:text="@string/intro_main2"
-    android:textSize="16dip"
-    android:id="@+id/textIntro2"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    />
-<ImageView 
-    android:src="@drawable/intro_v3" 
-    android:layout_centerVertical="true"
-    android:layout_centerHorizontal="true"
-    android:layout_width="270dip"
-    android:layout_below="@+id/textIntro2"
-    android:id="@+id/imageCover" 
-    android:layout_height="210dip"
-    />
 
-</RelativeLayout>
+</LinearLayout>
 </ScrollView>

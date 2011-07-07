@@ -117,7 +117,11 @@ public class DoubanFmPlayer {
 			this.loginSession = null;
 		}
 		
-		notifyPowerStateChanged(DoubanFmService.STATE_PREPARE);
+		try {
+			notifyPowerStateChanged(DoubanFmService.STATE_PREPARE);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		
 		if (!isOpen) {
@@ -199,7 +203,11 @@ public class DoubanFmPlayer {
 						login(email, passwd);
 					}
 					else {
-						notifyLoginStateChanged(DoubanFmService.STATE_IDLE, NO_REASON);
+						try {
+							notifyLoginStateChanged(DoubanFmService.STATE_IDLE, NO_REASON);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 						
 						loginSession = null;
 					}
@@ -223,9 +231,17 @@ public class DoubanFmPlayer {
 					
 					FmChannel c = db.getChannelInfo(ci);
 					
-					notifyPowerStateChanged( DoubanFmService.STATE_STARTED);
+					try {
+						notifyPowerStateChanged( DoubanFmService.STATE_STARTED);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					
-					notifyChannelChanged(c.channelId, c.getDisplayName(login));					
+					try {
+						notifyChannelChanged(c.channelId, c.getDisplayName(login));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					
 					isOpen = true;
 					
@@ -253,8 +269,11 @@ public class DoubanFmPlayer {
 					Debugger.info("DoubanFmService closeFM");
 					
 					//notifyChannelChanged(-1, context.getResources().getString(R.string.text_channel_closing));
-					
-					notifyPowerStateChanged(DoubanFmService.STATE_PREPARE);
+					try {
+						notifyPowerStateChanged(DoubanFmService.STATE_PREPARE);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 
 					curMusic = lastMusic = null;
 					curPic = null;
@@ -264,8 +283,11 @@ public class DoubanFmPlayer {
 						picTask = null;
 					}
 					
-					notifyPowerStateChanged( DoubanFmService.STATE_IDLE);
-					
+					try {
+						notifyPowerStateChanged( DoubanFmService.STATE_IDLE);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					isOpen = false;
 				}
 			}
@@ -287,7 +309,11 @@ public class DoubanFmPlayer {
 			mPlayer.reset();
 		}
 		Debugger.debug("player playing is " + mPlayer.isPlaying());
-		notifyMusicPaused();
+		try {
+			notifyMusicPaused();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void resumeMusic() {
@@ -326,9 +352,8 @@ public class DoubanFmPlayer {
 				try {
 					fillPendingList();
 					
-					notifyMusicRated(true);
-
 					curMusic.rate(true);
+					notifyMusicRated(true);
 				} catch (Exception e) {
 					Debugger.error("error rating music: " + e.toString());
 				}
@@ -348,9 +373,8 @@ public class DoubanFmPlayer {
 				try {
 					fillPendingList();
 					
-					notifyMusicRated(false);
-					
 					curMusic.rate(false);
+					notifyMusicRated(false);
 				} catch (Exception e) {
 					Debugger.error("error rating music: " + e.toString());
 				}
@@ -402,7 +426,11 @@ public class DoubanFmPlayer {
 			Preference.selectChannel(context, id);
 		}
 		
-		notifyChannelChanged(chan.channelId, chan.name);
+		try {
+			notifyChannelChanged(chan.channelId, chan.name);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		pendingMusicList.clear();
 		lastStopReason = DoubanFmApi.TYPE_NEW;
@@ -451,14 +479,22 @@ public class DoubanFmPlayer {
 		if (username == null || username.equals("") 
 				|| passwd == null || passwd.equals("")) {
 			
-			notifyLoginStateChanged(DoubanFmService.STATE_ERROR, DoubanFmService.REASON_API_REQUEST_ERROR);
+			try {
+				notifyLoginStateChanged(DoubanFmService.STATE_ERROR, DoubanFmService.REASON_API_REQUEST_ERROR);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			return false;
 		}
 			
 		synchronized(loginLock) {
 			try {
-				notifyLoginStateChanged(DoubanFmService.STATE_PREPARE, NO_REASON);
+				try {
+					notifyLoginStateChanged(DoubanFmService.STATE_PREPARE, NO_REASON);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				
 				loginSession = DoubanFmApi.login(username, passwd, Utility.getClientVersion());
 				if (loginSession != null) {
@@ -466,14 +502,23 @@ public class DoubanFmPlayer {
 					Preference.setAccountPasswd(context, passwd);
 					Preference.setLogin(context, true);
 					
-					notifyLoginStateChanged(DoubanFmService.STATE_STARTED, NO_REASON);
+					try {
+						notifyLoginStateChanged(DoubanFmService.STATE_STARTED, NO_REASON);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
 					return true;
 				} else {
 					Preference.setAccountEmail(context, username);
 					Preference.setAccountPasswd(context, null);
 					Preference.setLogin(context, false);
 					
-					notifyLoginStateChanged(DoubanFmService.STATE_ERROR, DoubanFmService.REASON_API_REQUEST_ERROR);
+					try {
+						notifyLoginStateChanged(DoubanFmService.STATE_ERROR, DoubanFmService.REASON_API_REQUEST_ERROR);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					return false;
 				}
 				
@@ -481,9 +526,12 @@ public class DoubanFmPlayer {
 			} catch (Exception e) {
 				Debugger.error("IO ERROR loging in: " + e.toString());
 				
-				notifyLoginStateChanged(DoubanFmService.STATE_ERROR, 
+				try {
+					notifyLoginStateChanged(DoubanFmService.STATE_ERROR, 
 												DoubanFmService.REASON_NETWORK_IO_ERROR);
-				
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 				loginSession = null;
 				return false;
 			}
@@ -496,20 +544,18 @@ public class DoubanFmPlayer {
 			Preference.setLogin(context, false);
 			loginSession = null;
 			
-			notifyLoginStateChanged(DoubanFmService.STATE_IDLE, NO_REASON);
+			try {
+				notifyLoginStateChanged(DoubanFmService.STATE_IDLE, NO_REASON);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
 	private void notifyMusicPrepareProgress(int progress) {
-		// update widgets
 		EasyDoubanFmWidget.setPrepareProgress(context, progress);
-		
 		EasyDoubanFm.setPrepareProgress(progress);
 		
-		// broadcast
-		//Intent i = new Intent(DoubanFmService.EVENT_PLAYER_MUSIC_PREPARE_PROGRESS);
-		//i.putExtra(DoubanFmService.EXTRA_PROGRESS, progress);
-		//context.sendBroadcast(i);
 	}
 	
 	private void notifyPowerStateChanged(int powerState) {

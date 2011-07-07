@@ -29,8 +29,9 @@ public class ChannelSelectorActivity extends Activity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Debugger.verbose("ChannelSelector onCreate");
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);  
+		//requestWindowFeature(Window.FEATURE_NO_TITLE);  
 		setContentView(R.layout.channelselector);
 
 		pendingSelChanId = -1;

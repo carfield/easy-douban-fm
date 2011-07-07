@@ -37,18 +37,18 @@
         <activity android:name="ChannelSelectorActivity" 
                   android:theme="@android:style/Theme.Dialog"
                   android:launchMode="singleTask"
-                  android:label="" >
+                  android:label="选择频道" >
         </activity>
         
         <activity android:name="PreferenceActivity" 
                   android:theme="@android:style/Theme.Dialog"
                   android:launchMode="singleTask"
-                  android:label="" >
+                  android:label="偏好设定" >
         </activity>
         
         <activity android:name="IntroductionActivity" 
                   android:launchMode="singleTask"
-                  android:label="" >
+                  android:label="使用简介" >
         </activity>
         
         <activity android:name="LoginActivity" 

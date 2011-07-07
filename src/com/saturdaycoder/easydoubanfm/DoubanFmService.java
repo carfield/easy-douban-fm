@@ -50,6 +50,8 @@ import org.apache.http.params.*;
 import android.media.MediaScannerConnection.*;
 
 public class DoubanFmService extends Service implements IDoubanFmService {
+	private static final int SERVICE_COMMAND_DELAY = 200;
+
 	private static final String BROADCAST_PREFIX = "com.saturdaycoder.easydoubanfm";
 
 	// actions for player
@@ -520,11 +522,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			
 		   dPlayer.open();
 
-		   try {
-			   DoubanFmApi.hackChannelTable();
-		   } catch (Exception e) {
-			   e.printStackTrace();
-		   }
 	   }
 	};
 	
@@ -533,13 +530,13 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		   if (!dPlayer.isOpen()) {
 		
 				mHandler.removeCallbacks(mOpenPlayerTask);
-		        mHandler.postDelayed(mOpenPlayerTask, 50);
+		        mHandler.postDelayed(mOpenPlayerTask, SERVICE_COMMAND_DELAY);
 		   }
 	}
 	
 	private Runnable mClosePlayerTask = new Runnable() {
 	   public void run() {
-			stopForeground(true);
+		   stopForeground(true);
 		   dPlayer.close();
 	   }
 	};
@@ -548,8 +545,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		Debugger.debug("DoubanFm Control Service unregistered");
 		//if (dPlayer.isOpen()) {
-		mHandler.removeCallbacks(mClosePlayerTask);
-        mHandler.postDelayed(mClosePlayerTask, 50);
+		stopForeground(true);
+		dPlayer.close();
 		//}
 	}
 	
@@ -578,8 +575,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			fgNotification.setLatestEventInfo(this, "", "", pi);		
 			startForeground(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
 			
-			mHandler.removeCallbacks(mResumeMusicTask);
-	        mHandler.postDelayed(mResumeMusicTask, 50);
+			dPlayer.resumeMusic();
 		}
 	}
 	private Runnable mPauseMusicTask = new Runnable() {
@@ -590,8 +586,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void pauseMusic() {
 		if (dPlayer.isOpen()) {
 			stopForeground(true);
-			mHandler.removeCallbacks(mPauseMusicTask);
-	        mHandler.postDelayed(mPauseMusicTask, 50);
+			dPlayer.pauseMusic();
 	        // make sure the service will shut down on its own if it was
 	        // just started but not bound to and nothing is playing
 	        mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
@@ -640,7 +635,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	@Override
 	public void selectChannel(int id) {
 		if (dPlayer.isOpen()) {
-	        mHandler.postDelayed(new SelectChannelRunnable(id), 50);
+	        mHandler.postDelayed(new SelectChannelRunnable(id), SERVICE_COMMAND_DELAY);
 		}
 	}
 	
@@ -652,7 +647,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void rateMusic() {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mRateMusicTask);
-	        mHandler.postDelayed(mRateMusicTask, 50);
+	        mHandler.postDelayed(mRateMusicTask, SERVICE_COMMAND_DELAY);
 		}
 	}
 	private Runnable mUnrateMusicTask = new Runnable() {
@@ -663,7 +658,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void unrateMusic() {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mUnrateMusicTask);
-	        mHandler.postDelayed(mUnrateMusicTask, 50);
+	        mHandler.postDelayed(mUnrateMusicTask, SERVICE_COMMAND_DELAY);
 		}
 
 	}
@@ -677,7 +672,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void nextMusic() {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mNextMusicTask);
-	        mHandler.postDelayed(mNextMusicTask, 50);
+	        mHandler.postDelayed(mNextMusicTask, SERVICE_COMMAND_DELAY);
 		}
 	}
 	
@@ -690,7 +685,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void nextChannel() {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mNextChannelTask);
-	        mHandler.postDelayed(mNextChannelTask, 50);
+	        mHandler.postDelayed(mNextChannelTask, SERVICE_COMMAND_DELAY);
 		}
 	}
 	
@@ -737,7 +732,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	Debugger.verbose("download filename is \"" + filename + "\"");
 
     	if (dDownloader.isOpen()) {
-    		mHandler.postDelayed(new DownloadMusicTask(url, filename), 50);
+    		mHandler.postDelayed(new DownloadMusicTask(url, filename), SERVICE_COMMAND_DELAY);
     	}
     }
     
@@ -754,7 +749,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     }
     private void cancelDownload(String url) {
     	if (dDownloader.isOpen()) {
-    		mHandler.postDelayed(new CancelDownloadTask(url), 50);
+    		mHandler.postDelayed(new CancelDownloadTask(url), SERVICE_COMMAND_DELAY);
     	}
     }
     
