@@ -28,6 +28,65 @@ public class DoubanFmApi {
 		DoubanFmApi.httpParams = params;
 	}
 	
+	public static FmChannel[] hackChannelTable() throws IOException {
+		Debugger.verbose("Start HACKING channel table");
+		String uri = "http://www.douban.com/service/account/?return_to=http%3A%2F%2Fdouban.fm%2F&sig=5d84e95568&mode=checkid_immediate";
+		HttpGet httpGet = new HttpGet(uri);
+		//httpGet.setHeader("Connection", "Keep-Alive");
+		//httpGet.setHeader("User-Agent", Utility.getSdkVersionName());
+		try {
+			Debugger.verbose("request is:");
+			Debugger.verbose(httpGet.getRequestLine().toString());
+			for (Header h: httpGet.getAllHeaders()) {
+				Debugger.verbose(h.toString());
+			}
+			
+			DefaultHttpClient hc = null;
+			if (httpParams == null) {
+				hc = new DefaultHttpClient();
+			}
+			else {
+				hc = new DefaultHttpClient(httpParams);
+				Debugger.info("set timeout for login: " 
+						+ HttpConnectionParams.getConnectionTimeout(hc.getParams())
+						+ "/" 
+						+ HttpConnectionParams.getSoTimeout(hc.getParams()));
+			}
+			HttpResponse httpResponse = hc.execute(httpGet);
+			Debugger.verbose("response is:");
+			Debugger.verbose(httpResponse.getStatusLine().toString());
+			for (Header h: httpResponse.getAllHeaders()) {
+				Debugger.verbose(h.toString());
+			}
+			if (httpResponse.getStatusLine().getStatusCode() != 200) {
+				Debugger.error("getchannel response is " + httpResponse.getStatusLine().getStatusCode());
+				return null;
+			} else {
+				InputStream is = httpResponse.getEntity().getContent();
+				long len = httpResponse.getEntity().getContentLength();
+				int length = (int)(len);
+				byte b[] = new byte[length];
+				int l = 0;
+				while (l < length) {
+					int tmpl = is.read(b, l, length);
+					if (tmpl == -1)
+						break;
+					l += tmpl;
+				}
+				String s = new String(b);
+				int i =0;
+				while (i < s.length()) {
+					Debugger.error(s.substring(i, (s.length() - i >= 3000)? (i + 3000): s.length()));
+					i += 3000;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		return null;
+	}
+	
 	public static FmChannel[] getChannelTable() throws IOException {
 		Debugger.verbose("Start SCANNING channel table");
 		String uri = "http://www.douban.com:80/j/app/radio/channels?";

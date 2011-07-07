@@ -520,6 +520,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			
 		   dPlayer.open();
 
+		   try {
+			   DoubanFmApi.hackChannelTable();
+		   } catch (Exception e) {
+			   e.printStackTrace();
+		   }
 	   }
 	};
 	
