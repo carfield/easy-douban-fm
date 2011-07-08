@@ -521,7 +521,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			startForeground(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
 			
 		   dPlayer.open();
-
+		   
 	   }
 	};
 	
