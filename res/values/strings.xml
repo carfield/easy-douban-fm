@@ -38,7 +38,9 @@
     <string name="err_get_songs">从频道获取音乐失败</string>
     <string name="radio_shake">激活甩动操作</string>
     <string name="text_shake_accuracy">甩动换曲所需力度</string>
-    <string name="radio_media_button">激活耳机按钮</string>
+    <string name="radio_media_button">激活耳机按钮短按</string>
+    <string name="radio_media_button_long">激活耳机按钮长按</string>
+    <string name="radio_media_button_long_1">长按判定时间</string>
     <string name="radio_camera_button">激活相机键</string>
     <string name="radio_volume_button">使用上下音量键切换频道</string>
     <string name="radio_shutdown_on_idle_1">暂停超时后关闭进程</string>

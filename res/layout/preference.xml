@@ -45,6 +45,7 @@ android:id="@+id/scroll"
 	   		>
 	   		<TextView 
 	   			android:paddingLeft="40dip"
+	   			android:textAppearance="?android:attr/textAppearanceMedium"
 	   			android:layout_height="fill_parent"
 	   			android:singleLine="true" 
 	   			android:textColor="#ffffff"
@@ -89,6 +90,57 @@ android:id="@+id/scroll"
 	    	android:prompt="@string/options_act"
 	    	>
     	</Spinner>
+    </LinearLayout>
+    <TextView
+    	android:id="@+id/border02"
+    	android:background="@drawable/divider_horizontal"
+    	android:layout_width="fill_parent"
+    	android:layout_height="1dp"
+    	/> 
+     <LinearLayout
+   		xmlns:android="http://schemas.android.com/apk/res/android" 
+   		android:orientation="horizontal"
+   		android:layout_width="fill_parent"
+   		android:layout_height="50dip"   		
+   		>
+	    <CheckBox 
+	    	android:text="@string/radio_media_button_long" 
+	    	android:id="@+id/cbMediaButtonLongEnable" 
+	    	android:textColor="#ffffff"
+	    	android:layout_weight="1"
+	    	android:layout_width="fill_parent" 
+	    	android:layout_height="fill_parent">
+	    </CheckBox>
+	    <Spinner 
+	    	android:layout_width="wrap_content" 
+	    	android:layout_height="fill_parent" 
+	    	android:id="@+id/spinnerActionMediaButtonLong"
+	    	android:prompt="@string/options_act"
+	    	>
+    	</Spinner>
+    </LinearLayout>
+    <LinearLayout
+   		xmlns:android="http://schemas.android.com/apk/res/android" 
+   		android:orientation="horizontal"
+   		android:layout_width="fill_parent"
+   		android:layout_height="50dip"   		
+   		>
+	    <TextView 
+	    	android:text="@string/radio_media_button_long_1" 
+	    	android:id="@+id/textMediaButtonLongEnable" 
+	    	android:textAppearance="?android:attr/textAppearanceMedium"
+	    	android:textColor="#ffffff"
+	    	android:paddingLeft="40dip"
+	    	android:layout_weight="1"
+	    	android:layout_width="fill_parent" 
+	    	android:layout_height="fill_parent" android:gravity="center_vertical">
+	    </TextView>
+	    <EditText 
+	    	android:layout_height="fill_parent" 
+	    	android:id="@+id/editMediaButtonLongPressThreshold" 
+	    	android:layout_width="120dip" 
+	    	android:numeric="integer">
+	    </EditText>
     </LinearLayout>
     <TextView
     	android:id="@+id/border02"

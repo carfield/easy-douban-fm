@@ -918,7 +918,7 @@ public class DoubanFmPlayer {
 					return null;
     			publishProgress(70);
     		} catch (Exception e) {
-    			Debugger.error("Error getting response of downloading music: " + e.toString());
+    			Debugger.error("Error getting response of downloading picture: " + e.toString());
     			return null;
     		}
     		

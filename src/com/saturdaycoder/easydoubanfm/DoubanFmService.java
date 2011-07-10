@@ -12,6 +12,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.view.KeyEvent;
@@ -154,6 +155,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	public static final String QUICKCONTROL_SHAKE = "act_shake";
 	public static final String QUICKCONTROL_MEDIA_BUTTON = "act_media_button";
+	public static final String QUICKCONTROL_MEDIA_BUTTON_LONG = "act_media_button_long";
 	public static final String QUICKCONTROL_CAMERA_BUTTON = "act_camera_button";
 	
 	public static final int QUICKACT_NEXT_MUSIC = 0;
@@ -238,6 +240,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
 		dPlayer = new DoubanFmPlayer(this);
 		dDownloader = new DoubanFmDownloader(this);
+		
+		//PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		//wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "EasyDoubanFm");
  
 		// work-around on gingerbread restart bug: onStartCommand will not execute,
 		// so update widgets here
@@ -257,6 +262,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		IntentFilter mfilter = new IntentFilter();
 		mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
 		mfilter.addAction(Intent.ACTION_CAMERA_BUTTON);
+		mfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(phoneControlListener, mfilter);
 		
 		// listens to shake event
@@ -435,6 +441,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
         
+        //if (wakeLock != null) {
+		//	wakeLock.release();
+		//}
+        
         try {
 			if (shakeDetector != null ) {
 				shakeDetector.unregisterOnShakeListener(phoneControlListener);
@@ -508,6 +518,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		dDownloader.close();
 	}
 
+	private PowerManager.WakeLock wakeLock = null;
 	private Runnable mOpenPlayerTask = new Runnable() {
 	   public void run() {
 
@@ -520,7 +531,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
 			startForeground(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
 			
-		   dPlayer.open();
+			//if (wakeLock != null) {
+			//	wakeLock.acquire();
+			//}
+			
+			dPlayer.open();
 		   
 	   }
 	};
@@ -547,6 +562,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		//if (dPlayer.isOpen()) {
 		stopForeground(true);
 		dPlayer.close();
+		
+		//if (wakeLock != null) {
+		//	wakeLock.release();
+		//}
 		//}
 	}
 	
@@ -923,25 +942,60 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 	}
 	
+	private boolean isMediaButtonDown = false;
+	private long mediaButtonDownStartTime;
+	private final Object mediaButtonDownLock = new Object();
 	private boolean handleMediaButtonControl(int keycode, int keyaction, long keytime) {
 
-		Debugger.debug("keycode = " + keycode + " action = " + keyaction 
-				+ "eventtime = " + keytime);
-		if (!dPlayer.isOpen()) {
-			return false;
+		synchronized(mediaButtonDownLock) {
+			Debugger.debug("keycode = " + keycode + " action = " + keyaction 
+					+ "eventtime = " + keytime);
+			if (!dPlayer.isOpen()) {
+				return false;
+			}
+			if (!Preference.getMediaButtonEnable(this)) {
+				return false;
+			}	
+			switch (keyaction) {
+			case KeyEvent.ACTION_DOWN: {
+				boolean ret = true;
+				if (!isMediaButtonDown) {
+					mediaButtonDownStartTime = keytime;
+				}
+				else if (mediaButtonDownStartTime != -1 &&
+						keytime - mediaButtonDownStartTime > 2000) {
+					mediaButtonDownStartTime = -1;
+					Debugger.info("MEDIA BUTTON LONG PRESS");
+					ret = doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
+				}
+				isMediaButtonDown = true;
+				return ret;
+			}
+			case KeyEvent.ACTION_UP: {
+				boolean ret = true;
+				if (isMediaButtonDown) {
+					if (mediaButtonDownStartTime == -1 || keytime < mediaButtonDownStartTime) {
+						Debugger.info("MEDIA BUTTON PRESSED but wrong start time");						
+					}
+					else if (keytime - mediaButtonDownStartTime > 2000) {
+						Debugger.info("MEDIA BUTTON LONG PRESS");
+						ret = doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
+					}
+					else {
+						Debugger.info("MEDIA BUTTON SHORT PRESS");
+						ret = doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON));					
+					}					
+				}
+				isMediaButtonDown = false;
+				mediaButtonDownStartTime = -1;
+				return ret;
+			}
+			case KeyEvent.ACTION_MULTIPLE: 
+			default:
+				isMediaButtonDown = false;
+				return true;
+			}	
 		}
-		if (!Preference.getMediaButtonEnable(this)) {
-			return false;
-		}	
-		switch (keyaction) {
-		case KeyEvent.ACTION_DOWN: {
-			int qa = Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON);
-			return doQuickAction(qa);
-		}
-		default:
-			return false;
-		}	
-		
 	}
 	
 	private boolean handleCameraButtonControl() {
@@ -959,39 +1013,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	}
 	
 	
-	private class AsyncPlayerTask extends AsyncTask<Object, Integer, Integer> {
-		@Override
-		public Integer doInBackground(Object...params) {
-			try {
-				DoubanFmPlayer object = (DoubanFmPlayer)params[0];
-				Method method = (Method)params[1];
-				method.invoke(object);
-			} catch (Exception e) {
-				Debugger.error("error doInBackground: " + e.toString());
-				e.printStackTrace();
-			}
-			return null;
-		}
-	}
-	
-	private class TimerPlayerTask extends TimerTask {
-		private Method method;
-		public TimerPlayerTask(Method method) {
-			this.method = method;
-		}
-		@Override
-		public void run() {
-			
-			try {
-				method.invoke(dPlayer);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-		}
-	}
-	
-	
+
 	private class PhoneControlListener extends BroadcastReceiver 
 			 implements ShakeDetector.OnShakeListener {
 		
@@ -1014,9 +1036,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			}
 			
 			if (action.equals(Intent.ACTION_MEDIA_BUTTON)) {
-
+				Debugger.info("ACTION_MEDIA_BUTTON heard");
 			
 				KeyEvent ke = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+				
 				if (ke == null) {
 					Debugger.error("ACTION_MEDIA_BUTTON heard but null KeyEvent");
 					return;

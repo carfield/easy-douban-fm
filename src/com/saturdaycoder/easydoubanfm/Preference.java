@@ -187,6 +187,8 @@ public class Preference {
 			res = pref.getInt(control, DoubanFmService.QUICKACT_NEXT_MUSIC);
 		else if (control.equals(DoubanFmService.QUICKCONTROL_MEDIA_BUTTON))
 			res = pref.getInt(control, DoubanFmService.QUICKACT_PLAY_PAUSE);
+		else if (control.equals(DoubanFmService.QUICKCONTROL_MEDIA_BUTTON_LONG))
+			res = pref.getInt(control, DoubanFmService.QUICKACT_NEXT_CHANNEL);
 		else if (control.equals(DoubanFmService.QUICKCONTROL_CAMERA_BUTTON))
 			res = pref.getInt(control, DoubanFmService.QUICKACT_DOWNLOAD_MUSIC);
 		else

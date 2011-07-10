@@ -32,7 +32,7 @@ public class Utility {
 		case 12:
 			return "Android-3.1";
 		default:
-			return "Android-unknown";
+			return "Android";
 		}
 	}
 	
