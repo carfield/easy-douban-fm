@@ -435,7 +435,9 @@ public class DoubanFmPlayer {
 		pendingMusicList.clear();
 		lastStopReason = DoubanFmApi.TYPE_NEW;
 
-		nextMusic();
+		if (isOpen()) {
+			nextMusic();
+		}
 		
 	}
 	
@@ -611,6 +613,7 @@ public class DoubanFmPlayer {
 				content.artist = musicInfo.artist;
 				content.rated = musicInfo.isRated();
 				content.title = musicInfo.title;
+				content.paused = false;
 			}
 			EasyDoubanFmWidget.updateContent(context, content, null);
 			EasyDoubanFm.updateContents(content);			
@@ -639,16 +642,21 @@ public class DoubanFmPlayer {
 		case DoubanFmService.STATE_IDLE:
 			break;
 		case DoubanFmService.STATE_FAILED:
-
 		case DoubanFmService.STATE_ERROR:
-			popNotify("无法获得音乐信息");
+			popNotify("无法获得音乐信息，这可能是网络问题或是服务器端问题。请检查网络，或稍后再试");
 			break;		
 		case DoubanFmService.STATE_MUSIC_SKIPPED:
 			break;
 		case DoubanFmService.STATE_MUSIC_PAUSED:
-			
+			content.paused = true;
+			EasyDoubanFmWidget.updateContent(context, content, null);
+			EasyDoubanFm.updateContents(content);
+			break;
 		case DoubanFmService.STATE_MUSIC_RESUMED:
-			
+			content.paused = false;
+			EasyDoubanFmWidget.updateContent(context, content, null);
+			EasyDoubanFm.updateContents(content);
+			break;
 		default:
 			break;
 		}
@@ -695,18 +703,18 @@ public class DoubanFmPlayer {
 		switch (loginState) {
 		case DoubanFmService.STATE_ERROR:
 		case DoubanFmService.STATE_IDLE:
-			//content.channel = context.getResources().getString(R.string.text_login_idle);
+			
 			break;
 		case DoubanFmService.STATE_PREPARE:
-			content.channel = context.getResources().getString(R.string.text_login_inprocess);
+			//content.channel = context.getResources().getString(R.string.text_login_inprocess);
 			break;
 		case DoubanFmService.STATE_STARTED:
 		case DoubanFmService.STATE_FINISHED:
-			//content.channel = context.getResources().getString(R.string.text_login_ok);
+			
 			break;
 		}
-		EasyDoubanFmWidget.updateContent(context, content, null);
-		EasyDoubanFm.updateContents(content);
+		//EasyDoubanFmWidget.updateContent(context, content, null);
+		//EasyDoubanFm.updateContents(content);
 	}
 	
 	private void notifyMusicRated(boolean rated) {
@@ -860,7 +868,7 @@ public class DoubanFmPlayer {
 	}
 	
 	public int getCurPosition() {
-		if (isOpen() && mPlayer.isPlaying()) {
+		if (isOpen() && mPlayer != null && mPlayer.isPlaying()) {
 			return mPlayer.getCurrentPosition();
 		}
 		
@@ -868,7 +876,7 @@ public class DoubanFmPlayer {
 	}
 	
 	public int getCurDuration() {
-		if (isOpen() && mPlayer.isPlaying()) {
+		if (isOpen() && mPlayer != null && mPlayer.isPlaying()) {
 			return mPlayer.getDuration();
 		}
 		
@@ -881,7 +889,7 @@ public class DoubanFmPlayer {
 			try {
 				fillPendingList();
 			} catch (IOException e) {
-				//popNotify(getResources().getString(R.string.text_network_error));
+				//popNotify(context.getResources().getString(R.string.text_network_error));
 				return null;
 			}
 		} 

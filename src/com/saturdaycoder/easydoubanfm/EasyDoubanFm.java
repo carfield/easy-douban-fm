@@ -164,6 +164,8 @@ public class EasyDoubanFm extends Activity {
 		buttonPlayPause.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				//_this.progressBar.setVisibility(ProgressBar.VISIBLE);
+				//_this.imageCover.setVisibility(ImageView.GONE);
 				Intent i = new Intent(DoubanFmService.ACTION_PLAYER_PLAYPAUSE);
 				i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 				startService(i);
@@ -227,8 +229,7 @@ public class EasyDoubanFm extends Activity {
  	
     	_this = this;
     	
-    	_this.progressBar.setVisibility(ProgressBar.VISIBLE);
-		_this.imageCover.setVisibility(ImageView.GONE);
+
     	try {
     		Thread.sleep(100,0);
     	} catch (Exception e) {
@@ -239,16 +240,15 @@ public class EasyDoubanFm extends Activity {
     	i.setComponent(new ComponentName(this, DoubanFmService.class));
     	startService(i);
     	
-    	//positionTimer = new Timer();
-    	//positionTimer.schedule(positionTask, 0, 1000);
 		mHandler.removeCallbacks(mPositionTask);
-        //mHandler.postDelayed(mPositionTask, 1000);
 		mHandler.removeCallbacks(mOpenPlayerTask);
-        mHandler.postDelayed(mOpenPlayerTask, 500);
+        //mHandler.postDelayed(mOpenPlayerTask, 200);
     }
 
 	private Runnable mOpenPlayerTask = new Runnable() {
 		   public void run() {
+		    	_this.progressBar.setVisibility(ProgressBar.VISIBLE);
+				_this.imageCover.setVisibility(ImageView.GONE);
 		    	Intent i = new Intent(DoubanFmService.ACTION_PLAYER_ON);
 		    	i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 		    	startService(i);
@@ -319,7 +319,6 @@ public class EasyDoubanFm extends Activity {
                 break;  
             }
             case MENU_ABOUT_ID: {  
-                //popNotify("一个可以暂停、下载、设置多种快捷操作的豆瓣电台客户端。");
             	Intent intent = new Intent(this, IntroductionActivity.class);
             	startActivity(intent);
                 break;  

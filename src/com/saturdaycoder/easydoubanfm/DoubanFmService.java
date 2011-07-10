@@ -491,21 +491,24 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			mHandler.removeCallbacks(mBanMusicTask);
 	        mHandler.postDelayed(mBanMusicTask, 50);			
 		}
+		else {
+			popNotify(getResources().getString(R.string.warning_not_open));
+		}
     }
 
 	@Override
 	public boolean login(String email, String passwd) {
-		if (dPlayer.isOpen()) {
+		//if (dPlayer.isOpen()) {
 			return dPlayer.login(email, passwd);
-		}
-		return false;
+		//}
+		//return false;
 	}
 
 	//@Override
 	private void logout() {
-		if (dPlayer.isOpen()) {
+		//if (dPlayer.isOpen()) {
 			dPlayer.logout();
-		}
+		//}
 	}
 	
 
@@ -653,9 +656,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	}
 	@Override
 	public void selectChannel(int id) {
-		if (dPlayer.isOpen()) {
+		//if (dPlayer.isOpen()) {
 	        mHandler.postDelayed(new SelectChannelRunnable(id), SERVICE_COMMAND_DELAY);
-		}
+		//}
 	}
 	
 	private Runnable mRateMusicTask = new Runnable() {
@@ -668,6 +671,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			mHandler.removeCallbacks(mRateMusicTask);
 	        mHandler.postDelayed(mRateMusicTask, SERVICE_COMMAND_DELAY);
 		}
+		else {
+			popNotify(getResources().getString(R.string.warning_not_open));
+		}
 	}
 	private Runnable mUnrateMusicTask = new Runnable() {
 		   public void run() {
@@ -679,7 +685,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			mHandler.removeCallbacks(mUnrateMusicTask);
 	        mHandler.postDelayed(mUnrateMusicTask, SERVICE_COMMAND_DELAY);
 		}
-
+		else {
+			popNotify(getResources().getString(R.string.warning_not_open));
+		}
 	}
 	
 	
@@ -692,6 +700,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mNextMusicTask);
 	        mHandler.postDelayed(mNextMusicTask, SERVICE_COMMAND_DELAY);
+		}
+		else {
+			popNotify(getResources().getString(R.string.warning_not_open));
 		}
 	}
 	
@@ -727,7 +738,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	if (dPlayer.isOpen()) {
     		curMusic = dPlayer.getCurMusic();
     	} 
-
+    	else if (url == null || url.equals("")) {
+    		popNotify(getResources().getString(R.string.warning_not_open));
+    	}
     	
     	if (url == null || url.equals("")) {
     		if (curMusic == null || curMusic.musicUrl == null) {
@@ -735,13 +748,14 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     			return;
     		}
     		url = curMusic.musicUrl;
-
+    		
     	}
     	
     	if (filename == null || filename.equals(""))  {
     		filename = Utility.getUnixFilename(curMusic.artist, curMusic.title, url);
     		if (filename == null || filename.equals("")) {
 	    		Debugger.error("can't generate valid file name, abort");
+	    		popNotify(getResources().getString(R.string.warning_filename));
 	    		return;
     		}
     	}
@@ -953,48 +967,53 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			if (!dPlayer.isOpen()) {
 				return false;
 			}
-			if (!Preference.getMediaButtonEnable(this)) {
-				return false;
-			}	
+
 			switch (keyaction) {
-			case KeyEvent.ACTION_DOWN: {
-				boolean ret = true;
+			case KeyEvent.ACTION_DOWN: {								
 				if (!isMediaButtonDown) {
 					mediaButtonDownStartTime = keytime;
 				}
 				else if (mediaButtonDownStartTime != -1 &&
-						keytime - mediaButtonDownStartTime > Preference.getMediaButtonLongPressThreshold(this)) {
+						keytime - mediaButtonDownStartTime > 1000 * Preference.getMediaButtonLongPressThreshold(this)) {
 					mediaButtonDownStartTime = -1;
 					Debugger.info("MEDIA BUTTON LONG PRESS");
-					ret = doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
+					if (Preference.getMediaButtonLongEnable(this)) {
+						doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
+					}
 				}
 				isMediaButtonDown = true;
-				return ret;
+				break;
 			}
 			case KeyEvent.ACTION_UP: {
-				boolean ret = true;
+				
 				if (isMediaButtonDown) {
 					if (mediaButtonDownStartTime == -1 || keytime < mediaButtonDownStartTime) {
 						Debugger.info("MEDIA BUTTON PRESSED but wrong start time");						
 					}
-					else if (keytime - mediaButtonDownStartTime > Preference.getMediaButtonLongPressThreshold(this)) {
+					else if (keytime - mediaButtonDownStartTime > 1000 * Preference.getMediaButtonLongPressThreshold(this)) {
 						Debugger.info("MEDIA BUTTON LONG PRESS");
-						ret = doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
+						if (Preference.getMediaButtonLongEnable(this)) {							
+							doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
+						}
+						
 					}
 					else {
 						Debugger.info("MEDIA BUTTON SHORT PRESS");
-						ret = doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON));					
-					}					
+						if (Preference.getMediaButtonEnable(this)) {							
+							doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON));
+						}
+					}
 				}
 				isMediaButtonDown = false;
 				mediaButtonDownStartTime = -1;
-				return ret;
+				break;
 			}
 			case KeyEvent.ACTION_MULTIPLE: 
 			default:
 				isMediaButtonDown = false;
-				return true;
-			}	
+				break;
+			}
+			return true;
 		}
 	}
 	
@@ -1063,4 +1082,5 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			}
 		}
 	}
+	
 }

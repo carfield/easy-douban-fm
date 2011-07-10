@@ -65,7 +65,7 @@ public class LoginActivity extends Activity {
         	}
         };
         bindService(new Intent(LoginActivity.this, DoubanFmService.class), 
-        		mServiceConn, 0);
+        		mServiceConn, BIND_AUTO_CREATE);
 		
 		buttonLogin.setOnClickListener(new Button.OnClickListener() {
 			@Override
@@ -129,14 +129,18 @@ public class LoginActivity extends Activity {
     	@Override
     	protected Boolean doInBackground(String... params) {
     		if (params.length < 2 || mDoubanFm == null) {
+    			Debugger.error("service not bind, can not log in");
     			return false;
     		}
     		boolean succ = false;
     		try {
     			succ = mDoubanFm.login(params[0], params[1]);
+    			Debugger.warn("failed logging in through API");
     			return succ;
     			//return false;
     		} catch (Exception e) {
+    			e.printStackTrace();
+    			Debugger.debug("failed logging in: " + e.toString());
     			return false;
     		}
     		
@@ -154,7 +158,7 @@ public class LoginActivity extends Activity {
     		}
     		if (result) {
     			
-				Debugger.debug("pressed login succ");
+				Debugger.debug("login succ");
 				Preference.setAccountEmail(LoginActivity.this, email);
 				Preference.setAccountPasswd(LoginActivity.this, passwd);
 				Preference.setLogin(LoginActivity.this, true);
@@ -162,6 +166,7 @@ public class LoginActivity extends Activity {
 				LoginActivity.this.setResult(RESULT_OK, intent);
 				LoginActivity.this.finish();
     		} else {
+    			Debugger.debug("login failed");
     			Preference.setAccountEmail(LoginActivity.this, email);
     			popNotify(getResources().getString(R.string.notify_login_fail));
     		}

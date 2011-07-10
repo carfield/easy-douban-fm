@@ -141,6 +141,14 @@ android:id="@+id/scroll"
 	    	android:layout_width="120dip" 
 	    	android:numeric="integer">
 	    </EditText>
+    	<TextView 
+			android:singleLine="true" 
+			android:text="@string/radio_media_button_long_2" 
+		   	android:textColor="#ffffff"
+	    	android:layout_height="fill_parent" 
+		   	android:id="@+id/text11" 
+		   	android:layout_width="wrap_content" android:gravity="center">
+		</TextView>
     </LinearLayout>
     <TextView
     	android:id="@+id/border02"

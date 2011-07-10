@@ -9,6 +9,8 @@
     <string name="intro_main2">下面是小部件各个按钮的介绍：
     </string>
     <string name="button_login_text">登录豆瓣</string>
+    <string name="warning_not_open">请先按开始键开启豆瓣电台</string>
+    <string name="warning_filename">文件名不合法</string>
     <string name="button_confirm_login_text">登录</string>
     <string name="text_login_email">E-Mail地址</string>
     <string name="text_login_passwd">密码</string>
@@ -41,6 +43,7 @@
     <string name="radio_media_button">激活耳机按钮短按</string>
     <string name="radio_media_button_long">激活耳机按钮长按</string>
     <string name="radio_media_button_long_1">长按判定时间</string>
+    <string name="radio_media_button_long_2">秒</string>
     <string name="radio_camera_button">激活相机键长按</string>
     <string name="radio_camera_button_1">(屏幕关闭时相机键无效)</string>
     <string name="radio_volume_button">使用上下音量键切换频道</string>

@@ -10,7 +10,7 @@ public class Preference {
 	private static final int VALUE_DEFAULT_SHAKE_THRESHOLD = 5000;
 	private static final int VALUE_DEFAULT_SOCKET_TIMEOUT = 5000;
 	private static final int VALUE_DEFAULT_CONNECTION_TIMEOUT = 3000;
-	private static final int VALUE_DEFAULT_MEDIA_BUTTON_LONG_PRESS_THRESHOLD = 1500;
+	private static final int VALUE_DEFAULT_MEDIA_BUTTON_LONG_PRESS_THRESHOLD = 2;
 	private static final int VALUE_DEFAULT_SELECTED_CHANNEL = 0;
 	private static final String VALUE_DEFAULT_DOWNLOAD_DIR = "/easydoubanfm";
 
