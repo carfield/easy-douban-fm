@@ -17,12 +17,49 @@ android:id="@+id/scroll"
     android:paddingBottom="10dip"
     android:paddingRight="10dip" 
     android:text="@string/intro_main"
+    android:textColor="#30f030"
     android:textSize="16dip"
     android:id="@+id/textIntro"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     />
-
+<TextView
+    android:paddingLeft="10dip"
+    android:paddingTop="10dip"
+    android:paddingBottom="10dip"
+    android:paddingRight="10dip" 
+    android:text="@string/intro_main0"
+    android:textSize="16dip"
+    android:id="@+id/textIntro"
+    android:textColor="#ff8030"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    />
+<TextView
+    android:paddingLeft="10dip"
+    android:paddingTop="10dip"
+    android:paddingBottom="10dip"
+    android:paddingRight="10dip" 
+    android:text="Changelog"
+    android:textSize="16dip"
+    android:id="@+id/textIntro"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    />
+<TextView
+    android:paddingLeft="10dip"
+    android:paddingTop="10dip"
+    android:paddingBottom="10dip"
+    android:paddingRight="10dip" 
+    android:text="@string/changelog"
+    android:textSize="16dip"
+    android:id="@+id/textIntro"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    />
 </LinearLayout>
 </ScrollView>

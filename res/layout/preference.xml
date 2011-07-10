@@ -150,26 +150,42 @@ android:id="@+id/scroll"
     	/>
     <LinearLayout
    		xmlns:android="http://schemas.android.com/apk/res/android" 
-   		android:orientation="horizontal"
+   		android:orientation="vertical"
    		android:layout_width="fill_parent"
-   		android:layout_height="50dip"
-   		
+   		android:layout_height="wrap_content"
    		>
-	    <CheckBox 
-	    	android:text="@string/radio_camera_button" 
-	    	android:id="@+id/cbCameraButtonEnable" 
-	    	android:textColor="#ffffff"
-	    	android:layout_weight="1"
-	    	android:layout_width="fill_parent" 
-	    	android:layout_height="fill_parent">
-	    </CheckBox>
-	    <Spinner 
-	    	android:layout_width="wrap_content" 
-	    	android:layout_height="fill_parent" 
-	    	android:id="@+id/spinnerActionCameraButton"
-	    	android:prompt="@string/options_act"
-	    	>
-    	</Spinner>
+	    <LinearLayout
+	   		xmlns:android="http://schemas.android.com/apk/res/android" 
+	   		android:orientation="horizontal"
+	   		android:layout_width="fill_parent"
+	   		android:layout_height="50dip"
+	   		
+	   		>
+		    <CheckBox 
+		    	android:text="@string/radio_camera_button" 
+		    	android:id="@+id/cbCameraButtonEnable" 
+		    	android:textColor="#ffffff"
+		    	android:layout_weight="1"
+		    	android:layout_width="fill_parent" 
+		    	android:layout_height="fill_parent">
+		    </CheckBox>
+		    <Spinner 
+		    	android:layout_width="wrap_content" 
+		    	android:layout_height="fill_parent" 
+		    	android:id="@+id/spinnerActionCameraButton"
+		    	android:prompt="@string/options_act"
+		    	>
+	    	</Spinner>
+	    </LinearLayout>
+    	<TextView 
+			android:paddingLeft="40dip"
+			android:singleLine="true" 
+			android:text="@string/radio_camera_button_1" 
+		   	android:textColor="#ffffff"
+	    	android:layout_height="50dip" 
+		   	android:id="@+id/text10" 
+		   	android:layout_width="fill_parent" android:gravity="center_vertical">
+		</TextView>
     </LinearLayout>
     <TextView
     	android:id="@+id/border03"

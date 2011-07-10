@@ -3,9 +3,9 @@
     
     <string name="app_name">豆瓣电台</string>
     <string name="appwidget_name">豆瓣电台</string>
-    <string name="intro_main"></string>
-    <string name="intro_main0"></string>
-    <string name="intro_main1">第一步，在桌面添加“豆瓣电台”小部件；\n第二步，在桌面上按小部件开关启动豆瓣电台。\n\n然后就可以按前进按钮，或者按耳机线控按钮，或者甩动手机来切换歌曲啦。\n</string>
+    <string name="intro_main">感谢下载使用豆瓣电台!\n本程序不是官方豆瓣电台客户端，若想使用官方版，请在Android Market搜索“豆瓣FM”。</string>
+    <string name="intro_main0">本程序和官方客户端的区别在于：\n1. 拥有下载/暂停音乐功能\n2. 更丰富的快捷键操作\n3. 可自定义快捷键映射\n4. 正确的频道列表\n5. 易用的桌面小部件</string>
+    <string name="intro_main1"></string>
     <string name="intro_main2">下面是小部件各个按钮的介绍：
     </string>
     <string name="button_login_text">登录豆瓣</string>
@@ -41,7 +41,8 @@
     <string name="radio_media_button">激活耳机按钮短按</string>
     <string name="radio_media_button_long">激活耳机按钮长按</string>
     <string name="radio_media_button_long_1">长按判定时间</string>
-    <string name="radio_camera_button">激活相机键</string>
+    <string name="radio_camera_button">激活相机键长按</string>
+    <string name="radio_camera_button_1">(屏幕关闭时相机键无效)</string>
     <string name="radio_volume_button">使用上下音量键切换频道</string>
     <string name="radio_shutdown_on_idle_1">暂停超时后关闭进程</string>
     <string name="radio_shutdown_on_idle_2">分钟</string>
@@ -65,20 +66,21 @@
 	    <item>切换频道</item>
 	    <item>下载曲目</item>
 	    <item>暂停/继续</item>
-	    <item>什么都不做</item>
+	    <!-- <item>什么都不做</item> -->
     </string-array>
     <string name="text_error_network">由于网络原因登录失败</string>
     <string name="changelog">
     v0.7 2011-07-08\n
     1.新增主程序界面（点击豆瓣电台程序图标进入）\n
     2.恢复暂停按钮（可设置暂停超时后关闭进程）\n
-    3.新增自定义多种快捷操作\n
-    4.新增相机按钮绑定到快捷操作\n
-    5.修复按钮不响应等问题\n
-    6.用户界面更改，重新设计桌面小部件\n
-    7.新增点击豆瓣电台通知图标进入主界面\n
-    8.改善下载实现，保证下载正确进行\n
-    9.更新频道列表\n    
+    3.新增自定义快捷键(请在设置菜单设定)\n
+    4.新增耳机按钮长按快捷键\n
+    5.新增相机按钮快捷键(屏幕关闭时不可用)\n
+    6.修复按钮不响应等问题\n
+    7.用户界面更改，重新设计桌面小部件\n
+    8.新增点击豆瓣电台通知图标进入主界面\n
+    9.改善下载实现，保证下载正确进行\n
+    10.更新频道列表\n    
     \n
     v0.6 2011-06-21\n
     1.更新到最新频道列表\n

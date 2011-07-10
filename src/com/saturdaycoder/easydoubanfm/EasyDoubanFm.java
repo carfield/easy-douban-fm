@@ -38,6 +38,7 @@ public class EasyDoubanFm extends Activity {
 	TextView textButtonRateUnrate;
 	ImageButton buttonMenu;
 	ProgressBar progressBar;
+	ProgressBar progressPower;
 	TextView textPosition;
 	
 	int curPos;
@@ -82,9 +83,9 @@ public class EasyDoubanFm extends Activity {
 		_this.buttonChannel.setText(content.channel);
 		// picture
 		if (content.picture == null) {
-			_this.progressBar.setVisibility(ProgressBar.GONE);
-			_this.imageCover.setVisibility(ImageView.VISIBLE);
-			_this.imageCover.setImageResource(R.drawable.default_album);
+			_this.progressBar.setVisibility(ProgressBar.VISIBLE);
+			_this.imageCover.setVisibility(ImageView.GONE);
+			//_this.imageCover.setImageResource(R.drawable.default_album);
 		}
 		else {
 			_this.imageCover.setVisibility(ImageView.VISIBLE);
@@ -108,22 +109,18 @@ public class EasyDoubanFm extends Activity {
 		// on/off
 		switch(content.onState) {
 		case EasyDoubanFmWidget.STATE_OFF: {
-			//_this.imageCover.setVisibility(ImageView.VISIBLE);
-			//_this.progressBar.setVisibility(ProgressBar.GONE);
 			_this.buttonPlayPause.setImageResource(R.drawable.btn_play);
 			_this.textButtonPlayPause.setText(_this.getResources().getString(R.string.button_name_play));
 			_this.mHandler.removeCallbacks(_this.mPositionTask);
+			_this.progressBar.setVisibility(ProgressBar.GONE);
+			_this.imageCover.setVisibility(ImageView.VISIBLE);
+			_this.imageCover.setImageResource(R.drawable.default_album);
 			break;
 		}
 		case EasyDoubanFmWidget.STATE_ON: {
-			//_this.imageCover.setVisibility(ImageView.VISIBLE);
-			//_this.progressBar.setVisibility(ProgressBar.GONE);
 			break;
 		}
 		case EasyDoubanFmWidget.STATE_PREPARE: {
-			//_this.imageCover.setVisibility(ImageView.GONE);
-			//_this.progressBar.setVisibility(ProgressBar.VISIBLE);
-			//_this.mHandler.removeCallbacks(_this.mPositionTask);
 			break;
 		}
 		default:
@@ -151,6 +148,7 @@ public class EasyDoubanFm extends Activity {
 		buttonMenu = (ImageButton)findViewById(R.id.buttonMenu);
 		progressBar = (ProgressBar)findViewById(R.id.progressBar);
 		textPosition = (TextView)findViewById(R.id.textMusicPosition);
+		//progressPower = (ProgressBar)findViewById(R.id.progressPower);
 		
 		positionTimer = new Timer();
 		buttonSkip.setOnClickListener(new Button.OnClickListener() {
@@ -229,6 +227,14 @@ public class EasyDoubanFm extends Activity {
  	
     	_this = this;
     	
+    	_this.progressBar.setVisibility(ProgressBar.VISIBLE);
+		_this.imageCover.setVisibility(ImageView.GONE);
+    	try {
+    		Thread.sleep(100,0);
+    	} catch (Exception e) {
+    		
+    	}
+		
     	Intent i = new Intent(DoubanFmService.ACTION_ACTIVITY_UPDATE);
     	i.setComponent(new ComponentName(this, DoubanFmService.class));
     	startService(i);

@@ -10,6 +10,7 @@ public class Preference {
 	private static final int VALUE_DEFAULT_SHAKE_THRESHOLD = 5000;
 	private static final int VALUE_DEFAULT_SOCKET_TIMEOUT = 5000;
 	private static final int VALUE_DEFAULT_CONNECTION_TIMEOUT = 3000;
+	private static final int VALUE_DEFAULT_MEDIA_BUTTON_LONG_PRESS_THRESHOLD = 1500;
 	private static final int VALUE_DEFAULT_SELECTED_CHANNEL = 0;
 	private static final String VALUE_DEFAULT_DOWNLOAD_DIR = "/easydoubanfm";
 
@@ -19,7 +20,9 @@ public class Preference {
 	private static final String KEY_SHUTDOWN_ON_IDLE_ENABLE = "shutdown_on_idle_enable";
 	private static final String KEY_CAMERA_BUTTON_ENABLE = "camera_button_enable";
 	private static final String KEY_MEDIA_BUTTON_ENABLE = "media_button_enable";
+	private static final String KEY_MEDIA_BUTTON_LONG_ENABLE = "media_button_long_enable";
 	private static final String KEY_SHAKE_THRESHOLD = "shake_threshold";
+	private static final String KEY_MEDIA_BUTTON_LONG_PRESS_THRESHOLD = "media_button_long_press_threshold";
 	private static final String KEY_SHAKE_ENABLE = "shake_enable";
 	private static final String KEY_LOGIN_ENABLE = "login";
 	private static final String KEY_ACCOUNT_PASSWD = "passwd";
@@ -125,6 +128,18 @@ public class Preference {
 		return pref.getInt(KEY_SHAKE_THRESHOLD, VALUE_DEFAULT_SHAKE_THRESHOLD);
 	}
 	
+	public static void setMediaButtonLongPressThreshold(Context context, int value) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putInt(KEY_MEDIA_BUTTON_LONG_PRESS_THRESHOLD, value);
+		ed.commit();
+	}
+	
+	public static int getMediaButtonLongPressThreshold(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getInt(KEY_MEDIA_BUTTON_LONG_PRESS_THRESHOLD, VALUE_DEFAULT_MEDIA_BUTTON_LONG_PRESS_THRESHOLD);
+	}
+	
 	public static void setMediaButtonEnable(Context context, boolean enable) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
@@ -135,6 +150,18 @@ public class Preference {
 	public static boolean getMediaButtonEnable(Context context) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		return pref.getBoolean(KEY_MEDIA_BUTTON_ENABLE, true);
+	}
+	
+	public static void setMediaButtonLongEnable(Context context, boolean enable) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putBoolean(KEY_MEDIA_BUTTON_LONG_ENABLE, enable);
+		ed.commit();
+	}
+	
+	public static boolean getMediaButtonLongEnable(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getBoolean(KEY_MEDIA_BUTTON_LONG_ENABLE, true);
 	}
 	
 	public static void setCameraButtonEnable(Context context, boolean enable) {

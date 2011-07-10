@@ -20,6 +20,10 @@ public class PreferenceActivity extends Activity {
 	
 	CheckBox boxMediaButton;
 	Spinner spinnerMediaButton;
+	
+	CheckBox boxLongMediaButton;
+	Spinner spinnerLongMediaButton;
+	EditText editMediaButtonLongPressThreshold;
 
 	CheckBox boxCameraButton;
 	Spinner spinnerCameraButton;
@@ -38,24 +42,43 @@ public class PreferenceActivity extends Activity {
 		boxShake = (CheckBox)findViewById(R.id.cbShakeEnable);
 		editShakeThreshold = (EditText)findViewById(R.id.editShakeThreshold);
 		boxMediaButton = (CheckBox)findViewById(R.id.cbMediaButtonEnable);
+		boxLongMediaButton = (CheckBox)findViewById(R.id.cbMediaButtonLongEnable);
 		boxCameraButton = (CheckBox)findViewById(R.id.cbCameraButtonEnable);
 		boxShutdownOnIdleButton = (CheckBox)findViewById(R.id.cbShutdownOnIdleEnable);
 		spinnerShake = (Spinner)findViewById(R.id.spinnerActionShake);
 		spinnerMediaButton = (Spinner)findViewById(R.id.spinnerActionMediaButton);
+		spinnerLongMediaButton = (Spinner)findViewById(R.id.spinnerActionMediaButtonLong);
 		spinnerCameraButton = (Spinner)findViewById(R.id.spinnerActionCameraButton);
 		editShutdownOnIdle = (EditText)findViewById(R.id.editShutdownIdleTime);
+		editMediaButtonLongPressThreshold = (EditText)findViewById(R.id.editMediaButtonLongPressThreshold);
 		//boxAutoClose = (CheckBox)findViewById(R.id.cbAutoCloseEnable);
 		//editAutoCloseMinutes = (EditText)findViewById(R.id.editAutoCloseTime);
 		
 		// get stored value
-		boxShake.setChecked(Preference.getShakeEnable(this));
+		boolean shakeEnabled = Preference.getShakeEnable(this); 
+		boxShake.setChecked(shakeEnabled);
+		editShakeThreshold.setEnabled(shakeEnabled);
+		spinnerShake.setEnabled(shakeEnabled);
 		editShakeThreshold.setText(String.valueOf(Preference.getShakeThreshold(this)));
-		boxMediaButton.setChecked(Preference.getMediaButtonEnable(this));
-		boxCameraButton.setChecked(Preference.getCameraButtonEnable(this));
-		boxShutdownOnIdleButton.setChecked(Preference.getShutdownOnIdleEnable(this));
+		
+		boolean mediaButtonEnabled = Preference.getMediaButtonEnable(this);
+		boxMediaButton.setChecked(mediaButtonEnabled);
+		spinnerMediaButton.setEnabled(mediaButtonEnabled);
+		
+		boolean longMediaButtonEnabled = Preference.getMediaButtonLongEnable(this);
+		boxLongMediaButton.setChecked(longMediaButtonEnabled);
+		editMediaButtonLongPressThreshold.setEnabled(longMediaButtonEnabled);
+		spinnerLongMediaButton.setEnabled(longMediaButtonEnabled);
+		editMediaButtonLongPressThreshold.setText(String.valueOf(Preference.getMediaButtonLongPressThreshold(this)));
+		
+		boolean cameraButtonEnabled = Preference.getCameraButtonEnable(this);
+		boxCameraButton.setChecked(cameraButtonEnabled);
+		spinnerCameraButton.setEnabled(cameraButtonEnabled);
+		
+		boolean shutDownOnIdleEnabled = Preference.getShutdownOnIdleEnable(this);
+		boxShutdownOnIdleButton.setChecked(shutDownOnIdleEnabled);
+		editShutdownOnIdle.setEnabled(shutDownOnIdleEnabled);
 		editShutdownOnIdle.setText(String.valueOf(Preference.getMaxIdleTime(this)));
-		//boxAutoClose.setChecked(Preference.getAutoCloseEnable(this));
-		//editAutoCloseMinutes.setText(String.valueOf(Preference.getAutoCloseTime(this)));
 		
 		
 		boxShake.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
@@ -63,7 +86,7 @@ public class PreferenceActivity extends Activity {
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
 				editShakeThreshold.setEnabled(checked);
 				Preference.setShakeEnable(PreferenceActivity.this, checked);
-				
+				spinnerShake.setEnabled(checked);
 			}
 		});
 		
@@ -85,6 +108,30 @@ public class PreferenceActivity extends Activity {
 					int i = Integer.parseInt(s);
 					if (i > 0) {
 						Preference.setShakeThreshold(PreferenceActivity.this, i);
+					}
+				} catch (Exception e) {
+					
+				}
+			}
+		});
+		
+		editMediaButtonLongPressThreshold.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence str, int i, int j, int k) {
+				
+			}
+			@Override
+			public void onTextChanged(CharSequence str, int i, int j, int k) {
+				
+			}
+			@Override
+			public void afterTextChanged(Editable editable) {
+				String s = editable.toString();
+				Debugger.info("MEDIA BUTTON LONG PRESS THRESHOLD set to " + s);
+				try {
+					int i = Integer.parseInt(s);
+					if (i > 0) {
+						Preference.setMediaButtonLongPressThreshold(PreferenceActivity.this, i);
 					}
 				} catch (Exception e) {
 					
@@ -120,6 +167,16 @@ public class PreferenceActivity extends Activity {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
 				Preference.setMediaButtonEnable(PreferenceActivity.this, checked);
+				spinnerMediaButton.setEnabled(checked);
+			}
+		});
+		
+		boxLongMediaButton.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
+				Preference.setMediaButtonLongEnable(PreferenceActivity.this, checked);
+				spinnerLongMediaButton.setEnabled(checked);
+				editMediaButtonLongPressThreshold.setEnabled(checked);
 			}
 		});
 		
@@ -127,6 +184,7 @@ public class PreferenceActivity extends Activity {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
 				Preference.setCameraButtonEnable(PreferenceActivity.this, checked);
+				spinnerCameraButton.setEnabled(checked);
 			}
 		});
 		
@@ -134,6 +192,7 @@ public class PreferenceActivity extends Activity {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
 				Preference.setShutdownOnIdleEnable(PreferenceActivity.this, checked);
+				editShutdownOnIdle.setEnabled(checked);
 			}
 		});
 		
@@ -154,12 +213,15 @@ public class PreferenceActivity extends Activity {
         //为下拉列表设置适配器
         spinnerShake.setAdapter(adapter);
         spinnerMediaButton.setAdapter(adapter);
+        spinnerLongMediaButton.setAdapter(adapter);
         spinnerCameraButton.setAdapter(adapter);
   
         spinnerShake.setSelection(Preference.getQuickAction(this, 
         		DoubanFmService.QUICKCONTROL_SHAKE), false);
         spinnerMediaButton.setSelection(Preference.getQuickAction(this, 
         		DoubanFmService.QUICKCONTROL_MEDIA_BUTTON), false);
+        spinnerLongMediaButton.setSelection(Preference.getQuickAction(this, 
+        		DoubanFmService.QUICKCONTROL_MEDIA_BUTTON_LONG), false);
         spinnerCameraButton.setSelection(Preference.getQuickAction(this, 
         		DoubanFmService.QUICKCONTROL_CAMERA_BUTTON), false);
         
@@ -192,6 +254,22 @@ public class PreferenceActivity extends Activity {
             }
         };
         spinnerMediaButton.setOnItemSelectedListener(oislMediaButton);
+        
+        OnItemSelectedListener oislLongMediaButton =  new OnItemSelectedListener() {
+      	  
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int position, long id) {
+                  Preference.setQuickAction(PreferenceActivity.this, 
+                		  DoubanFmService.QUICKCONTROL_MEDIA_BUTTON_LONG, position);
+            }
+  
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        };
+        spinnerLongMediaButton.setOnItemSelectedListener(oislLongMediaButton);
+        
         
         OnItemSelectedListener oislCameraButton =  new OnItemSelectedListener() {
         	  

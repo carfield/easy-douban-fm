@@ -226,9 +226,13 @@
 	    		android:layout_weight="1" 
 	    		android:layout_height="fill_parent" android:layout_gravity="center|bottom">
 	    		</Button>
-
+	    <!-- <ProgressBar 
+	    	style="?android:attr/progressBarStyleLarge" 
+	    	android:layout_height="fill_parent" 
+	    	android:id="@+id/progressPower"
+	    	android:layout_weight="1" 
+	    	android:layout_width="fill_parent" android:layout_gravity="center"></ProgressBar> -->
 	    <ImageButton 
-
 	    		android:scaleType="fitCenter"
 	    		android:src="@drawable/btn_play"
 	    		android:background="@drawable/transparent" 

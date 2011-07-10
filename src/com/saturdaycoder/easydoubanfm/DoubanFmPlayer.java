@@ -28,7 +28,7 @@ import android.widget.Toast;
 public class DoubanFmPlayer {
 	private static final int MAX_HISTORY_COUNT = 20;
 	private static final int MAX_PENDING_COUNT = 20;
-	private static final int MAX_PREBUFFER_PLAYER_COUNT = 2;
+	//private static final int MAX_PREBUFFER_PLAYER_COUNT = 2;
 	
 	private static final int NO_REASON = -1;
 	
@@ -52,27 +52,27 @@ public class DoubanFmPlayer {
 	
 	//private PlayMusicThread playThread = null;	
 	
-	private int[] appWidgetIds = null;
-	private final Object appWidgetIdsLock = new Object();
+	//private int[] appWidgetIds = null;
+	//private final Object appWidgetIdsLock = new Object();
 	
 	//private Handler mainHandler = null;
 	private LoginSession loginSession = null;
 	private final Object loginLock = new Object();
 	
-	private AudioManager audioManager = null;
+	//private AudioManager audioManager = null;
 
 	private MediaPlayer mPlayer;
 	
-	public void setAppWidgetIds(int[] ids) {
+	/*public void setAppWidgetIds(int[] ids) {
 		synchronized(appWidgetIdsLock) {
 			appWidgetIds = ids;
 		}
-	}
+	}*/
 	
 	public DoubanFmPlayer(Context context) {
 		this.isOpen = false;
 		this.context = context;
-		this.audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+		//this.audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		this.picTask = new GetPictureTask();
 		
 		synchronized(DoubanFmPlayer.class) {

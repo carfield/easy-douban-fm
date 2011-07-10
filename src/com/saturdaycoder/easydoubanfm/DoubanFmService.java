@@ -963,7 +963,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					mediaButtonDownStartTime = keytime;
 				}
 				else if (mediaButtonDownStartTime != -1 &&
-						keytime - mediaButtonDownStartTime > 2000) {
+						keytime - mediaButtonDownStartTime > Preference.getMediaButtonLongPressThreshold(this)) {
 					mediaButtonDownStartTime = -1;
 					Debugger.info("MEDIA BUTTON LONG PRESS");
 					ret = doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
@@ -977,7 +977,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 					if (mediaButtonDownStartTime == -1 || keytime < mediaButtonDownStartTime) {
 						Debugger.info("MEDIA BUTTON PRESSED but wrong start time");						
 					}
-					else if (keytime - mediaButtonDownStartTime > 2000) {
+					else if (keytime - mediaButtonDownStartTime > Preference.getMediaButtonLongPressThreshold(this)) {
 						Debugger.info("MEDIA BUTTON LONG PRESS");
 						ret = doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
 					}
