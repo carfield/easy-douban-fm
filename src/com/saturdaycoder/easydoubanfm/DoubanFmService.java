@@ -441,9 +441,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
         
-        //if (wakeLock != null) {
-		//	wakeLock.release();
-		//}
+        pausedByPhoneCall = false;
         
         try {
 			if (shakeDetector != null ) {
@@ -565,6 +563,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		//if (dPlayer.isOpen()) {
 		stopForeground(true);
 		dPlayer.close();
+        pausedByPhoneCall = false;
 		
 		//if (wakeLock != null) {
 		//	wakeLock.release();
@@ -694,6 +693,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private Runnable mNextMusicTask = new Runnable() {
 		   public void run() {
 				dPlayer.skipMusic();
+		        pausedByPhoneCall = false;
 		   }
 		};		
 	private void nextMusic() {
@@ -710,6 +710,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private Runnable mNextChannelTask = new Runnable() {
 		   public void run() {
 			   dPlayer.forwardChannel();
+		        pausedByPhoneCall = false;
 		   }
 		};	
 	private void nextChannel() {
@@ -858,9 +859,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	
 	//private Map<Integer, Notification> notifications = new HashMap<Integer, Notification>(); 
-	
+	private boolean pausedByPhoneCall = false;
+	//private final Object pausedByPhoneCallLock = new Object();
 	private class PhoneCallListener extends BroadcastReceiver {
-		boolean pausedByCall = false;
+		//boolean pausedByCall = false;
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -886,27 +888,31 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				switch(state) {
 				case TelephonyManager.CALL_STATE_IDLE: {
 					Debugger.info("Call state idle");
-					//if (pausedByCall) {
-						pausedByCall = false;
-						resumeMusic();
-						
-					//}
-					
+					synchronized(DoubanFmService.class) {
+						if (pausedByPhoneCall) {
+							resumeMusic();
+							pausedByPhoneCall = false;
+						}
+					}
 					break;
 				}
 				case TelephonyManager.CALL_STATE_OFFHOOK: {
 					Debugger.info("Offhook call!");
-					if (dPlayer.isPlaying()) {
-						pausedByCall = true;
-						pauseMusic();
+					synchronized(DoubanFmService.class) {
+						if (dPlayer.isPlaying()) {
+							pausedByPhoneCall = true;
+							pauseMusic();
+						}
 					}
 					break;
 				}
 				case TelephonyManager.CALL_STATE_RINGING: {
 					Debugger.info("Incoming call!");
-					if (dPlayer.isPlaying()) {
-						pausedByCall = true;
-						pauseMusic();
+					synchronized(DoubanFmService.class) {
+						if (dPlayer.isPlaying()) {
+							pausedByPhoneCall = true;
+							pauseMusic();
+						}						
 					}
 					break;
 				}
@@ -1031,6 +1037,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		return doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_CAMERA_BUTTON));
 	}
 	
+
 	
 
 	private class PhoneControlListener extends BroadcastReceiver 
