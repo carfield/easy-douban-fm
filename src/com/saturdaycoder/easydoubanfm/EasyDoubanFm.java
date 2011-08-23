@@ -20,8 +20,10 @@ import android.graphics.BitmapFactory;
 import android.widget.*;
 
 public class EasyDoubanFm extends Activity {
-	private static final int MENU_CLOSE_ID = Menu.FIRST;  	 
-	private static final int MENU_ABOUT_ID = Menu.FIRST + 1;  
+	private static final int MENU_LOGIN_ID = Menu.FIRST;
+	private static final int MENU_CLOSE_ID = Menu.FIRST + 1;
+	private static final int MENU_FEEDBACK_ID = Menu.FIRST + 2;
+	private static final int MENU_ABOUT_ID = Menu.FIRST + 3;  
 	//private WidgetContent widgetContent;
 
 	private static EasyDoubanFm _this = null;
@@ -258,6 +260,8 @@ public class EasyDoubanFm extends Activity {
     @Override
     protected void onResume() {
     	super.onResume();
+
+
     }
     
     @Override
@@ -297,26 +301,89 @@ public class EasyDoubanFm extends Activity {
 					+ " / " + DateFormat.format("mm:ss", duration).toString());	
 		}
 	}
-	
+	@Override
+	public boolean onPrepareOptionsMenu (Menu menu) {
+		Debugger.info("EasyDoubanFm.onPrepareOptionsMenu");
+		boolean loggedIn = Preference.getLogin(this);
+		if (menu.size() == 4) {
+			menu.getItem(0).setTitle(loggedIn? "账户登出": "账户登入");
+		}
+		return true;
+	}
     @Override
-    public boolean onCreateOptionsMenu (Menu aMenu) {  
-        
-        super.onCreateOptionsMenu(aMenu);  
-        aMenu.add(0, MENU_CLOSE_ID, 0, "退出");  
+    public boolean onCreateOptionsMenu (Menu aMenu) {   
+    	Debugger.info("EasyDoubanFm.onCreateOptionsMenu");
+        super.onCreateOptionsMenu(aMenu);
+    	boolean loggedIn = Preference.getLogin(this);
+        aMenu.add(0, MENU_LOGIN_ID, 0, loggedIn? "账户登出": "账户登入");
+        aMenu.add(0, MENU_CLOSE_ID, 0, "退出 程序");  
+        aMenu.add(0, MENU_FEEDBACK_ID, 0, "意见反馈");   
         aMenu.add(0, MENU_ABOUT_ID, 0, "关于");  
         return true;  
           
     }  
+	/*@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+    	Debugger.debug( "onActivityResult: " + requestCode + ", " + resultCode );
+    	switch (requestCode) {
+    	case 0: {
+    		if (resultCode != RESULT_OK) {
+    			return;
+    		}
+    		if (FmChannel.isChannelIdValid(pendingSelChanId)) {
+    			Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SELECT_CHANNEL);
+                i.putExtra(DoubanFmService.EXTRA_CHANNEL, pendingSelChanId);
+                startService(i);
+                
+                ChannelSelectorActivity.this.finish();
+    		}
+    		break;
+    	}
+    	default:
+    		break;
+    	}
+    }*/
     @Override
     public boolean onOptionsItemSelected (MenuItem aMenuItem) {  
         
         switch (aMenuItem.getItemId()) {  
+	        case MENU_LOGIN_ID: {
+	        	if (!Preference.getLogin(this)) {
+		        	Intent intent = new Intent();
+	    			intent.setClass(EasyDoubanFm.this, LoginActivity.class);
+	    			startActivity(intent);
+	        	}
+	        	else {
+	        		Preference.setLogin(EasyDoubanFm.this, false);
+					Preference.setAccountPasswd(EasyDoubanFm.this, null);
+					
+					popNotify(getResources().getString(R.string.notify_logout_succ));
+	        	}
+	        	break;
+	        }
             case MENU_CLOSE_ID: { 
             	Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);
 				intent.setComponent(new ComponentName(this, DoubanFmService.class));
 				startService(intent);
 				this.finish();
                 break;  
+            }
+            case MENU_FEEDBACK_ID: {
+            	//建立Intent 对象
+                final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+                //设置文本格式
+                emailIntent.setType("plain/text");
+                //设置对方邮件地址
+                emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{"saturdaycoder@gmail.com"});
+                //设置标题内容
+                emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "豆瓣电台意见反馈");
+                //设置邮件文本内容
+                //emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
+                //启动一个新的ACTIVITY,"Sending mail..."是在启动这个ACTIVITY的等待时间时所显示的文字
+                startActivity(Intent.createChooser(emailIntent, "Sending mail..."));
+                
+                break;
             }
             case MENU_ABOUT_ID: {  
             	Intent intent = new Intent(this, IntroductionActivity.class);

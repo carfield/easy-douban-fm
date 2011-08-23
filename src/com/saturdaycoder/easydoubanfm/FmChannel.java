@@ -86,12 +86,15 @@ public class FmChannel {
 		new FmChannel(5, "90", "90", "九零", 18),
 
 		new FmChannel(26, "Ar", "Artist", "豆瓣音乐人", 19),
+		new FmChannel(48, "Who", "Who's Next?!", "Who's Next?!", 20),
 		
+		new FmChannel(20, "FEM", "Female", "女声", 21),
+		new FmChannel(28, "Ani", "Anime", "动漫", 22),
+		new FmChannel(32, "Caf", "Cafe", "咖啡", 23),
 		
-		new FmChannel(20, "FEM", "Female", "女声", 20),
-		new FmChannel(28, "Ani", "Anime", "动漫", 21),
-		new FmChannel(32, "Caf", "Cafe", "咖啡", 22),
-		new FmChannel(41, "Red", "Red", "红歌", 23),
+		new FmChannel(44, "SE", "SonyEricsson", "索尼爱立信", 24),
+		new FmChannel(45, "BB", "Burberry", "BurberryMusic", 25),
+		new FmChannel(47, "NP", "NewPower", "新能量音乐", 26),
 
 	};
 }
