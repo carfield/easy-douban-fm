@@ -69,15 +69,16 @@ public class DoubanFmPlayer {
 		}
 	}*/
 	
-	public DoubanFmPlayer(Context context) {
+	public DoubanFmPlayer(Context context, Database db) {
 		this.isOpen = false;
 		this.context = context;
+		this.db = db;
 		//this.audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		this.picTask = new GetPictureTask();
 		
 		synchronized(DoubanFmPlayer.class) {
 			// get stored channel table
-			db = new Database(context);		
+			//db = new Database(context);		
 			// the API isn't updated by douban.com. So write it by 
 			// myself instead of fetching from douban.com
 			db.clearChannels();

@@ -168,6 +168,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
 
 	HttpParams httpParameters;	
+	Database db;
 	
 	// Event Listeners
 	private PhoneCallListener phoneCallListener;
@@ -238,8 +239,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		mDelayedPausedStopHandler.removeCallbacksAndMessages(null);	
 		//lastStopReason = DoubanFmApi.TYPE_NEW;
 
-		dPlayer = new DoubanFmPlayer(this);
-		dDownloader = new DoubanFmDownloader(this);
+		db = new Database(this);
+		dPlayer = new DoubanFmPlayer(this, db);
+		dDownloader = new DoubanFmDownloader(this, db);
 		
 		//PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		//wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "EasyDoubanFm");
@@ -461,6 +463,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         	}
         } catch (Exception e) {
         	
+        }
+        
+        try {
+        	db.close();
+        } catch (Exception e) {
+        	e.printStackTrace();
         }
         //mMediaplayerHandler.removeCallbacksAndMessages(null);
 		super.onDestroy();

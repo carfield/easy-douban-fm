@@ -44,9 +44,9 @@ public class DoubanFmDownloader {
 	private static final int NO_REASON = -1;
 	private static final int INVALID_DOWNLOAD_ID = -1;
 	
-	public DoubanFmDownloader(Context context) {
+	public DoubanFmDownloader(Context context, Database db) {
 		this.context = context;
-		db = new Database(context);
+		this.db = db;
 		notManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 	
@@ -202,8 +202,13 @@ public class DoubanFmDownloader {
 	
 				notification.contentIntent = pi;      
 	
+				
 				notificationMap.put(id, notification);
-				notManager.notify(id, notification);
+				try {
+					notManager.notify(id, notification);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;
 			}
 			case DoubanFmService.STATE_CANCELLED: {
@@ -238,7 +243,11 @@ public class DoubanFmDownloader {
 		        		filename, pi);
 				
 				notificationMap.put(id, notification);
-		        notManager.notify(id, notification);
+				try {
+					notManager.notify(id, notification);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 		        
 		        Debugger.debug(notification.toString());
 		        
@@ -273,12 +282,20 @@ public class DoubanFmDownloader {
 		        
 		        
 				notificationMap.put(id, notification);
-		        notManager.notify(id, notification);
+				try {
+					notManager.notify(id, notification);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 		        
 		        break;			
 			}
 			case DoubanFmService.STATE_ERROR: {
-				notManager.cancel(id);
+				try {
+					notManager.cancel(id);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				notificationMap.remove(id);
 				
 				Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
@@ -304,8 +321,11 @@ public class DoubanFmDownloader {
 		        		filename, pi);
 		        
 				notificationMap.put(id, notification);
-		        notManager.notify(id, notification);
-		        
+				try {
+					notManager.notify(id, notification);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 		        break;				
 			}
 			default:
@@ -339,8 +359,11 @@ public class DoubanFmDownloader {
 			n.contentView.setTextViewText(R.id.textDownloadSize, detail);
 			//n.contentIntent = pi;
 
-			notManager.notify(id, n);
-		
+			try {
+				notManager.notify(id, n);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
