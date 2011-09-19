@@ -27,7 +27,7 @@ import android.widget.Toast;
 
 public class DoubanFmPlayer {
 	private static final int MAX_HISTORY_COUNT = 20;
-	private static final int MAX_PENDING_COUNT = 20;
+	private static final int MAX_PENDING_COUNT = 5;
 	//private static final int MAX_PREBUFFER_PLAYER_COUNT = 2;
 	
 	private static final int NO_REASON = -1;
