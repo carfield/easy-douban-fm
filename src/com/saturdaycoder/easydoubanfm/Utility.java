@@ -77,6 +77,6 @@ public class Utility {
     }
     
 	public static int getClientVersion() {
-		return 584;
+		return 586;
 	}
 }

@@ -73,6 +73,10 @@
     </string-array>
     <string name="text_error_network">由于网络原因登录失败</string>
     <string name="changelog">
+    v0.7.2.1 2011-09-26\n
+    1.尝试修复2.3.3下载崩溃的问题\n
+    2.降低音乐重复几率\n
+    \n
     v0.7.2 2011-08-24\n
     1.修复豆瓣从8月23日起无法使用的故障\n
     2.更新到官方最新频道列表\n

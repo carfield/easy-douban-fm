@@ -92,9 +92,9 @@ public class FmChannel {
 		new FmChannel(28, "Ani", "Anime", "动漫", 22),
 		new FmChannel(32, "Caf", "Cafe", "咖啡", 23),
 		
-		new FmChannel(44, "SE", "SonyEricsson", "索尼爱立信", 24),
-		new FmChannel(45, "BB", "Burberry", "BurberryMusic", 25),
-		new FmChannel(47, "NP", "NewPower", "新能量音乐", 26),
+		new FmChannel(50, "CN", "China original", "中国原创盛典", 24),
+		new FmChannel(51, "K5", "K5 classic", "K5经典乐赏", 25),
+		new FmChannel(52, "Le", "LeHun", "乐混翻唱", 26),
 
 	};
 }
