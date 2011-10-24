@@ -100,8 +100,9 @@ public class SchedulerTask {
 		if (timer != null) {
 			timer.cancel();
 			timer = null;
-			notifyOnDisabled();
+			
 		}
+		notifyOnDisabled();
 	}
 	
 	public void onTicked(long remainingMillis) {

@@ -6,6 +6,7 @@ public class Utility {
 	}
 	
 	public static String getSdkVersionName() {
+		//return "Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.0.1";
 		switch (android.os.Build.VERSION.SDK_INT) {
 		case 1:
 			return "Android-1.0";
@@ -24,13 +25,16 @@ public class Utility {
 		case 8:
 			return "Android-2.2";
 		case 9:
-			return "Android-2.3";
 		case 10:
-			return "Android-2.3.3";
+			return "Android-2.3";
 		case 11:
 			return "Android-3.0";
 		case 12:
 			return "Android-3.1";
+		case 13:
+			return "Android-3.2";
+		case 14:
+			return "Android-4.0";
 		default:
 			return "Android";
 		}
@@ -77,6 +81,6 @@ public class Utility {
     }
     
 	public static int getClientVersion() {
-		return 586;
+		return 588;
 	}
 }

@@ -3,6 +3,8 @@ import org.json.*;
 import org.apache.http.params.*;
 //import java.net.SocketException;
 import java.util.Date;
+import java.util.zip.GZIPInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.http.Header;
@@ -152,9 +154,11 @@ public class DoubanFmApi {
 					url += "%7C";
 			}
 		}
+		
 		HttpGet httpGet = new HttpGet(url);
 		httpGet.setHeader("Connection", "Keep-Alive");
 		httpGet.setHeader("User-Agent", Utility.getSdkVersionName());
+		httpGet.setHeader("Accept-Encoding", "gzip");
 		if (user != null) {
 			httpGet.setHeader("Cookie", "bid=\"" + cookie.bid + "\"");
 			//httpGet.setHeader("Cookie2", "$Version=1");
@@ -185,22 +189,38 @@ public class DoubanFmApi {
 				Debugger.verbose(h.toString());
 			}
 			
-
+		
 			if (httpResponse.getStatusLine().getStatusCode() == 200) {
-				
-				InputStream is = httpResponse.getEntity().getContent();
-				long len = httpResponse.getEntity().getContentLength();
-				int length = (int)(len);
-				byte b[] = new byte[length];
-				int l = 0;
-				while (l < length) {
-					int tmpl = is.read(b, l, length);
-					if (tmpl == -1)
+				boolean isGzip = false;
+				Header[] hs = httpResponse.getHeaders("Content-Encoding");
+				for (Header h: hs) {
+					if (h.getValue().equals("gzip")) {
+						isGzip = true;
 						break;
-					l += tmpl;
+					}
 				}
+				InputStream is = null;
+				Debugger.debug("Response is " + (isGzip? "": "not") + " GZIP format");
+				if (!isGzip) {
+					is = httpResponse.getEntity().getContent();
+				} else {
+					is = new GZIPInputStream(httpResponse.getEntity().getContent());
+				}
+				long len = httpResponse.getEntity().getContentLength();
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				byte[] buf = new byte[1024 * 5];
 				
-				String c = new String(b, 0, length, "UTF-8");
+				int total = 0;
+				int read = 0;
+				while ((read = is.read(buf)) != -1)
+				{
+					total += read;
+					baos.write(buf, 0, read);
+					
+				}
+				is.close();
+				String c = baos.toString();
+
 				Debugger.verbose(c);
 				
 				JSONObject json = new JSONObject(c);

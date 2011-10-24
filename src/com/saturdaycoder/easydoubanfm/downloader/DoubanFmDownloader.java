@@ -206,7 +206,7 @@ public class DoubanFmDownloader {
 				Debugger.debug("notification " + id + " displayed");
 				
 				notification.contentView = new android.widget.RemoteViews(context.getPackageName(),
-						R.layout.download_notification_1); 
+						R.layout.download_notification_rich); 
 				notification.contentView.setTextViewText(R.id.textDownloadFilename, filename);
 				notification.contentView.setTextViewText(R.id.textDownloadSize, 
 						context.getResources().getString(R.string.text_download_cancel));

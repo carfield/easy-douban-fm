@@ -104,7 +104,7 @@ public class SchedulerActivity extends Activity {
 					if (now.after(stoptime)) {
 						stoptime.setDate(now.getDate() + 1);						
 					}
-					Debugger.debug("schedule stop: " + stoptime.toString());
+					Debugger.debug("schedule stop: " + stoptime.toLocaleString());
 					schedManager.scheduleStopAt(stoptime);
 				}
 			}
@@ -148,7 +148,7 @@ public class SchedulerActivity extends Activity {
 					
 					if (now.after(stoptime)) {
 						stoptime.setDate(now.getDate() + 1);
-						Debugger.debug("schedule stop: " + stoptime.toString());
+						Debugger.debug("schedule stop: " + stoptime.toLocaleString());
 					}
 					
 					schedManager.scheduleStopAt(stoptime);
@@ -183,7 +183,7 @@ public class SchedulerActivity extends Activity {
 					if (now.after(starttime)) {
 						starttime.setDate(now.getDate() + 1);						
 					}
-					Debugger.debug("schedule start: " + starttime.toString());
+					Debugger.debug("schedule start: " + starttime.toLocaleString());
 					schedManager.scheduleStartAt(starttime);
 				}
 			}
@@ -227,7 +227,7 @@ public class SchedulerActivity extends Activity {
 					
 					if (now.after(starttime)) {
 						starttime.setDate(now.getDate() + 1);
-						Debugger.debug("schedule stop: " + starttime.toString());
+						Debugger.debug("schedule stop: " + starttime.toLocaleString());
 					}
 					
 					schedManager.scheduleStartAt(starttime);

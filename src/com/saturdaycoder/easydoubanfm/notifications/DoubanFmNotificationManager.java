@@ -8,6 +8,8 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.text.format.Time;
+import android.widget.Toast;
 
 import com.saturdaycoder.easydoubanfm.Debugger;
 import com.saturdaycoder.easydoubanfm.DoubanFmService;
@@ -51,6 +53,12 @@ public class DoubanFmNotificationManager
 		this.notManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 	
+    private void popNotify(String msg)
+    {
+        Toast.makeText(context, msg,
+                Toast.LENGTH_LONG).show();
+    }
+    
 	@Override
 	public void onPosition(long pos, long total) {
 		// TODO Auto-generated method stub
@@ -102,16 +110,19 @@ public class DoubanFmNotificationManager
 		String notText = "";
 		int notIconId = android.R.drawable.ic_dialog_alert;
 		int notId = 0;
+		String popText = "";
 		switch (type) {
 		case SchedulerTask.TASK_START:
 			notText = context.getResources().getString(R.string.notify_start_timer);
 			notIconId = android.R.drawable.ic_dialog_alert;
 			notId = START_NOTIFICATION_ID;
+			popText = "开启";
 			break;
 		case SchedulerTask.TASK_STOP:
 			notText = context.getResources().getString(R.string.notify_stop_timer);
 			notIconId = android.R.drawable.ic_dialog_alert;
 			notId = STOP_NOTIFICATION_ID;
+			popText = "关闭";
 			break;
 		default:
 			return;
@@ -123,10 +134,15 @@ public class DoubanFmNotificationManager
                 System.currentTimeMillis());
 		
 		notification.contentIntent = pi;
+		notification.flags |= Notification.FLAG_NO_CLEAR;
 		notification.setLatestEventInfo(context, notText, when.toLocaleString(), pi);	
 		
 		try {
 			notManager.notify(notId, notification);
+			long remaining = when.getTime() - System.currentTimeMillis();
+			long hours = remaining / (1000 * 60 * 60);
+			long mins = remaining / (1000 * 60) - hours * 60;
+			popNotify("将在" + hours + "小时" + mins + "分后自动" + popText);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
