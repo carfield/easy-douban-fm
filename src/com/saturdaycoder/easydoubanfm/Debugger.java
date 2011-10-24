@@ -5,11 +5,11 @@ import android.util.Log;
 public class Debugger {
   private static final String TAG="EasyDoubanFm";
   public static void verbose(String s) {
-    //Log.v(TAG, s);
+    Log.v(TAG, s);
   }
 
   public static void debug(String s) {
-    //Log.d(TAG, s);
+    Log.d(TAG, s);
   }
   public static void info(String s) {
     Log.i(TAG, s);

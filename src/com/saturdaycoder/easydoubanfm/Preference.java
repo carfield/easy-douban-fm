@@ -12,6 +12,7 @@ public class Preference {
 	private static final int VALUE_DEFAULT_CONNECTION_TIMEOUT = 3000;
 	private static final int VALUE_DEFAULT_MEDIA_BUTTON_LONG_PRESS_THRESHOLD = 2;
 	private static final int VALUE_DEFAULT_SELECTED_CHANNEL = 0;
+	private static final int VALUE_INVALID_SCHEDULED_TIME = 0;
 	private static final String VALUE_DEFAULT_DOWNLOAD_DIR = "/easydoubanfm";
 
 	private static final String KEY_AUTO_CLOSE_TIME = "auto_close_time";
@@ -32,6 +33,9 @@ public class Preference {
 	private static final String KEY_SELECTED_CHANNEL = "selected_channel";
 	private static final String PREF_SETTINGS_FILENAME = "settings";
 	private static final String KEY_AUTO_CLOSE_ENABLE = "auto_close_enable";
+	
+	private static final String KEY_SCHEDULED_STOP = "scheduled_stop_at";
+	private static final String KEY_SCHEDULED_START = "scheduled_start_at";
 
 	//private static SharedPreferences pref = null;
 	public static int getSelectedChannel(Context context) {
@@ -256,6 +260,32 @@ public class Preference {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
 		ed.putInt(KEY_AUTO_CLOSE_TIME, minutes);
+		ed.commit();
+	}
+	
+	public static long getScheduledStopTime(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getLong(KEY_SCHEDULED_STOP, VALUE_INVALID_SCHEDULED_TIME);
+		
+	}
+	
+	public static void setScheduledStopTime(Context context, long millis) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putLong(KEY_SCHEDULED_STOP, millis);
+		ed.commit();
+	}
+	
+	public static long getScheduledStartTime(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getLong(KEY_SCHEDULED_START, VALUE_INVALID_SCHEDULED_TIME);
+		
+	}
+	
+	public static void setScheduledStartTime(Context context, long millis) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putLong(KEY_SCHEDULED_START, millis);
 		ed.commit();
 	}
 }

@@ -48,6 +48,13 @@ import android.graphics.BitmapFactory;
 import android.os.Message;
 import org.apache.http.params.*;
 
+import com.saturdaycoder.easydoubanfm.apis.DoubanFmApi;
+import com.saturdaycoder.easydoubanfm.channels.FmChannel;
+import com.saturdaycoder.easydoubanfm.downloader.*;
+import com.saturdaycoder.easydoubanfm.notifications.DoubanFmNotificationManager;
+import com.saturdaycoder.easydoubanfm.player.*;
+import com.saturdaycoder.easydoubanfm.scheduling.SchedulerManager;
+
 import android.media.MediaScannerConnection.*;
 
 public class DoubanFmService extends Service implements IDoubanFmService {
@@ -71,6 +78,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final String ACTION_PLAYER_SELECT_CHANNEL = BROADCAST_PREFIX + ".action.PLAYER_SELECT_CHANNEL";
 	public static final String ACTION_PLAYER_LOGIN = BROADCAST_PREFIX + ".action.PLAYER_LOGIN";
 	public static final String ACTION_PLAYER_LOGOUT = BROADCAST_PREFIX + ".action.PLAYER_LOGOUT";
+	
+	// actions for scheduler
+	public static final String ACTION_SCHEDULER_COMMAND = BROADCAST_PREFIX + ".action.SCHEDULER_COMMAND";
+	
 	// actions for downloader
 	public static final String ACTION_DOWNLOADER_DOWNLOAD = BROADCAST_PREFIX + ".action.DOWNLOADER_DOWNLOAD";
 	public static final String ACTION_DOWNLOADER_CANCEL = BROADCAST_PREFIX + ".action.DOWNLOADER_CANCEL";
@@ -85,6 +96,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	public static final String EXTRA_LOGIN_USERNAME = "extra.LOGIN_USERNAME";
 	public static final String EXTRA_LOGIN_PASSWD = "extra.LOGIN_PASSWD";
+	
+	// extra for scheduler
+	public static final String EXTRA_SCHEDULE_TYPE = "extra.SCHEDULE_TYPE";
+	public static final String EXTRA_SCHEDULE_TIME = "extra.SCHEDULE_TIME";
 	
 	//extra for downloader
 	public static final String EXTRA_DOWNLOADER_DOWNLOAD_FILENAME = "extra.DOWNLOAD_FILENAME";
@@ -113,6 +128,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final String EXTRA_CHANNEL = "extra.CHANNEL";
 	public static final String EXTRA_REASON = "extra.REASON";
 	
+	
+	public static final int SCHEDULE_STOP = 0;
+	public static final int SCHEDULE_START = 1;
 	
 	public static final int STATE_PREPARE = 0;
 	public static final int STATE_STARTED = 1;	
@@ -147,11 +165,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final int REASON_DOWNLOAD_STORAGE_IO_ERROR = 14;
 	public static final int REASON_DOWNLOAD_INVALID_FILENAME = 15;
 	
-	public static final int REASON_API_REQUEST_ERROR = 16;
+	public static final int REASON_API_REQUEST_ERROR = 16;	
 	
-	public static final int SERVICE_NOTIFICATION_ID = 1;
-	public static final int DOWNLOAD_DEFAULT_SESSIONID = 2;
-	
+	public static final int DOWNLOAD_DEFAULT_SESSIONID = 4;	
 	
 	public static final String QUICKCONTROL_SHAKE = "act_shake";
 	public static final String QUICKCONTROL_MEDIA_BUTTON = "act_media_button";
@@ -285,6 +301,31 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		DoubanFmApi.setHttpParameters(httpParameters);
 		
 		
+		if (android.os.Build.VERSION.SDK_INT == 9 
+				|| android.os.Build.VERSION.SDK_INT == 10) {
+			long schedStopMillis = Preference.getScheduledStopTime(this);
+			long schedStartMillis = Preference.getScheduledStartTime(this);
+			
+			Debugger.debug("stored scheduled stop timer: " + new Date(schedStopMillis).toLocaleString());
+			Debugger.debug("stored scheduled start timer: " + new Date(schedStartMillis).toLocaleString());
+			// delete stop timer
+			if (schedStopMillis > 0) {
+				Debugger.info("Clear scheduled stop timer: " + new Date(schedStopMillis).toLocaleString());
+				Preference.setScheduledStopTime(this, 0);	
+				
+			}
+			SchedulerManager.getInstance(this).cancelScheduleStop();
+			
+			// to keep the start timer valid
+			
+			if (schedStartMillis > System.currentTimeMillis()) {
+				Debugger.info("Detected scheduled start timer: " + new Date(schedStartMillis).toLocaleString());
+				SchedulerManager.getInstance(this).scheduleStartAt(new Date(schedStartMillis));
+				return;
+			} else {
+				SchedulerManager.getInstance(this).cancelScheduleStart();
+			}
+		}
 		// If the service was idle, but got killed before it stopped itself, the
         // system will relaunch it. Make sure it gets stopped again in that case.
         Message msg = mDelayedStopHandler.obtainMessage();
@@ -298,6 +339,27 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		if (intent == null) { // it tells us the service was killed by system.
 			Debugger.warn("null intent");
 			updateWidgets();
+			
+			long schedStopMillis = Preference.getScheduledStopTime(this);
+			long schedStartMillis = Preference.getScheduledStartTime(this);
+			
+			Debugger.debug("stored scheduled stop timer: " + new Date(schedStopMillis).toLocaleString());
+			Debugger.debug("stored scheduled start timer: " + new Date(schedStartMillis).toLocaleString());
+			// delete stop timer
+			if (schedStopMillis > 0) {
+				Debugger.info("Clear scheduled stop timer: " + new Date(schedStopMillis).toLocaleString());
+				Preference.setScheduledStopTime(this, 0);	
+				
+			}
+			
+			// to keep the start timer valid
+			
+			if (schedStartMillis > System.currentTimeMillis()) {
+				Debugger.info("Detected scheduled start timer: " + new Date(schedStartMillis).toLocaleString());
+				SchedulerManager.getInstance(this).scheduleStartAt(new Date(schedStartMillis));
+				return START_STICKY;
+			}
+			
 	        //mDelayedStopHandler.removeCallbacksAndMessages(null);
 	        Message msg = mDelayedStopHandler.obtainMessage();
 	        mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
@@ -394,7 +456,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         	Debugger.info("Douban service starts with SELECT_CHANNEL: " + chann);
         	selectChannel(chann);
         }
-        
         
         if (action.equals(ACTION_DOWNLOADER_DOWNLOAD)) {
         	String url = intent.getStringExtra(EXTRA_MUSIC_URL);
@@ -538,7 +599,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			Intent it = new Intent(DoubanFmService.this, EasyDoubanFm.class);
 			PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 0, it, 0);
 			fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
-			startForeground(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
+			startForeground(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID, fgNotification);
 			
 			//if (wakeLock != null) {
 			//	wakeLock.acquire();
@@ -572,6 +633,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		stopForeground(true);
 		dPlayer.close();
         pausedByPhoneCall = false;
+        
+        SchedulerManager.getInstance(this).cancelScheduleStop();
 		
 		//if (wakeLock != null) {
 		//	wakeLock.release();
@@ -602,7 +665,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			Intent it = new Intent(this, EasyDoubanFm.class);
 			PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
 			fgNotification.setLatestEventInfo(this, "", "", pi);		
-			startForeground(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
+			startForeground(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID, fgNotification);
 			
 			dPlayer.resumeMusic();
 		}

@@ -1,4 +1,4 @@
-package com.saturdaycoder.easydoubanfm;
+package com.saturdaycoder.easydoubanfm.player;
 
 public class LoginSession {
 	public User user;

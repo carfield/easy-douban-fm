@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
+android:id="@+id/scroll" 
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@drawable/audio_player_default_show_bg_dark" 
+            >
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:orientation="horizontal"
+		    android:layout_width="fill_parent"
+		    android:layout_height="50dip"		   
+		    >
+			<CheckBox 
+		    	android:text="@string/radio_enable_stop_timer" 
+		    	android:id="@+id/cbEnableStopTimer" 
+		    	android:textColor="#ffffff"
+		    	android:layout_width="fill_parent" 
+		    	android:layout_weight="1"
+		    	android:layout_height="fill_parent">
+		    </CheckBox>
+		    <Spinner 		    	
+		    	android:layout_width="wrap_content" 
+		    	android:layout_height="fill_parent" 
+		    	android:id="@+id/spinnerStopTimerShortcut"
+		    	android:prompt="@string/options_timer_list"
+		    	>
+	    	</Spinner>
+	    </LinearLayout>
+ 
+        <TimePicker
+            android:id="@+id/stopTimerPicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+   	</LinearLayout>
+   	<TextView
+    	android:id="@+id/border01"
+    	android:background="@drawable/divider_horizontal"
+    	android:layout_width="fill_parent"
+    	android:layout_height="1dp"
+    	/>
+     <LinearLayout
+   		xmlns:android="http://schemas.android.com/apk/res/android" 
+   		android:orientation="horizontal"
+   		android:layout_width="fill_parent"
+   		android:layout_height="50dip"   		
+   		>
+	    <CheckBox 
+	    	android:text="@string/radio_enable_start_timer" 
+	    	android:id="@+id/cbEnableStartTimer" 
+	    	android:textColor="#ffffff"
+	    	android:layout_weight="1"
+	    	android:layout_width="fill_parent" 
+	    	android:layout_height="fill_parent">
+	    </CheckBox>
+	    <Spinner 
+	    	android:layout_width="wrap_content" 
+	    	android:layout_height="fill_parent" 
+	    	android:id="@+id/spinnerStartTimerShortcut"
+	    	android:prompt="@string/options_timer_list"
+	    	>
+    	</Spinner>
+    </LinearLayout>
+    <TimePicker
+            android:id="@+id/startTimerPicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    <TextView
+    	android:id="@+id/border02"
+    	android:background="@drawable/divider_horizontal"
+    	android:layout_width="fill_parent"
+    	android:layout_height="1dp"
+    	/>
+
+ 
+</LinearLayout>
+</ScrollView>

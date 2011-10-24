@@ -1,4 +1,4 @@
-package com.saturdaycoder.easydoubanfm;
+package com.saturdaycoder.easydoubanfm.channels;
 import android.content.res.*;
 import android.content.*;
 public class FmChannel {

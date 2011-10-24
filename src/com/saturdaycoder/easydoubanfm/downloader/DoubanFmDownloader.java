@@ -1,4 +1,4 @@
-package com.saturdaycoder.easydoubanfm;
+package com.saturdaycoder.easydoubanfm.downloader;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +15,18 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+
+import com.saturdaycoder.easydoubanfm.Database;
+import com.saturdaycoder.easydoubanfm.Debugger;
+import com.saturdaycoder.easydoubanfm.DoubanFmService;
+import com.saturdaycoder.easydoubanfm.Preference;
+import com.saturdaycoder.easydoubanfm.R;
+import com.saturdaycoder.easydoubanfm.SingleMediaScanner;
+import com.saturdaycoder.easydoubanfm.Utility;
+import com.saturdaycoder.easydoubanfm.R.drawable;
+import com.saturdaycoder.easydoubanfm.R.id;
+import com.saturdaycoder.easydoubanfm.R.layout;
+import com.saturdaycoder.easydoubanfm.R.string;
 
 import android.app.Notification;
 import android.app.NotificationManager;

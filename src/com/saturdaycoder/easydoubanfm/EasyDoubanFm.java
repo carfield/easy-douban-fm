@@ -21,9 +21,10 @@ import android.widget.*;
 
 public class EasyDoubanFm extends Activity {
 	private static final int MENU_LOGIN_ID = Menu.FIRST;
-	private static final int MENU_CLOSE_ID = Menu.FIRST + 1;
-	private static final int MENU_FEEDBACK_ID = Menu.FIRST + 2;
-	private static final int MENU_ABOUT_ID = Menu.FIRST + 3;  
+	private static final int MENU_ABOUT_ID = Menu.FIRST + 1;
+	private static final int MENU_TIMER_ID = Menu.FIRST + 2;
+	private static final int MENU_FEEDBACK_ID = Menu.FIRST + 3;
+	private static final int MENU_CLOSE_ID = Menu.FIRST + 4;  
 	//private WidgetContent widgetContent;
 
 	private static EasyDoubanFm _this = null;
@@ -305,7 +306,7 @@ public class EasyDoubanFm extends Activity {
 	public boolean onPrepareOptionsMenu (Menu menu) {
 		Debugger.info("EasyDoubanFm.onPrepareOptionsMenu");
 		boolean loggedIn = Preference.getLogin(this);
-		if (menu.size() == 4) {
+		if (menu.size() > 0) {
 			menu.getItem(0).setTitle(loggedIn? "账户登出": "账户登入");
 		}
 		return true;
@@ -316,9 +317,10 @@ public class EasyDoubanFm extends Activity {
         super.onCreateOptionsMenu(aMenu);
     	boolean loggedIn = Preference.getLogin(this);
         aMenu.add(0, MENU_LOGIN_ID, 0, loggedIn? "账户登出": "账户登入");
-        aMenu.add(0, MENU_CLOSE_ID, 0, "退出 程序");  
-        aMenu.add(0, MENU_FEEDBACK_ID, 0, "意见反馈");   
-        aMenu.add(0, MENU_ABOUT_ID, 0, "关于");  
+        aMenu.add(0, MENU_ABOUT_ID, 0, "使用说明");
+        aMenu.add(0, MENU_TIMER_ID, 0, "设置定时");
+        aMenu.add(0, MENU_FEEDBACK_ID, 0, "意见反馈");           
+        aMenu.add(0, MENU_CLOSE_ID, 0, "退出程序");
         return true;  
           
     }  
@@ -367,6 +369,12 @@ public class EasyDoubanFm extends Activity {
 				intent.setComponent(new ComponentName(this, DoubanFmService.class));
 				startService(intent);
 				this.finish();
+                break;  
+            }
+            case MENU_TIMER_ID: { 
+            	Intent intent = new Intent();
+    			intent.setClass(EasyDoubanFm.this, SchedulerActivity.class);
+    			startActivity(intent);
                 break;  
             }
             case MENU_FEEDBACK_ID: {

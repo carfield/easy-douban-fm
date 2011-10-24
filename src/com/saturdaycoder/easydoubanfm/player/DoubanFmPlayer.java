@@ -1,4 +1,4 @@
-package com.saturdaycoder.easydoubanfm;
+package com.saturdaycoder.easydoubanfm.player;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +8,21 @@ import java.util.TimerTask;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+
+import com.saturdaycoder.easydoubanfm.Database;
+import com.saturdaycoder.easydoubanfm.Debugger;
+import com.saturdaycoder.easydoubanfm.DoubanFmService;
+import com.saturdaycoder.easydoubanfm.EasyDoubanFm;
+import com.saturdaycoder.easydoubanfm.EasyDoubanFmWidget;
+import com.saturdaycoder.easydoubanfm.Preference;
+import com.saturdaycoder.easydoubanfm.R;
+import com.saturdaycoder.easydoubanfm.Utility;
+import com.saturdaycoder.easydoubanfm.WidgetContent;
+import com.saturdaycoder.easydoubanfm.R.drawable;
+import com.saturdaycoder.easydoubanfm.R.string;
+import com.saturdaycoder.easydoubanfm.apis.DoubanFmApi;
+import com.saturdaycoder.easydoubanfm.channels.FmChannel;
+import com.saturdaycoder.easydoubanfm.notifications.DoubanFmNotificationManager;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -626,7 +641,7 @@ public class DoubanFmPlayer {
 			Intent it = new Intent(context, EasyDoubanFm.class);
 			PendingIntent pi = PendingIntent.getActivity(context, 0, it, 0);
 			fgNotification.setLatestEventInfo(context, content.artist, content.title, pi);	
-			notificationManager.notify(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
+			notificationManager.notify(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID, fgNotification);
 			break;
 		}
 		case DoubanFmService.STATE_FINISHED: {
@@ -727,7 +742,7 @@ public class DoubanFmPlayer {
 	
 	private void notifyMusicPaused() {
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.cancel(DoubanFmService.SERVICE_NOTIFICATION_ID);
+		notificationManager.cancel(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID);
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		content.paused = true;
 		EasyDoubanFmWidget.updateContent(context, content, null);
@@ -744,7 +759,7 @@ public class DoubanFmPlayer {
 			Intent it = new Intent(context, EasyDoubanFm.class);
 			PendingIntent pi = PendingIntent.getActivity(context, 0, it, 0);
 			fgNotification.setLatestEventInfo(context, curMusic.artist, curMusic.title, pi);	
-			notificationManager.notify(DoubanFmService.SERVICE_NOTIFICATION_ID, fgNotification);
+			notificationManager.notify(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID, fgNotification);
 		}
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		content.paused = false;

@@ -1,4 +1,4 @@
-package com.saturdaycoder.easydoubanfm;
+package com.saturdaycoder.easydoubanfm.apis;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +27,9 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
+
+import com.saturdaycoder.easydoubanfm.Debugger;
+import com.saturdaycoder.easydoubanfm.channels.FmChannel;
 
 import android.content.Context;
 import android.text.Html;

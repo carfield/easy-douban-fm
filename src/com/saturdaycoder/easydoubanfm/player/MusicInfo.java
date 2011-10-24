@@ -1,17 +1,17 @@
-package com.saturdaycoder.easydoubanfm;
+package com.saturdaycoder.easydoubanfm.player;
 import android.graphics.*;
 public class MusicInfo {
-	String sid;
-	String aid;
-	String like;
-	String albumtitle;
-	String company;
-	double rating_avg;
-	String album;
-	String artist;
-	String title;
-	String pictureUrl;
-	String musicUrl;
+	public String sid;
+	public String aid;
+	public String like;
+	public String albumtitle;
+	public String company;
+	public double rating_avg;
+	public String album;
+	public String artist;
+	public String title;
+	public String pictureUrl;
+	public String musicUrl;
 	//Bitmap bmp;
 	public boolean isRated() {
 		return !like.equals("0");

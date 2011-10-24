@@ -1,4 +1,4 @@
-package com.saturdaycoder.easydoubanfm;
+package com.saturdaycoder.easydoubanfm.apis;
 import org.json.*;
 import org.apache.http.params.*;
 //import java.net.SocketException;
@@ -12,6 +12,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.*;
 import org.json.JSONObject;
+
+import com.saturdaycoder.easydoubanfm.Debugger;
+import com.saturdaycoder.easydoubanfm.Utility;
+import com.saturdaycoder.easydoubanfm.channels.FmChannel;
+import com.saturdaycoder.easydoubanfm.player.Cookie;
+import com.saturdaycoder.easydoubanfm.player.LoginSession;
+import com.saturdaycoder.easydoubanfm.player.MusicInfo;
+import com.saturdaycoder.easydoubanfm.player.User;
 public class DoubanFmApi {
 
 	public static final char TYPE_BYE = 'b';

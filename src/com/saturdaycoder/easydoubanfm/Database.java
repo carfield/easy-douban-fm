@@ -4,6 +4,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
+
+import com.saturdaycoder.easydoubanfm.channels.FmChannel;
+
 import android.content.ContentValues;
 //import android.content.SharedPreferences;
 //import android.content.SharedPreferences.Editor;

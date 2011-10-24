@@ -1,6 +1,9 @@
 package com.saturdaycoder.easydoubanfm;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.saturdaycoder.easydoubanfm.channels.FmChannel;
+
 import android.app.*;
 import android.os.*;
 import android.content.*;
