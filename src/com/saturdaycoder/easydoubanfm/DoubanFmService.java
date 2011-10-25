@@ -58,38 +58,34 @@ import com.saturdaycoder.easydoubanfm.scheduling.SchedulerManager;
 import android.media.MediaScannerConnection.*;
 
 public class DoubanFmService extends Service implements IDoubanFmService {
-	private static final int SERVICE_COMMAND_DELAY = 200;
-
-	private static final String BROADCAST_PREFIX = "com.saturdaycoder.easydoubanfm";
-
 	// actions for player
-	public static final String ACTION_PLAYER_SKIP = BROADCAST_PREFIX + ".action.PLAYER_SKIP";
-	public static final String ACTION_PLAYER_NEXT_CHANNEL = BROADCAST_PREFIX + ".action.PLAYER_NEXT_CHANNEL";
-	public static final String ACTION_PLAYER_PLAYPAUSE = BROADCAST_PREFIX + ".action.PLAYER_PLAYPAUSE";
-	public static final String ACTION_PLAYER_PAUSE = BROADCAST_PREFIX + ".action.PLAYER_PAUSE";
-	public static final String ACTION_PLAYER_RESUME = BROADCAST_PREFIX + ".action.PLAYER_RESUME";
-	public static final String ACTION_PLAYER_ON = BROADCAST_PREFIX + ".action.PLAYER_ON";
-	public static final String ACTION_PLAYER_OFF = BROADCAST_PREFIX + ".action.PLAYER_OFF";
-	public static final String ACTION_PLAYER_ONOFF = BROADCAST_PREFIX + ".action.PLAYER_ONOFF";
-	public static final String ACTION_PLAYER_RATE = BROADCAST_PREFIX + ".action.PLAYER_RATE";
-	public static final String ACTION_PLAYER_UNRATE = BROADCAST_PREFIX + ".action.PLAYER_UNRATE";
-	public static final String ACTION_PLAYER_RATEUNRATE = BROADCAST_PREFIX + ".action.PLAYER_RATEUNRATE";
-	public static final String ACTION_PLAYER_TRASH = BROADCAST_PREFIX + ".action.PLAYER_TRASH";
-	public static final String ACTION_PLAYER_SELECT_CHANNEL = BROADCAST_PREFIX + ".action.PLAYER_SELECT_CHANNEL";
-	public static final String ACTION_PLAYER_LOGIN = BROADCAST_PREFIX + ".action.PLAYER_LOGIN";
-	public static final String ACTION_PLAYER_LOGOUT = BROADCAST_PREFIX + ".action.PLAYER_LOGOUT";
+	public static final String ACTION_PLAYER_SKIP = Global.BROADCAST_PREFIX + ".action.PLAYER_SKIP";
+	public static final String ACTION_PLAYER_NEXT_CHANNEL = Global.BROADCAST_PREFIX + ".action.PLAYER_NEXT_CHANNEL";
+	public static final String ACTION_PLAYER_PLAYPAUSE = Global.BROADCAST_PREFIX + ".action.PLAYER_PLAYPAUSE";
+	public static final String ACTION_PLAYER_PAUSE = Global.BROADCAST_PREFIX + ".action.PLAYER_PAUSE";
+	public static final String ACTION_PLAYER_RESUME = Global.BROADCAST_PREFIX + ".action.PLAYER_RESUME";
+	public static final String ACTION_PLAYER_ON = Global.BROADCAST_PREFIX + ".action.PLAYER_ON";
+	public static final String ACTION_PLAYER_OFF = Global.BROADCAST_PREFIX + ".action.PLAYER_OFF";
+	public static final String ACTION_PLAYER_ONOFF = Global.BROADCAST_PREFIX + ".action.PLAYER_ONOFF";
+	public static final String ACTION_PLAYER_RATE = Global.BROADCAST_PREFIX + ".action.PLAYER_RATE";
+	public static final String ACTION_PLAYER_UNRATE = Global.BROADCAST_PREFIX + ".action.PLAYER_UNRATE";
+	public static final String ACTION_PLAYER_RATEUNRATE = Global.BROADCAST_PREFIX + ".action.PLAYER_RATEUNRATE";
+	public static final String ACTION_PLAYER_TRASH = Global.BROADCAST_PREFIX + ".action.PLAYER_TRASH";
+	public static final String ACTION_PLAYER_SELECT_CHANNEL = Global.BROADCAST_PREFIX + ".action.PLAYER_SELECT_CHANNEL";
+	public static final String ACTION_PLAYER_LOGIN = Global.BROADCAST_PREFIX + ".action.PLAYER_LOGIN";
+	public static final String ACTION_PLAYER_LOGOUT = Global.BROADCAST_PREFIX + ".action.PLAYER_LOGOUT";
 	
 	// actions for scheduler
-	public static final String ACTION_SCHEDULER_COMMAND = BROADCAST_PREFIX + ".action.SCHEDULER_COMMAND";
+	public static final String ACTION_SCHEDULER_COMMAND = Global.BROADCAST_PREFIX + ".action.SCHEDULER_COMMAND";
 	
 	// actions for downloader
-	public static final String ACTION_DOWNLOADER_DOWNLOAD = BROADCAST_PREFIX + ".action.DOWNLOADER_DOWNLOAD";
-	public static final String ACTION_DOWNLOADER_CANCEL = BROADCAST_PREFIX + ".action.DOWNLOADER_CANCEL";
-	public static final String ACTION_DOWNLOADER_CLEAR_NOTIFICATION = BROADCAST_PREFIX + ".action.DOWNLOADER_CLEAR_NOTIFICATION";
+	public static final String ACTION_DOWNLOADER_DOWNLOAD = Global.BROADCAST_PREFIX + ".action.DOWNLOADER_DOWNLOAD";
+	public static final String ACTION_DOWNLOADER_CANCEL = Global.BROADCAST_PREFIX + ".action.DOWNLOADER_CANCEL";
+	public static final String ACTION_DOWNLOADER_CLEAR_NOTIFICATION = Global.BROADCAST_PREFIX + ".action.DOWNLOADER_CLEAR_NOTIFICATION";
 	// extra for other, i.e. ui, etc.
-	public static final String ACTION_WIDGET_UPDATE = BROADCAST_PREFIX + ".action.UPDATE_WIDGET";
-	public static final String ACTION_ACTIVITY_UPDATE = BROADCAST_PREFIX + ".action.UPDATE_ACTIVITY";
-	public static final String ACTION_NULL = BROADCAST_PREFIX + ".action.NULL";
+	public static final String ACTION_WIDGET_UPDATE = Global.BROADCAST_PREFIX + ".action.UPDATE_WIDGET";
+	public static final String ACTION_ACTIVITY_UPDATE = Global.BROADCAST_PREFIX + ".action.UPDATE_ACTIVITY";
+	public static final String ACTION_NULL = Global.BROADCAST_PREFIX + ".action.NULL";
 	// extra for player
 	public static final String EXTRA_MUSIC_URL = "extra.MUSIC_URL";
 	public static final String EXTRA_PICTURE_URL = "extra.MUSIC_URL";
@@ -105,18 +101,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public static final String EXTRA_DOWNLOADER_DOWNLOAD_FILENAME = "extra.DOWNLOAD_FILENAME";
 	
 	// service status
-	public static final String EVENT_PLAYER_MUSIC_PREPARE_PROGRESS = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_PREPARE_PROGRESS";
-	public static final String EVENT_PLAYER_POWER_STATE_CHANGED = BROADCAST_PREFIX + ".event.PLAYER_POWER_STATE_CHANGED";
-	public static final String EVENT_PLAYER_MUSIC_STATE_CHANGED = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_STATE_CHANGED";
-	public static final String EVENT_PLAYER_MUSIC_PROGRESS = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_PROGRESS";
-	public static final String EVENT_PLAYER_PICTURE_STATE_CHANGED = BROADCAST_PREFIX + ".event.PLAYER_PICTURE_STATE_CHANGED";
-	public static final String EVENT_DOWNLOADER_STATE_CHANGED = BROADCAST_PREFIX + ".event.DOWNLOADER_STATE_CHANGED";
-	public static final String EVENT_DOWNLOADER_PROGRESS = BROADCAST_PREFIX + ".event.DOWNLOADER_PROGRESS";
-	public static final String EVENT_CHANNEL_CHANGED = BROADCAST_PREFIX + ".event.CHANNEL_CHANGED";
-	public static final String EVENT_LOGIN_STATE_CHANGED = BROADCAST_PREFIX + ".event.LOGIN_STATE_CHANGED";
-	public static final String EVENT_PLAYER_MUSIC_RATED = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_RATED";
-	public static final String EVENT_PLAYER_MUSIC_UNRATED = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_UNRATED";
-	public static final String EVENT_PLAYER_MUSIC_BANNED = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_BANNED";
+	public static final String EVENT_PLAYER_MUSIC_PREPARE_PROGRESS = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_PREPARE_PROGRESS";
+	public static final String EVENT_PLAYER_POWER_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.PLAYER_POWER_STATE_CHANGED";
+	public static final String EVENT_PLAYER_MUSIC_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_STATE_CHANGED";
+	public static final String EVENT_PLAYER_MUSIC_PROGRESS = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_PROGRESS";
+	public static final String EVENT_PLAYER_PICTURE_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.PLAYER_PICTURE_STATE_CHANGED";
+	public static final String EVENT_DOWNLOADER_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.DOWNLOADER_STATE_CHANGED";
+	public static final String EVENT_DOWNLOADER_PROGRESS = Global.BROADCAST_PREFIX + ".event.DOWNLOADER_PROGRESS";
+	public static final String EVENT_CHANNEL_CHANGED = Global.BROADCAST_PREFIX + ".event.CHANNEL_CHANGED";
+	public static final String EVENT_LOGIN_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.LOGIN_STATE_CHANGED";
+	public static final String EVENT_PLAYER_MUSIC_RATED = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_RATED";
+	public static final String EVENT_PLAYER_MUSIC_UNRATED = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_UNRATED";
+	public static final String EVENT_PLAYER_MUSIC_BANNED = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_BANNED";
 	
 	
 	public static final String EXTRA_STATE = "extra.STATE";
@@ -212,6 +208,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
             }
             
             if (dPlayer.isOpen()) {
+            	return;
+            }
+            
+            if (SchedulerManager.getInstance(DoubanFmService.this).isStopScheduled() || 
+            		SchedulerManager.getInstance(DoubanFmService.this).isStartScheduled()) {
             	return;
             }
 
@@ -488,6 +489,21 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         	updateActivity();
         }
         
+        if (action.equals(DoubanFmService.ACTION_SCHEDULER_COMMAND)) {
+        	int cmd = intent.getIntExtra(EXTRA_SCHEDULE_TYPE, -1);
+        	long millis = intent.getLongExtra(EXTRA_SCHEDULE_TIME, -1);
+        	if (millis > System.currentTimeMillis()) {
+        		if (cmd == SCHEDULE_START) {
+        			SchedulerManager.getInstance(this).scheduleStartAt(new Date(millis));
+        			return START_STICKY;
+        		}
+        		if (cmd == SCHEDULE_STOP) {
+        			SchedulerManager.getInstance(this).scheduleStopAt(new Date(millis));
+        			return START_STICKY;
+        		}
+        	}
+        	
+        }
         // make sure the service will shut down on its own if it was
         // just started but not bound to and nothing is playing
 		Message msg = mDelayedStopHandler.obtainMessage();
@@ -615,7 +631,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		   if (!dPlayer.isOpen()) {
 		
 				mHandler.removeCallbacks(mOpenPlayerTask);
-		        mHandler.postDelayed(mOpenPlayerTask, SERVICE_COMMAND_DELAY);
+		        mHandler.postDelayed(mOpenPlayerTask, Global.SERVICE_COMMAND_DELAY);
 		   }
 	}
 	
@@ -727,7 +743,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	@Override
 	public void selectChannel(int id) {
 		//if (dPlayer.isOpen()) {
-	        mHandler.postDelayed(new SelectChannelRunnable(id), SERVICE_COMMAND_DELAY);
+	        mHandler.postDelayed(new SelectChannelRunnable(id), Global.SERVICE_COMMAND_DELAY);
 		//}
 	}
 	
@@ -739,7 +755,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void rateMusic() {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mRateMusicTask);
-	        mHandler.postDelayed(mRateMusicTask, SERVICE_COMMAND_DELAY);
+	        mHandler.postDelayed(mRateMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
@@ -753,7 +769,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void unrateMusic() {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mUnrateMusicTask);
-	        mHandler.postDelayed(mUnrateMusicTask, SERVICE_COMMAND_DELAY);
+	        mHandler.postDelayed(mUnrateMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
@@ -770,7 +786,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void nextMusic() {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mNextMusicTask);
-	        mHandler.postDelayed(mNextMusicTask, SERVICE_COMMAND_DELAY);
+	        mHandler.postDelayed(mNextMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
@@ -787,7 +803,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void nextChannel() {
 		if (dPlayer.isOpen()) {
 			mHandler.removeCallbacks(mNextChannelTask);
-	        mHandler.postDelayed(mNextChannelTask, SERVICE_COMMAND_DELAY);
+	        mHandler.postDelayed(mNextChannelTask, Global.SERVICE_COMMAND_DELAY);
 		}
 	}
 	
@@ -837,7 +853,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	Debugger.verbose("download filename is \"" + filename + "\"");
 
     	if (dDownloader.isOpen()) {
-    		mHandler.postDelayed(new DownloadMusicTask(url, filename), SERVICE_COMMAND_DELAY);
+    		mHandler.postDelayed(new DownloadMusicTask(url, filename), Global.SERVICE_COMMAND_DELAY);
     	}
     }
     
@@ -854,7 +870,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     }
     private void cancelDownload(String url) {
     	if (dDownloader.isOpen()) {
-    		mHandler.postDelayed(new CancelDownloadTask(url), SERVICE_COMMAND_DELAY);
+    		mHandler.postDelayed(new CancelDownloadTask(url), Global.SERVICE_COMMAND_DELAY);
     	}
     }
     

@@ -5,7 +5,11 @@ import java.util.Date;
 import com.saturdaycoder.easydoubanfm.scheduling.SchedulerManager;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
@@ -27,12 +31,23 @@ public class SchedulerActivity extends Activity {
 	
 	SchedulerManager schedManager;
 	
+	//IDoubanFmService mDoubanFm;
+	//ServiceConnection mServiceConn;
+	
 	static final long[] predefinedTimerList = new long[] {
 		30 * 60 * 1000,
 		60 * 60 * 1000,
 		2 * 60 * 60 * 1000,
 		8 * 60 * 60 * 1000,
 	};
+	
+	private void doSchedule(int type, Date time) {
+		Intent i = new Intent(DoubanFmService.ACTION_SCHEDULER_COMMAND);
+        i.setComponent(new ComponentName(SchedulerActivity.this, DoubanFmService.class));
+        i.putExtra(DoubanFmService.EXTRA_SCHEDULE_TYPE, type);
+        i.putExtra(DoubanFmService.EXTRA_SCHEDULE_TIME, time.getTime());
+        startService(i);
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +59,18 @@ public class SchedulerActivity extends Activity {
 		
 		setContentView(R.layout.scheduler);		
 		
+		
+		/*mServiceConn = new ServiceConnection(){
+        	public void onServiceConnected(ComponentName className, IBinder service) {
+        		mDoubanFm = (IDoubanFmService)((DoubanFmService.LocalBinder)service).getService();
+        	}
+        	public void onServiceDisconnected(ComponentName className) {
+        		mDoubanFm = null;
+        	}
+        };
+        bindService(new Intent(SchedulerActivity.this, DoubanFmService.class), 
+        		mServiceConn, BIND_AUTO_CREATE);*/
+        
 		schedManager = SchedulerManager.getInstance(this);
 		
 		boxEnableStopTimer = (CheckBox)findViewById(R.id.cbEnableStopTimer);
@@ -105,7 +132,8 @@ public class SchedulerActivity extends Activity {
 						stoptime.setDate(now.getDate() + 1);						
 					}
 					Debugger.debug("schedule stop: " + stoptime.toLocaleString());
-					schedManager.scheduleStopAt(stoptime);
+					
+					doSchedule(DoubanFmService.SCHEDULE_STOP, stoptime);
 				}
 			}
 		});
@@ -151,7 +179,7 @@ public class SchedulerActivity extends Activity {
 						Debugger.debug("schedule stop: " + stoptime.toLocaleString());
 					}
 					
-					schedManager.scheduleStopAt(stoptime);
+					doSchedule(DoubanFmService.SCHEDULE_STOP, stoptime);
 				}
 			}
         	
@@ -184,7 +212,7 @@ public class SchedulerActivity extends Activity {
 						starttime.setDate(now.getDate() + 1);						
 					}
 					Debugger.debug("schedule start: " + starttime.toLocaleString());
-					schedManager.scheduleStartAt(starttime);
+					doSchedule(DoubanFmService.SCHEDULE_START, starttime);
 				}
 			}
 		});
@@ -230,7 +258,7 @@ public class SchedulerActivity extends Activity {
 						Debugger.debug("schedule stop: " + starttime.toLocaleString());
 					}
 					
-					schedManager.scheduleStartAt(starttime);
+					doSchedule(DoubanFmService.SCHEDULE_START, starttime);
 				}
 			}
         	

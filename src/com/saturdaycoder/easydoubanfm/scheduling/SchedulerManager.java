@@ -65,6 +65,17 @@ public class SchedulerManager {
 			return null;
 	}
 	
+	
+	public boolean isStopScheduled() {
+		assert(context != null);
+		return stopTask.isScheduled();
+	}
+	
+	public boolean isStartScheduled() {
+		assert(context != null);
+		return startTask.isScheduled();
+	}
+	
 	public void scheduleStopAt(Date stoptime) {
 		assert (context != null);
 		stopTask.cancel();
