@@ -34,6 +34,18 @@
             </meta-data>
         </receiver>
         
+        <receiver android:name="MediaButtonListener">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+        
+        <receiver android:name="CameraButtonListener">
+            <intent-filter>
+                <action android:name="android.intent.action.CAMERA_BUTTON" />
+            </intent-filter>
+        </receiver>
+        
 		<service android:name="DoubanFmService" />        
         
         <activity android:name="ChannelSelectorActivity" 

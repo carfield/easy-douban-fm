@@ -6,13 +6,14 @@ import android.content.Intent;
 
 import com.saturdaycoder.easydoubanfm.Debugger;
 import com.saturdaycoder.easydoubanfm.DoubanFmService;
+import com.saturdaycoder.easydoubanfm.Global;
 
 public class SchedulerStopTask extends SchedulerTask {
 
 	Context context;
 	
 	public SchedulerStopTask(Context context) {
-		super(SchedulerTask.TASK_STOP);
+		super(Global.SCHEDULE_TYPE_STOP_PLAYER);
 		this.context = context;
 	}
 	
@@ -24,7 +25,7 @@ public class SchedulerStopTask extends SchedulerTask {
 
 	@Override
 	public void onFinished() {
-		Intent i = new Intent(DoubanFmService.ACTION_PLAYER_OFF);
+		Intent i = new Intent(Global.ACTION_PLAYER_OFF);
 		i.setComponent(new ComponentName(context, DoubanFmService.class));
 		super.onFinished();
 		Debugger.debug("StopTask.onFinished");

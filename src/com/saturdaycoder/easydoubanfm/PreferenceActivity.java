@@ -217,13 +217,13 @@ public class PreferenceActivity extends Activity {
         spinnerCameraButton.setAdapter(adapter);
   
         spinnerShake.setSelection(Preference.getQuickAction(this, 
-        		DoubanFmService.QUICKCONTROL_SHAKE), false);
+        		Global.QUICKCONTROL_SHAKE), false);
         spinnerMediaButton.setSelection(Preference.getQuickAction(this, 
-        		DoubanFmService.QUICKCONTROL_MEDIA_BUTTON), false);
+        		Global.QUICKCONTROL_MEDIA_BUTTON), false);
         spinnerLongMediaButton.setSelection(Preference.getQuickAction(this, 
-        		DoubanFmService.QUICKCONTROL_MEDIA_BUTTON_LONG), false);
+        		Global.QUICKCONTROL_MEDIA_BUTTON_LONG), false);
         spinnerCameraButton.setSelection(Preference.getQuickAction(this, 
-        		DoubanFmService.QUICKCONTROL_CAMERA_BUTTON), false);
+        		Global.QUICKCONTROL_CAMERA_BUTTON), false);
         
         OnItemSelectedListener oislShake =  new OnItemSelectedListener() {
   
@@ -231,7 +231,7 @@ public class PreferenceActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
                   Preference.setQuickAction(PreferenceActivity.this, 
-                		  DoubanFmService.QUICKCONTROL_SHAKE, position);
+                		  Global.QUICKCONTROL_SHAKE, position);
             }
   
             @Override
@@ -246,7 +246,7 @@ public class PreferenceActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
                   Preference.setQuickAction(PreferenceActivity.this, 
-                		  DoubanFmService.QUICKCONTROL_MEDIA_BUTTON, position);
+                		  Global.QUICKCONTROL_MEDIA_BUTTON, position);
             }
   
             @Override
@@ -261,7 +261,7 @@ public class PreferenceActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
                   Preference.setQuickAction(PreferenceActivity.this, 
-                		  DoubanFmService.QUICKCONTROL_MEDIA_BUTTON_LONG, position);
+                		  Global.QUICKCONTROL_MEDIA_BUTTON_LONG, position);
             }
   
             @Override
@@ -277,7 +277,7 @@ public class PreferenceActivity extends Activity {
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
                   Preference.setQuickAction(PreferenceActivity.this, 
-                		  DoubanFmService.QUICKCONTROL_CAMERA_BUTTON, position);
+                		  Global.QUICKCONTROL_CAMERA_BUTTON, position);
             }
   
             @Override

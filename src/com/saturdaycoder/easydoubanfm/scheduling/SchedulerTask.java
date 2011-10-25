@@ -6,8 +6,8 @@ import java.util.Date;
 import android.os.CountDownTimer;
 
 public class SchedulerTask {
-	public final static int TASK_STOP = 0;
-	public final static int TASK_START = 1;
+	//public final static int TASK_STOP = 0;
+	//public final static int TASK_START = 1;
 	
 	protected int type;
 	protected Date finishTime;

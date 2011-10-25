@@ -204,21 +204,21 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		ComponentName cn = new ComponentName(context, DoubanFmService.class);
 		
 		// Next button
-		Intent nextIntent = new Intent(DoubanFmService.ACTION_PLAYER_SKIP);
+		Intent nextIntent = new Intent(Global.ACTION_PLAYER_SKIP);
 		nextIntent.setComponent(cn);
 		PendingIntent nextPendingIntent = PendingIntent.getService(context, 
 				0, nextIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonNext, nextPendingIntent);
 		
 		// RATE button
-		Intent rateIntent = new Intent(DoubanFmService.ACTION_PLAYER_RATEUNRATE);
+		Intent rateIntent = new Intent(Global.ACTION_PLAYER_RATEUNRATE);
 		rateIntent.setComponent(cn);
 		PendingIntent ratePendingIntent = PendingIntent.getService(context, 
 				0, rateIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonLike, ratePendingIntent);
 		
 		// TRASH button
-		Intent trashIntent = new Intent(DoubanFmService.ACTION_PLAYER_TRASH);
+		Intent trashIntent = new Intent(Global.ACTION_PLAYER_TRASH);
 		trashIntent.setComponent(cn);
 		PendingIntent trashPendingIntent = PendingIntent.getService(context, 
 				0, trashIntent, 0);
@@ -232,21 +232,21 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		remoteViews.setOnClickPendingIntent(R.id.buttonPlaypause, stopPendingIntent);*/	
 		
 		// Download button
-		Intent downloadIntent = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+		Intent downloadIntent = new Intent(Global.ACTION_DOWNLOADER_DOWNLOAD);
 		downloadIntent.setComponent(cn);
 		PendingIntent downloadPendingIntent = PendingIntent.getService(context, 
 				0, downloadIntent, 0);
 		remoteViews.setOnClickPendingIntent(R.id.buttonDownload, downloadPendingIntent);
 		
 		// On/Off button
-		Intent openIntent = new Intent(DoubanFmService.ACTION_PLAYER_ONOFF);
+		Intent openIntent = new Intent(Global.ACTION_PLAYER_ONOFF);
 		openIntent.setComponent(cn);
 		PendingIntent openPendingIntent = PendingIntent.getService(context, 
 				0, openIntent, 0);
 		//remoteViews.setOnClickPendingIntent(R.id.buttonOnOff, openPendingIntent);
 		
 		// PLAY/PAUSE button
-		Intent playPauseIntent = new Intent(DoubanFmService.ACTION_PLAYER_PLAYPAUSE);
+		Intent playPauseIntent = new Intent(Global.ACTION_PLAYER_PLAYPAUSE);
 		playPauseIntent.setComponent(cn);
 		PendingIntent playPausePendingIntent = PendingIntent.getService(context, 
 				0, playPauseIntent, 0);
@@ -285,7 +285,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			
 			updateContent(context, content, appWidgetIds);
 			
-			Intent i = new Intent(DoubanFmService.ACTION_WIDGET_UPDATE);
+			Intent i = new Intent(Global.ACTION_WIDGET_UPDATE);
 			context.sendBroadcast(i);
 		}
 	}

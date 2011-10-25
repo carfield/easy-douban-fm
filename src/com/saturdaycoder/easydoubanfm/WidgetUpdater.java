@@ -15,12 +15,12 @@ public class WidgetUpdater extends BroadcastReceiver{
 		
 		String action = intent.getAction();
 		
-		if (action.equals(DoubanFmService.EVENT_PLAYER_POWER_STATE_CHANGED)) {
-			int state = intent.getIntExtra(DoubanFmService.EXTRA_STATE, 
-													DoubanFmService.INVALID_STATE);
+		if (action.equals(Global.EVENT_PLAYER_POWER_STATE_CHANGED)) {
+			int state = intent.getIntExtra(Global.EXTRA_STATE, 
+													Global.INVALID_STATE);
 			Debugger.debug("EVENT_PLAYER_POWER_STATE_CHANGED, state=" + state);
 			switch(state) {
-			case DoubanFmService.STATE_IDLE: {
+			case Global.STATE_IDLE: {
 				WidgetContent content = EasyDoubanFmWidget.getContent(context);
 				content = EasyDoubanFmWidget.getContent(context);
 				content.channel = context.getResources().getString(R.string.text_channel_unselected);
@@ -31,13 +31,13 @@ public class WidgetUpdater extends BroadcastReceiver{
 				EasyDoubanFmWidget.updateContent(context, content, null);
 				return;
 			}
-			case DoubanFmService.STATE_PREPARE: {
+			case Global.STATE_PREPARE: {
 				WidgetContent content = EasyDoubanFmWidget.getContent(context);
 				content.onState = EasyDoubanFmWidget.STATE_PREPARE;
 				EasyDoubanFmWidget.updateContent(context, content, null);
 				return;
 			}
-			case DoubanFmService.STATE_STARTED: {
+			case Global.STATE_STARTED: {
 				WidgetContent content = EasyDoubanFmWidget.getContent(context);
 				content.onState = EasyDoubanFmWidget.STATE_ON;
 				EasyDoubanFmWidget.updateContent(context, content, null);
@@ -49,15 +49,15 @@ public class WidgetUpdater extends BroadcastReceiver{
 			}
 		}
 		
-		else if (action.equals(DoubanFmService.EVENT_LOGIN_STATE_CHANGED)) {
-			int state = intent.getIntExtra(DoubanFmService.EXTRA_STATE, 
-													DoubanFmService.INVALID_STATE);
+		else if (action.equals(Global.EVENT_LOGIN_STATE_CHANGED)) {
+			int state = intent.getIntExtra(Global.EXTRA_STATE, 
+													Global.INVALID_STATE);
 			switch (state) {
-			case DoubanFmService.STATE_STARTED: 
-			case DoubanFmService.STATE_IDLE:
-			case DoubanFmService.STATE_ERROR:
+			case Global.STATE_STARTED: 
+			case Global.STATE_IDLE:
+			case Global.STATE_ERROR:
 				return;
-			case DoubanFmService.STATE_PREPARE: {
+			case Global.STATE_PREPARE: {
 				WidgetContent content = EasyDoubanFmWidget.getContent(context);
 				content.channel = context.getResources().getString(R.string.text_login_inprocess);
 				EasyDoubanFmWidget.updateContent(context, content, null);
@@ -69,8 +69,8 @@ public class WidgetUpdater extends BroadcastReceiver{
 			}
 		}
 		
-		else if (action.equals(DoubanFmService.EVENT_CHANNEL_CHANGED)) {
-			String chan = intent.getStringExtra(DoubanFmService.EXTRA_CHANNEL);
+		else if (action.equals(Global.EVENT_CHANNEL_CHANGED)) {
+			String chan = intent.getStringExtra(Global.EXTRA_CHANNEL);
 			if (chan == null || chan.equals("")) {
 				WidgetContent content = EasyDoubanFmWidget.getContent(context);
 				content.channel = "Error";

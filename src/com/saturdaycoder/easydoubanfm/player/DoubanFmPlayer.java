@@ -11,9 +11,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.saturdaycoder.easydoubanfm.Database;
 import com.saturdaycoder.easydoubanfm.Debugger;
-import com.saturdaycoder.easydoubanfm.DoubanFmService;
 import com.saturdaycoder.easydoubanfm.EasyDoubanFm;
 import com.saturdaycoder.easydoubanfm.EasyDoubanFmWidget;
+import com.saturdaycoder.easydoubanfm.Global;
 import com.saturdaycoder.easydoubanfm.Preference;
 import com.saturdaycoder.easydoubanfm.R;
 import com.saturdaycoder.easydoubanfm.Utility;
@@ -22,7 +22,6 @@ import com.saturdaycoder.easydoubanfm.R.drawable;
 import com.saturdaycoder.easydoubanfm.R.string;
 import com.saturdaycoder.easydoubanfm.apis.DoubanFmApi;
 import com.saturdaycoder.easydoubanfm.channels.FmChannel;
-import com.saturdaycoder.easydoubanfm.notifications.DoubanFmNotificationManager;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -134,7 +133,7 @@ public class DoubanFmPlayer {
 		}
 		
 		try {
-			notifyPowerStateChanged(DoubanFmService.STATE_PREPARE);
+			notifyPowerStateChanged(Global.STATE_PREPARE);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -220,7 +219,7 @@ public class DoubanFmPlayer {
 					}
 					else {
 						try {
-							notifyLoginStateChanged(DoubanFmService.STATE_IDLE, NO_REASON);
+							notifyLoginStateChanged(Global.STATE_IDLE, NO_REASON);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -248,7 +247,7 @@ public class DoubanFmPlayer {
 					FmChannel c = db.getChannelInfo(ci);
 					
 					try {
-						notifyPowerStateChanged( DoubanFmService.STATE_STARTED);
+						notifyPowerStateChanged( Global.STATE_STARTED);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -286,7 +285,7 @@ public class DoubanFmPlayer {
 					
 					//notifyChannelChanged(-1, context.getResources().getString(R.string.text_channel_closing));
 					try {
-						notifyPowerStateChanged(DoubanFmService.STATE_PREPARE);
+						notifyPowerStateChanged(Global.STATE_PREPARE);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -300,7 +299,7 @@ public class DoubanFmPlayer {
 					}
 					
 					try {
-						notifyPowerStateChanged( DoubanFmService.STATE_IDLE);
+						notifyPowerStateChanged( Global.STATE_IDLE);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -498,7 +497,7 @@ public class DoubanFmPlayer {
 				|| passwd == null || passwd.equals("")) {
 			
 			try {
-				notifyLoginStateChanged(DoubanFmService.STATE_ERROR, DoubanFmService.REASON_API_REQUEST_ERROR);
+				notifyLoginStateChanged(Global.STATE_ERROR, Global.REASON_API_REQUEST_ERROR);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -509,7 +508,7 @@ public class DoubanFmPlayer {
 		synchronized(loginLock) {
 			try {
 				try {
-					notifyLoginStateChanged(DoubanFmService.STATE_PREPARE, NO_REASON);
+					notifyLoginStateChanged(Global.STATE_PREPARE, NO_REASON);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -521,7 +520,7 @@ public class DoubanFmPlayer {
 					Preference.setLogin(context, true);
 					
 					try {
-						notifyLoginStateChanged(DoubanFmService.STATE_STARTED, NO_REASON);
+						notifyLoginStateChanged(Global.STATE_STARTED, NO_REASON);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -533,7 +532,7 @@ public class DoubanFmPlayer {
 					Preference.setLogin(context, false);
 					
 					try {
-						notifyLoginStateChanged(DoubanFmService.STATE_ERROR, DoubanFmService.REASON_API_REQUEST_ERROR);
+						notifyLoginStateChanged(Global.STATE_ERROR, Global.REASON_API_REQUEST_ERROR);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -545,8 +544,8 @@ public class DoubanFmPlayer {
 				Debugger.error("IO ERROR loging in: " + e.toString());
 				
 				try {
-					notifyLoginStateChanged(DoubanFmService.STATE_ERROR, 
-												DoubanFmService.REASON_NETWORK_IO_ERROR);
+					notifyLoginStateChanged(Global.STATE_ERROR, 
+												Global.REASON_NETWORK_IO_ERROR);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -563,7 +562,7 @@ public class DoubanFmPlayer {
 			loginSession = null;
 			
 			try {
-				notifyLoginStateChanged(DoubanFmService.STATE_IDLE, NO_REASON);
+				notifyLoginStateChanged(Global.STATE_IDLE, NO_REASON);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -581,12 +580,12 @@ public class DoubanFmPlayer {
 		WidgetContent wc = EasyDoubanFmWidget.getContent(context);
 		//Intent intent = new Intent(DoubanFmService.EVENT_PLAYER_POWER_STATE_CHANGED);
 		switch(powerState) {
-		case DoubanFmService.STATE_PREPARE:
+		case Global.STATE_PREPARE:
 			wc.onState = EasyDoubanFmWidget.STATE_PREPARE;
 			EasyDoubanFmWidget.updateContent(context, wc, null);
 			EasyDoubanFm.updateContents(wc);
 			break;
-		case DoubanFmService.STATE_IDLE:
+		case Global.STATE_IDLE:
 			wc.onState = EasyDoubanFmWidget.STATE_OFF;
 			wc.channel = context.getResources().getString(R.string.text_channel_unselected);
 			wc.rated = false;
@@ -596,7 +595,7 @@ public class DoubanFmPlayer {
 			EasyDoubanFm.updateContents(wc);
 			
 			break;
-		case DoubanFmService.STATE_STARTED:
+		case Global.STATE_STARTED:
 			wc.onState = EasyDoubanFmWidget.STATE_ON;
 			EasyDoubanFmWidget.updateContent(context, wc, null);
 			EasyDoubanFm.updateContents(wc);
@@ -616,7 +615,7 @@ public class DoubanFmPlayer {
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		switch(musicState) {
-		case DoubanFmService.STATE_PREPARE:
+		case Global.STATE_PREPARE:
 			content.artist = content.title = "";
 			content.rated = false;
 			//content.picture = null;//defaultAlbumPic;
@@ -624,7 +623,7 @@ public class DoubanFmPlayer {
 			EasyDoubanFm.updateContents(content);
 			EasyDoubanFm.updatePosition(0, 0);
 			break;
-		case DoubanFmService.STATE_STARTED:	 {
+		case Global.STATE_STARTED:	 {
 			if (musicInfo != null) {
 				content.artist = musicInfo.artist;
 				content.rated = musicInfo.isRated();
@@ -641,10 +640,10 @@ public class DoubanFmPlayer {
 			Intent it = new Intent(context, EasyDoubanFm.class);
 			PendingIntent pi = PendingIntent.getActivity(context, 0, it, 0);
 			fgNotification.setLatestEventInfo(context, content.artist, content.title, pi);	
-			notificationManager.notify(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID, fgNotification);
+			notificationManager.notify(Global.NOTIFICATION_ID_PLAYER, fgNotification);
 			break;
 		}
-		case DoubanFmService.STATE_FINISHED: {
+		case Global.STATE_FINISHED: {
 			content.artist = content.title = "";
 			content.rated = false;
 			content.picture = null;//BitmapFactory.decodeResource(context.getResources(), R.drawable.default_album);
@@ -653,22 +652,22 @@ public class DoubanFmPlayer {
 			break;
 		}
 		
-		case DoubanFmService.STATE_CANCELLED:
+		case Global.STATE_CANCELLED:
 			break;
-		case DoubanFmService.STATE_IDLE:
+		case Global.STATE_IDLE:
 			break;
-		case DoubanFmService.STATE_FAILED:
-		case DoubanFmService.STATE_ERROR:
+		case Global.STATE_FAILED:
+		case Global.STATE_ERROR:
 			popNotify("无法获得音乐信息，这可能是网络问题或是服务器端问题。请检查网络，或稍后再试");
 			break;		
-		case DoubanFmService.STATE_MUSIC_SKIPPED:
+		case Global.STATE_MUSIC_SKIPPED:
 			break;
-		case DoubanFmService.STATE_MUSIC_PAUSED:
+		case Global.STATE_MUSIC_PAUSED:
 			content.paused = true;
 			EasyDoubanFmWidget.updateContent(context, content, null);
 			EasyDoubanFm.updateContents(content);
 			break;
-		case DoubanFmService.STATE_MUSIC_RESUMED:
+		case Global.STATE_MUSIC_RESUMED:
 			content.paused = false;
 			EasyDoubanFmWidget.updateContent(context, content, null);
 			EasyDoubanFm.updateContents(content);
@@ -681,16 +680,16 @@ public class DoubanFmPlayer {
 	private void notifyPictureStateChanged(int picState, Bitmap pic, int reason) {
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		switch (picState) {
-		case DoubanFmService.STATE_ERROR:
-		case DoubanFmService.STATE_CANCELLED:
-		case DoubanFmService.STATE_IDLE:
+		case Global.STATE_ERROR:
+		case Global.STATE_CANCELLED:
+		case Global.STATE_IDLE:
 			//break;
-		case DoubanFmService.STATE_PREPARE:
+		case Global.STATE_PREPARE:
 			//content.picture = defaultAlbumPic;
 			//EasyDoubanFmWidget.updateContent(context, content, null);
 			break;
-		case DoubanFmService.STATE_STARTED:
-		case DoubanFmService.STATE_FINISHED:
+		case Global.STATE_STARTED:
+		case Global.STATE_FINISHED:
 			if (pic != null) {
 				content.picture = pic;
 				EasyDoubanFmWidget.updateContent(context, content, null);
@@ -717,15 +716,15 @@ public class DoubanFmPlayer {
 	private void notifyLoginStateChanged(int loginState, int reason) {
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		switch (loginState) {
-		case DoubanFmService.STATE_ERROR:
-		case DoubanFmService.STATE_IDLE:
+		case Global.STATE_ERROR:
+		case Global.STATE_IDLE:
 			
 			break;
-		case DoubanFmService.STATE_PREPARE:
+		case Global.STATE_PREPARE:
 			//content.channel = context.getResources().getString(R.string.text_login_inprocess);
 			break;
-		case DoubanFmService.STATE_STARTED:
-		case DoubanFmService.STATE_FINISHED:
+		case Global.STATE_STARTED:
+		case Global.STATE_FINISHED:
 			
 			break;
 		}
@@ -742,7 +741,7 @@ public class DoubanFmPlayer {
 	
 	private void notifyMusicPaused() {
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.cancel(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID);
+		notificationManager.cancel(Global.NOTIFICATION_ID_PLAYER);
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		content.paused = true;
 		EasyDoubanFmWidget.updateContent(context, content, null);
@@ -759,7 +758,7 @@ public class DoubanFmPlayer {
 			Intent it = new Intent(context, EasyDoubanFm.class);
 			PendingIntent pi = PendingIntent.getActivity(context, 0, it, 0);
 			fgNotification.setLatestEventInfo(context, curMusic.artist, curMusic.title, pi);	
-			notificationManager.notify(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID, fgNotification);
+			notificationManager.notify(Global.NOTIFICATION_ID_PLAYER, fgNotification);
 		}
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		content.paused = false;
@@ -775,7 +774,7 @@ public class DoubanFmPlayer {
 		
 		mPlayer.reset();
 		
-		notifyMusicStateChanged( DoubanFmService.STATE_PREPARE, null, NO_REASON);
+		notifyMusicStateChanged( Global.STATE_PREPARE, null, NO_REASON);
 		
 		notifyMusicPrepareProgress(10);
 		
@@ -801,8 +800,8 @@ public class DoubanFmPlayer {
 			if (curMusic == null) {
 			    Debugger.error("curMusic == null!!");
 			    
-				notifyMusicStateChanged( DoubanFmService.STATE_ERROR, null, 
-								DoubanFmService.REASON_NETWORK_IO_ERROR);
+				notifyMusicStateChanged( Global.STATE_ERROR, null, 
+								Global.REASON_NETWORK_IO_ERROR);
 			    return;
 			} 
 			
@@ -814,8 +813,8 @@ public class DoubanFmPlayer {
 			try {
 				mPlayer.setDataSource(curMusic.musicUrl);
 			} catch (IOException e) {
-				notifyMusicStateChanged(DoubanFmService.STATE_ERROR, null,
-								DoubanFmService.REASON_NETWORK_IO_ERROR);
+				notifyMusicStateChanged(Global.STATE_ERROR, null,
+								Global.REASON_NETWORK_IO_ERROR);
 			    return;
 			}
 			
@@ -824,7 +823,7 @@ public class DoubanFmPlayer {
 			mPlayer.prepareAsync();
 
 			// report music info (artist, title, rated)
-	    	notifyMusicStateChanged( DoubanFmService.STATE_STARTED, curMusic, NO_REASON);
+	    	notifyMusicStateChanged( Global.STATE_STARTED, curMusic, NO_REASON);
 	    	
 			notifyMusicPrepareProgress(50);
 			
@@ -995,7 +994,7 @@ public class DoubanFmPlayer {
     	@Override
         protected void onPostExecute(Bitmap bmp) {
     		if (bmp == null) {
-        		notifyPictureStateChanged(DoubanFmService.STATE_IDLE, null, NO_REASON);
+        		notifyPictureStateChanged(Global.STATE_IDLE, null, NO_REASON);
     		}
      		
     		curPic = bmp;
@@ -1004,7 +1003,7 @@ public class DoubanFmPlayer {
     			return;
     		}
     		
-    		notifyPictureStateChanged(DoubanFmService.STATE_STARTED, bmp, NO_REASON);
+    		notifyPictureStateChanged(Global.STATE_STARTED, bmp, NO_REASON);
     		
         }
     }

@@ -213,20 +213,20 @@ public class Preference {
 	public static int getQuickAction(Context context, String control) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		
-		int res = DoubanFmService.QUICKACT_NONE;
-		if (control.equals(DoubanFmService.QUICKCONTROL_SHAKE))
-			res = pref.getInt(control, DoubanFmService.QUICKACT_NEXT_MUSIC);
-		else if (control.equals(DoubanFmService.QUICKCONTROL_MEDIA_BUTTON))
-			res = pref.getInt(control, DoubanFmService.QUICKACT_PLAY_PAUSE);
-		else if (control.equals(DoubanFmService.QUICKCONTROL_MEDIA_BUTTON_LONG))
-			res = pref.getInt(control, DoubanFmService.QUICKACT_NEXT_CHANNEL);
-		else if (control.equals(DoubanFmService.QUICKCONTROL_CAMERA_BUTTON))
-			res = pref.getInt(control, DoubanFmService.QUICKACT_DOWNLOAD_MUSIC);
+		int res = Global.QUICKACT_NONE;
+		if (control.equals(Global.QUICKCONTROL_SHAKE))
+			res = pref.getInt(control, Global.QUICKACT_NEXT_MUSIC);
+		else if (control.equals(Global.QUICKCONTROL_MEDIA_BUTTON))
+			res = pref.getInt(control, Global.QUICKACT_PLAY_PAUSE);
+		else if (control.equals(Global.QUICKCONTROL_MEDIA_BUTTON_LONG))
+			res = pref.getInt(control, Global.QUICKACT_NEXT_CHANNEL);
+		else if (control.equals(Global.QUICKCONTROL_CAMERA_BUTTON))
+			res = pref.getInt(control, Global.QUICKACT_DOWNLOAD_MUSIC);
 		else
-			res = pref.getInt(control, DoubanFmService.QUICKACT_NONE);
+			res = pref.getInt(control, Global.QUICKACT_NONE);
 		
-		if (res < 0 || res > DoubanFmService.QUICKACT_NONE)
-			res = DoubanFmService.QUICKACT_NONE;
+		if (res < 0 || res > Global.QUICKACT_NONE)
+			res = Global.QUICKACT_NONE;
 		
 		return res;
 	}

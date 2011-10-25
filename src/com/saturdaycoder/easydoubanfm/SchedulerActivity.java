@@ -16,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TimePicker;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.TimePicker.OnTimeChangedListener;
 
@@ -42,13 +43,23 @@ public class SchedulerActivity extends Activity {
 	};
 	
 	private void doSchedule(int type, Date time) {
-		Intent i = new Intent(DoubanFmService.ACTION_SCHEDULER_COMMAND);
+		Intent i = new Intent(Global.ACTION_SCHEDULER_COMMAND);
         i.setComponent(new ComponentName(SchedulerActivity.this, DoubanFmService.class));
-        i.putExtra(DoubanFmService.EXTRA_SCHEDULE_TYPE, type);
-        i.putExtra(DoubanFmService.EXTRA_SCHEDULE_TIME, time.getTime());
+        i.putExtra(Global.EXTRA_SCHEDULE_TYPE, type);
+        i.putExtra(Global.EXTRA_SCHEDULE_TIME, time.getTime());
         startService(i);
+        long remaining = time.getTime() - System.currentTimeMillis();
+		long hours = remaining / (1000 * 60 * 60);
+		long mins = remaining / (1000 * 60) - hours * 60;
+		String popText = (type == Global.SCHEDULE_TYPE_START_PLAYER)? "开启": "关闭";
+		popNotify("豆瓣电台将在" + hours + "小时" + mins + "分后自动" + popText);
 	}
 	
+    private void popNotify(String msg)
+    {
+        Toast.makeText(this, msg,
+                Toast.LENGTH_LONG).show();
+    }
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		
@@ -133,7 +144,7 @@ public class SchedulerActivity extends Activity {
 					}
 					Debugger.debug("schedule stop: " + stoptime.toLocaleString());
 					
-					doSchedule(DoubanFmService.SCHEDULE_STOP, stoptime);
+					doSchedule(Global.SCHEDULE_TYPE_STOP_PLAYER, stoptime);
 				}
 			}
 		});
@@ -179,7 +190,7 @@ public class SchedulerActivity extends Activity {
 						Debugger.debug("schedule stop: " + stoptime.toLocaleString());
 					}
 					
-					doSchedule(DoubanFmService.SCHEDULE_STOP, stoptime);
+					doSchedule(Global.SCHEDULE_TYPE_STOP_PLAYER, stoptime);
 				}
 			}
         	
@@ -212,7 +223,7 @@ public class SchedulerActivity extends Activity {
 						starttime.setDate(now.getDate() + 1);						
 					}
 					Debugger.debug("schedule start: " + starttime.toLocaleString());
-					doSchedule(DoubanFmService.SCHEDULE_START, starttime);
+					doSchedule(Global.SCHEDULE_TYPE_START_PLAYER, starttime);
 				}
 			}
 		});
@@ -258,7 +269,7 @@ public class SchedulerActivity extends Activity {
 						Debugger.debug("schedule stop: " + starttime.toLocaleString());
 					}
 					
-					doSchedule(DoubanFmService.SCHEDULE_START, starttime);
+					doSchedule(Global.SCHEDULE_TYPE_START_PLAYER, starttime);
 				}
 			}
         	

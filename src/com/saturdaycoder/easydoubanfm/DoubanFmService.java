@@ -51,131 +51,12 @@ import org.apache.http.params.*;
 import com.saturdaycoder.easydoubanfm.apis.DoubanFmApi;
 import com.saturdaycoder.easydoubanfm.channels.FmChannel;
 import com.saturdaycoder.easydoubanfm.downloader.*;
-import com.saturdaycoder.easydoubanfm.notifications.DoubanFmNotificationManager;
 import com.saturdaycoder.easydoubanfm.player.*;
 import com.saturdaycoder.easydoubanfm.scheduling.SchedulerManager;
 
 import android.media.MediaScannerConnection.*;
 
 public class DoubanFmService extends Service implements IDoubanFmService {
-	// actions for player
-	public static final String ACTION_PLAYER_SKIP = Global.BROADCAST_PREFIX + ".action.PLAYER_SKIP";
-	public static final String ACTION_PLAYER_NEXT_CHANNEL = Global.BROADCAST_PREFIX + ".action.PLAYER_NEXT_CHANNEL";
-	public static final String ACTION_PLAYER_PLAYPAUSE = Global.BROADCAST_PREFIX + ".action.PLAYER_PLAYPAUSE";
-	public static final String ACTION_PLAYER_PAUSE = Global.BROADCAST_PREFIX + ".action.PLAYER_PAUSE";
-	public static final String ACTION_PLAYER_RESUME = Global.BROADCAST_PREFIX + ".action.PLAYER_RESUME";
-	public static final String ACTION_PLAYER_ON = Global.BROADCAST_PREFIX + ".action.PLAYER_ON";
-	public static final String ACTION_PLAYER_OFF = Global.BROADCAST_PREFIX + ".action.PLAYER_OFF";
-	public static final String ACTION_PLAYER_ONOFF = Global.BROADCAST_PREFIX + ".action.PLAYER_ONOFF";
-	public static final String ACTION_PLAYER_RATE = Global.BROADCAST_PREFIX + ".action.PLAYER_RATE";
-	public static final String ACTION_PLAYER_UNRATE = Global.BROADCAST_PREFIX + ".action.PLAYER_UNRATE";
-	public static final String ACTION_PLAYER_RATEUNRATE = Global.BROADCAST_PREFIX + ".action.PLAYER_RATEUNRATE";
-	public static final String ACTION_PLAYER_TRASH = Global.BROADCAST_PREFIX + ".action.PLAYER_TRASH";
-	public static final String ACTION_PLAYER_SELECT_CHANNEL = Global.BROADCAST_PREFIX + ".action.PLAYER_SELECT_CHANNEL";
-	public static final String ACTION_PLAYER_LOGIN = Global.BROADCAST_PREFIX + ".action.PLAYER_LOGIN";
-	public static final String ACTION_PLAYER_LOGOUT = Global.BROADCAST_PREFIX + ".action.PLAYER_LOGOUT";
-	
-	// actions for scheduler
-	public static final String ACTION_SCHEDULER_COMMAND = Global.BROADCAST_PREFIX + ".action.SCHEDULER_COMMAND";
-	
-	// actions for downloader
-	public static final String ACTION_DOWNLOADER_DOWNLOAD = Global.BROADCAST_PREFIX + ".action.DOWNLOADER_DOWNLOAD";
-	public static final String ACTION_DOWNLOADER_CANCEL = Global.BROADCAST_PREFIX + ".action.DOWNLOADER_CANCEL";
-	public static final String ACTION_DOWNLOADER_CLEAR_NOTIFICATION = Global.BROADCAST_PREFIX + ".action.DOWNLOADER_CLEAR_NOTIFICATION";
-	// extra for other, i.e. ui, etc.
-	public static final String ACTION_WIDGET_UPDATE = Global.BROADCAST_PREFIX + ".action.UPDATE_WIDGET";
-	public static final String ACTION_ACTIVITY_UPDATE = Global.BROADCAST_PREFIX + ".action.UPDATE_ACTIVITY";
-	public static final String ACTION_NULL = Global.BROADCAST_PREFIX + ".action.NULL";
-	// extra for player
-	public static final String EXTRA_MUSIC_URL = "extra.MUSIC_URL";
-	public static final String EXTRA_PICTURE_URL = "extra.MUSIC_URL";
-	
-	public static final String EXTRA_LOGIN_USERNAME = "extra.LOGIN_USERNAME";
-	public static final String EXTRA_LOGIN_PASSWD = "extra.LOGIN_PASSWD";
-	
-	// extra for scheduler
-	public static final String EXTRA_SCHEDULE_TYPE = "extra.SCHEDULE_TYPE";
-	public static final String EXTRA_SCHEDULE_TIME = "extra.SCHEDULE_TIME";
-	
-	//extra for downloader
-	public static final String EXTRA_DOWNLOADER_DOWNLOAD_FILENAME = "extra.DOWNLOAD_FILENAME";
-	
-	// service status
-	public static final String EVENT_PLAYER_MUSIC_PREPARE_PROGRESS = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_PREPARE_PROGRESS";
-	public static final String EVENT_PLAYER_POWER_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.PLAYER_POWER_STATE_CHANGED";
-	public static final String EVENT_PLAYER_MUSIC_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_STATE_CHANGED";
-	public static final String EVENT_PLAYER_MUSIC_PROGRESS = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_PROGRESS";
-	public static final String EVENT_PLAYER_PICTURE_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.PLAYER_PICTURE_STATE_CHANGED";
-	public static final String EVENT_DOWNLOADER_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.DOWNLOADER_STATE_CHANGED";
-	public static final String EVENT_DOWNLOADER_PROGRESS = Global.BROADCAST_PREFIX + ".event.DOWNLOADER_PROGRESS";
-	public static final String EVENT_CHANNEL_CHANGED = Global.BROADCAST_PREFIX + ".event.CHANNEL_CHANGED";
-	public static final String EVENT_LOGIN_STATE_CHANGED = Global.BROADCAST_PREFIX + ".event.LOGIN_STATE_CHANGED";
-	public static final String EVENT_PLAYER_MUSIC_RATED = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_RATED";
-	public static final String EVENT_PLAYER_MUSIC_UNRATED = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_UNRATED";
-	public static final String EVENT_PLAYER_MUSIC_BANNED = Global.BROADCAST_PREFIX + ".event.PLAYER_MUSIC_BANNED";
-	
-	
-	public static final String EXTRA_STATE = "extra.STATE";
-	public static final String EXTRA_PROGRESS = "extra.PROGRESS";
-	public static final String EXTRA_DOWNLOAD_SESSION = "extra.DOWNLOAD_SESSION";
-	public static final String EXTRA_MUSIC_TITLE = "extra.MUSIC_TITLE";
-	public static final String EXTRA_MUSIC_ARTIST = "extra.MUSIC_ARTIST";
-	public static final String EXTRA_MUSIC_ISRATED = "extra.MUSIC_ISRATED";
-	public static final String EXTRA_CHANNEL = "extra.CHANNEL";
-	public static final String EXTRA_REASON = "extra.REASON";
-	
-	
-	public static final int SCHEDULE_STOP = 0;
-	public static final int SCHEDULE_START = 1;
-	
-	public static final int STATE_PREPARE = 0;
-	public static final int STATE_STARTED = 1;	
-	public static final int STATE_FINISHED = 2;
-	public static final int STATE_FAILED = 3;
-	public static final int STATE_CANCELLED = 4;
-	public static final int STATE_IDLE = 5;
-	public static final int STATE_ERROR = 6;
-	
-	public static final int STATE_MUSIC_SKIPPED = 7;
-	public static final int STATE_MUSIC_PAUSED = 8;
-	public static final int STATE_MUSIC_RESUMED = 9;
-	
-	public static final int INVALID_STATE = -1;
-	
-
-	public static final int REASON_NETWORK_IO_ERROR = 3;
-	public static final int REASON_NETWORK_INVALID_URL = 4;
-	
-	public static final int REASON_MUSIC_FINISHED = 5;
-	public static final int REASON_MUSIC_BANNED = 6;
-	public static final int REASON_MUSIC_RATED = 7;
-	public static final int REASON_MUSIC_UNRATED = 8;
-	public static final int REASON_MUSIC_SKIPPED = 9;
-	public static final int REASON_MUSIC_NEW_LIST = 10;
-	public static final int REASON_MUSIC_LIST_EMPTY = 11;
-	
-	
-	
-	public static final int REASON_DOWNLOAD_STORAGE_INVALID = 12;
-	public static final int REASON_DOWNLOAD_STORAGE_FULL = 13;
-	public static final int REASON_DOWNLOAD_STORAGE_IO_ERROR = 14;
-	public static final int REASON_DOWNLOAD_INVALID_FILENAME = 15;
-	
-	public static final int REASON_API_REQUEST_ERROR = 16;	
-	
-	public static final int DOWNLOAD_DEFAULT_SESSIONID = 4;	
-	
-	public static final String QUICKCONTROL_SHAKE = "act_shake";
-	public static final String QUICKCONTROL_MEDIA_BUTTON = "act_media_button";
-	public static final String QUICKCONTROL_MEDIA_BUTTON_LONG = "act_media_button_long";
-	public static final String QUICKCONTROL_CAMERA_BUTTON = "act_camera_button";
-	
-	public static final int QUICKACT_NEXT_MUSIC = 0;
-	public static final int QUICKACT_NEXT_CHANNEL = 1;
-	public static final int QUICKACT_DOWNLOAD_MUSIC = 2;
-	public static final int QUICKACT_PLAY_PAUSE = 3;
-	public static final int QUICKACT_NONE = 4;
-	
 	private final IBinder mBinder = new LocalBinder();
 
 
@@ -277,12 +158,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		registerReceiver(phoneCallListener, phoneFilter);
 
 		// listens to hard button event
-		phoneControlListener = new PhoneControlListener();
-		IntentFilter mfilter = new IntentFilter();
-		mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
-		mfilter.addAction(Intent.ACTION_CAMERA_BUTTON);
-		mfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-		registerReceiver(phoneControlListener, mfilter);
+		//phoneControlListener = new PhoneControlListener();
+		//IntentFilter mfilter = new IntentFilter();
+		//mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
+		//mfilter.addAction(Intent.ACTION_CAMERA_BUTTON);
+		//mfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+		//registerReceiver(phoneControlListener, mfilter);
 		
 		// listens to shake event
 		shakeDetector = new ShakeDetector(this);		
@@ -319,9 +200,15 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			
 			// to keep the start timer valid
 			
+			// 5 minutes is safe margin (in case the service is killed near the scheduled time)
 			if (schedStartMillis > System.currentTimeMillis()) {
 				Debugger.info("Detected scheduled start timer: " + new Date(schedStartMillis).toLocaleString());
-				SchedulerManager.getInstance(this).scheduleStartAt(new Date(schedStartMillis));
+				//SchedulerManager.getInstance(this).scheduleStartAt(new Date(schedStartMillis));
+				Intent i = new Intent(Global.ACTION_SCHEDULER_COMMAND);
+		        i.setComponent(new ComponentName(this, DoubanFmService.class));
+		        i.putExtra(Global.EXTRA_SCHEDULE_TYPE, Global.SCHEDULE_TYPE_START_PLAYER);
+		        i.putExtra(Global.EXTRA_SCHEDULE_TIME, schedStartMillis);
+		        startService(i);
 				return;
 			} else {
 				SchedulerManager.getInstance(this).cancelScheduleStart();
@@ -372,15 +259,15 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		Debugger.warn("Intent action=\"" + intent.getAction() + "\" flags=" + flags + " startId=" + startId);
 		String action = intent.getAction();
-        if (action.equals(ACTION_PLAYER_ON)) {
+        if (action.equals(Global.ACTION_PLAYER_ON)) {
         	Debugger.info("Douban service starts with ON command");
        		openPlayer();
         }        
-        if (action.equals(ACTION_PLAYER_OFF)) {        	
+        if (action.equals(Global.ACTION_PLAYER_OFF)) {        	
         	Debugger.info("Douban service starts with OFF command");
       		closePlayer();
         }	
-        if (action.equals(ACTION_PLAYER_ONOFF)) {
+        if (action.equals(Global.ACTION_PLAYER_ONOFF)) {
         	Debugger.info("Douban service starts with ON/OFF command");
         	if (!dPlayer.isOpen()) {
         		openPlayer();
@@ -389,34 +276,44 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         		closePlayer();
         	}	
         }
-        if (action.equals(ACTION_PLAYER_SKIP)) {
+        if (action.equals(Global.ACTION_PLAYER_SKIP)) {
         	Debugger.info("Douban service starts with SKIP command");
-        	nextMusic();
+        	if (!dPlayer.isOpen()) {
+        		openPlayer();
+        	}
+        	else {
+        		nextMusic();
+        	}
         }
-        if (action.equals(ACTION_PLAYER_NEXT_CHANNEL)) {
+        if (action.equals(Global.ACTION_PLAYER_NEXT_CHANNEL)) {
         	Debugger.info("Douban service starts with SKIP command");
-        	nextChannel();
+        	if (!dPlayer.isOpen()) {
+        		openPlayer();
+        	}
+        	else {
+        		nextChannel();
+        	}
         }
-        if (action.equals(ACTION_PLAYER_TRASH)) {
+        if (action.equals(Global.ACTION_PLAYER_TRASH)) {
         	Debugger.info("Douban service starts with TRASH command");
         	banMusic();
         }
-        if (action.equals(ACTION_PLAYER_RATE)) {
+        if (action.equals(Global.ACTION_PLAYER_RATE)) {
         	Debugger.info("Douban service starts with RATE command");
        		rateMusic();
         }
-        if (action.equals(ACTION_PLAYER_UNRATE)) {
+        if (action.equals(Global.ACTION_PLAYER_UNRATE)) {
         	Debugger.info("Douban service starts with UNRATE command");
        		unrateMusic();
         }
-        if (action.equals(ACTION_PLAYER_RATEUNRATE)) {
+        if (action.equals(Global.ACTION_PLAYER_RATEUNRATE)) {
         	Debugger.info("Douban service starts with RATE/UNRATE command");
         	if (!dPlayer.isMusicRated())
         		rateMusic();
         	else 
         		unrateMusic();
         }
-        if (action.equals(ACTION_PLAYER_PLAYPAUSE)) {
+        if (action.equals(Global.ACTION_PLAYER_PLAYPAUSE)) {
         	
         	Debugger.info("Douban service starts with PLAY/PAUSE command");
         	if (!dPlayer.isOpen()) {
@@ -426,12 +323,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         		playPauseMusic();
         	}
         }
-        if (action.equals(ACTION_PLAYER_PAUSE)) {
+        if (action.equals(Global.ACTION_PLAYER_PAUSE)) {
         	
         	Debugger.info("Douban service starts with PAUSE command");
         	pauseMusic();
         }
-        if (action.equals(ACTION_PLAYER_RESUME)) {
+        if (action.equals(Global.ACTION_PLAYER_RESUME)) {
         	
         	Debugger.info("Douban service starts with RESUME command");
         	if (!dPlayer.isOpen()) {
@@ -441,63 +338,63 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         		resumeMusic();
         	}
         }
-        if (action.equals(ACTION_PLAYER_LOGIN)) {
-        	String username = intent.getStringExtra(EXTRA_LOGIN_USERNAME); 
-        	String passwd = intent.getStringExtra(EXTRA_LOGIN_PASSWD); 
+        if (action.equals(Global.ACTION_PLAYER_LOGIN)) {
+        	String username = intent.getStringExtra(Global.EXTRA_LOGIN_USERNAME); 
+        	String passwd = intent.getStringExtra(Global.EXTRA_LOGIN_PASSWD); 
         	Debugger.info("Douban service starts with LOGIN command");
         	
         	login(username, passwd);
         }
-        if (action.equals(ACTION_PLAYER_LOGOUT)) {
+        if (action.equals(Global.ACTION_PLAYER_LOGOUT)) {
         	Debugger.info("Douban service starts with LOGOUT command");        	
         	logout();
         }
-        if (action.equals(ACTION_PLAYER_SELECT_CHANNEL)) {
-        	int chann = intent.getIntExtra(EXTRA_CHANNEL, 0);
+        if (action.equals(Global.ACTION_PLAYER_SELECT_CHANNEL)) {
+        	int chann = intent.getIntExtra(Global.EXTRA_CHANNEL, 0);
         	Debugger.info("Douban service starts with SELECT_CHANNEL: " + chann);
         	selectChannel(chann);
         }
         
-        if (action.equals(ACTION_DOWNLOADER_DOWNLOAD)) {
-        	String url = intent.getStringExtra(EXTRA_MUSIC_URL);
-        	String filename = intent.getStringExtra(EXTRA_DOWNLOADER_DOWNLOAD_FILENAME);
+        if (action.equals(Global.ACTION_DOWNLOADER_DOWNLOAD)) {
+        	String url = intent.getStringExtra(Global.EXTRA_MUSIC_URL);
+        	String filename = intent.getStringExtra(Global.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME);
         	Debugger.info("Douban service starts with DOWNLOAD command");
         	openDownloader();
         	downloadMusic(url, filename);
         }
-        if (action.equals(ACTION_DOWNLOADER_CANCEL)) {
-        	String url = intent.getStringExtra(EXTRA_MUSIC_URL);
+        if (action.equals(Global.ACTION_DOWNLOADER_CANCEL)) {
+        	String url = intent.getStringExtra(Global.EXTRA_MUSIC_URL);
         	Debugger.info("Douban service starts with CANCEL DOWNLOAD command");
         	openDownloader();
         	cancelDownload(url);
         }
-        if (action.equals(ACTION_DOWNLOADER_CLEAR_NOTIFICATION)) {
-        	String url = intent.getStringExtra(EXTRA_MUSIC_URL);
+        if (action.equals(Global.ACTION_DOWNLOADER_CLEAR_NOTIFICATION)) {
+        	String url = intent.getStringExtra(Global.EXTRA_MUSIC_URL);
         	Debugger.info("Douban service starts with CLEAR NOTIFICATION command");
         	openDownloader();
         	clearDownloadNotification(url);
         }
 
 
-        if (action.equals(DoubanFmService.ACTION_WIDGET_UPDATE)) {
+        if (action.equals(Global.ACTION_WIDGET_UPDATE)) {
         	Debugger.info("Douban service starts with UPDATE_WIDGET");
         	updateWidgets();
         }
         
-        if (action.equals(DoubanFmService.ACTION_ACTIVITY_UPDATE)) {
+        if (action.equals(Global.ACTION_ACTIVITY_UPDATE)) {
         	Debugger.info("Douban service starts with UPDATE_ACTIVITY");
         	updateActivity();
         }
         
-        if (action.equals(DoubanFmService.ACTION_SCHEDULER_COMMAND)) {
-        	int cmd = intent.getIntExtra(EXTRA_SCHEDULE_TYPE, -1);
-        	long millis = intent.getLongExtra(EXTRA_SCHEDULE_TIME, -1);
+        if (action.equals(Global.ACTION_SCHEDULER_COMMAND)) {
+        	int cmd = intent.getIntExtra(Global.EXTRA_SCHEDULE_TYPE, -1);
+        	long millis = intent.getLongExtra(Global.EXTRA_SCHEDULE_TIME, -1);
         	if (millis > System.currentTimeMillis()) {
-        		if (cmd == SCHEDULE_START) {
+        		if (cmd == Global.SCHEDULE_TYPE_START_PLAYER) {
         			SchedulerManager.getInstance(this).scheduleStartAt(new Date(millis));
         			return START_STICKY;
         		}
-        		if (cmd == SCHEDULE_STOP) {
+        		if (cmd == Global.SCHEDULE_TYPE_STOP_PLAYER) {
         			SchedulerManager.getInstance(this).scheduleStopAt(new Date(millis));
         			return START_STICKY;
         		}
@@ -529,10 +426,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				shakeDetector = null;
 			}
         
-        	if (phoneControlListener != null) {
-        		unregisterReceiver(phoneControlListener);
-        		phoneControlListener = null;
-        	}
+        	//if (phoneControlListener != null) {
+        	//	unregisterReceiver(phoneControlListener);
+        	//	phoneControlListener = null;
+        	//}
         	
         	if (phoneCallListener != null) {
         		unregisterReceiver(phoneCallListener);
@@ -615,7 +512,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			Intent it = new Intent(DoubanFmService.this, EasyDoubanFm.class);
 			PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 0, it, 0);
 			fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
-			startForeground(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID, fgNotification);
+			startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
 			
 			//if (wakeLock != null) {
 			//	wakeLock.acquire();
@@ -681,7 +578,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			Intent it = new Intent(this, EasyDoubanFm.class);
 			PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
 			fgNotification.setLatestEventInfo(this, "", "", pi);		
-			startForeground(DoubanFmNotificationManager.SERVICE_NOTIFICATION_ID, fgNotification);
+			startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
 			
 			dPlayer.resumeMusic();
 		}
@@ -1012,167 +909,17 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			}
 		}
 	}
-	   
 	
-	private boolean doQuickAction(int quickact) {
-		switch (quickact) {
-		case QUICKACT_NEXT_MUSIC:
-			nextMusic();
-			return true;
-		case QUICKACT_NEXT_CHANNEL:
-			nextChannel();
-			return true;
-		case QUICKACT_PLAY_PAUSE:
-			playPauseMusic();
-			return true;
-		case QUICKACT_DOWNLOAD_MUSIC:
-			openDownloader();
-			downloadMusic(null, null);
-			return true;
-		default:
-			return false;
-		}
-				
-	}
-	
-	private boolean handleShakeControl() {
-		Debugger.info("Detected SHAKING!!!");
-		if (!dPlayer.isOpen()) {
-			return false;
-		}
-		if (Preference.getShakeEnable(this)) {
-			int qa = Preference.getQuickAction(this, QUICKCONTROL_SHAKE);
-			return doQuickAction(qa);
-		}
-		else {
-			return false;
-		}
-	}
-	
-	private boolean isMediaButtonDown = false;
-	private long mediaButtonDownStartTime;
-	private final Object mediaButtonDownLock = new Object();
-	private boolean handleMediaButtonControl(int keycode, int keyaction, long keytime) {
-
-		synchronized(mediaButtonDownLock) {
-			Debugger.debug("keycode = " + keycode + " action = " + keyaction 
-					+ "eventtime = " + keytime);
-			if (!dPlayer.isOpen()) {
-				return false;
-			}
-
-			switch (keyaction) {
-			case KeyEvent.ACTION_DOWN: {								
-				if (!isMediaButtonDown) {
-					mediaButtonDownStartTime = keytime;
-				}
-				else if (mediaButtonDownStartTime != -1 &&
-						keytime - mediaButtonDownStartTime > 1000 * Preference.getMediaButtonLongPressThreshold(this)) {
-					mediaButtonDownStartTime = -1;
-					Debugger.info("MEDIA BUTTON LONG PRESS");
-					if (Preference.getMediaButtonLongEnable(this)) {
-						doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
-					}
-				}
-				isMediaButtonDown = true;
-				break;
-			}
-			case KeyEvent.ACTION_UP: {
-				
-				if (isMediaButtonDown) {
-					if (mediaButtonDownStartTime == -1 || keytime < mediaButtonDownStartTime) {
-						Debugger.info("MEDIA BUTTON PRESSED but wrong start time");						
-					}
-					else if (keytime - mediaButtonDownStartTime > 1000 * Preference.getMediaButtonLongPressThreshold(this)) {
-						Debugger.info("MEDIA BUTTON LONG PRESS");
-						if (Preference.getMediaButtonLongEnable(this)) {							
-							doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON_LONG));
-						}
-						
-					}
-					else {
-						Debugger.info("MEDIA BUTTON SHORT PRESS");
-						if (Preference.getMediaButtonEnable(this)) {							
-							doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_MEDIA_BUTTON));
-						}
-					}
-				}
-				isMediaButtonDown = false;
-				mediaButtonDownStartTime = -1;
-				break;
-			}
-			case KeyEvent.ACTION_MULTIPLE: 
-			default:
-				isMediaButtonDown = false;
-				break;
-			}
-			return true;
-		}
-	}
-	
-	private boolean handleCameraButtonControl() {
-
-	
-		Debugger.info("ACTION_CAMERA_BUTTON heard");
-		if (!dPlayer.isOpen()) {
-			return false;
-		}
-		if (!Preference.getCameraButtonEnable(this)) {
-			return false;
-		}		
-
-		return doQuickAction(Preference.getQuickAction(this, QUICKCONTROL_CAMERA_BUTTON));
-	}
-	
-
-	
-
-	private class PhoneControlListener extends BroadcastReceiver 
-			 implements ShakeDetector.OnShakeListener {
-		
+	private class PhoneControlListener implements ShakeDetector.OnShakeListener {
 		@Override
 		public void onShake(Context context) {
-			handleShakeControl();
-		}
-		
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (intent == null) {
-				Debugger.error("null Intent");
+			Debugger.info("Detected SHAKING!!!");
+			if (!dPlayer.isOpen()) {
 				return;
 			}
-		
-			String action = intent.getAction();
-			if (action == null) {
-				Debugger.error("null Intent action");
-				return;
-			}
-			
-			if (action.equals(Intent.ACTION_MEDIA_BUTTON)) {
-				Debugger.info("ACTION_MEDIA_BUTTON heard");
-			
-				KeyEvent ke = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-				
-				if (ke == null) {
-					Debugger.error("ACTION_MEDIA_BUTTON heard but null KeyEvent");
-					return;
-				}
-				
-				int keycode = ke.getKeyCode();
-				int keyaction = ke.getAction();
-				long eventtime = ke.getEventTime();
-				
-				if (handleMediaButtonControl(keycode, keyaction, eventtime)) {
-					abortBroadcast();
-					setResultData(null);
-				}
-			}
-			
-			if (action.equals(Intent.ACTION_CAMERA_BUTTON)) {
-				if (handleCameraButtonControl()) {
-					abortBroadcast();
-					setResultData(null);
-				}
+			if (Preference.getShakeEnable(DoubanFmService.this)) {
+				int qa = Preference.getQuickAction(DoubanFmService.this, Global.QUICKCONTROL_SHAKE);
+				QuickAction.doQuickAction(DoubanFmService.this, qa);
 			}
 		}
 	}

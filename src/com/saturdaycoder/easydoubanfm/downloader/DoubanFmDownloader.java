@@ -19,6 +19,7 @@ import org.apache.http.params.HttpParams;
 import com.saturdaycoder.easydoubanfm.Database;
 import com.saturdaycoder.easydoubanfm.Debugger;
 import com.saturdaycoder.easydoubanfm.DoubanFmService;
+import com.saturdaycoder.easydoubanfm.Global;
 import com.saturdaycoder.easydoubanfm.Preference;
 import com.saturdaycoder.easydoubanfm.R;
 import com.saturdaycoder.easydoubanfm.SingleMediaScanner;
@@ -48,13 +49,6 @@ public class DoubanFmDownloader {
 	//private HashMap<Integer, Integer> progressMap = new HashMap<Integer, Integer>();
 	
 	private NotificationManager notManager = null;
-	
-	private static final int DOWNLOAD_ERROR_OK = 0;
-	private static final int DOWNLOAD_ERROR_IOERROR = -1;
-	private static final int DOWNLOAD_ERROR_CANCELLED = -2;
-	
-	private static final int NO_REASON = -1;
-	private static final int INVALID_DOWNLOAD_ID = -1;
 	
 	public DoubanFmDownloader(Context context, Database db) {
 		this.context = context;
@@ -86,19 +80,19 @@ public class DoubanFmDownloader {
 		synchronized(downloadMapLock) { 
 			Debugger.verbose("Downloader.download url=\"" + url + "\"");
 			if (filename == null || filename.equals("") || url == null || url.equals("")) {
-				return INVALID_DOWNLOAD_ID;
+				return Global.INVALID_DOWNLOAD_ID;
 			}
 			
 			int id = db.addDownload(url, filename);
 			Debugger.debug("Downloader.download id=\"" + id + "\"");
-			if (id != INVALID_DOWNLOAD_ID) {
+			if (id != Global.INVALID_DOWNLOAD_ID) {
 				DownloadTask task = new DownloadTask();
 				Debugger.debug("download task id=" + id + " added");
 				downloadMap.put(id, task);
 				task.execute(url, filename);
 				
-				notifyDownloadStateChanged(DoubanFmService.STATE_STARTED,  
-						filename, url, NO_REASON);
+				notifyDownloadStateChanged(Global.STATE_STARTED,  
+						filename, url, Global.NO_REASON);
 			}
 			return id;
 		}
@@ -108,7 +102,7 @@ public class DoubanFmDownloader {
 		synchronized(downloadMapLock) {
 			int id = db.getDownloadIdByUrl(url);
 			
-			if (id == INVALID_DOWNLOAD_ID) {
+			if (id == Global.INVALID_DOWNLOAD_ID) {
 				Debugger.debug("can not get invalid download id by url: " + url);
 				return;
 			}
@@ -173,22 +167,22 @@ public class DoubanFmDownloader {
 		synchronized(notificationMapLock) {
 			int id = db.getDownloadIdByUrl(url);
 			
-			if (id == INVALID_DOWNLOAD_ID) {
+			if (id == Global.INVALID_DOWNLOAD_ID) {
 				Debugger.error("no valid not id when notify download state changed: url=\"" + url + "\"");
 				return;
 			}
 			
 			switch(downloadState) {
-			case DoubanFmService.STATE_STARTED: {
+			case Global.STATE_STARTED: {
 				notManager.cancel(id);
 				notificationMap.remove(id);
 				
-				Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_CANCEL);
+				Intent i = new Intent(Global.ACTION_DOWNLOADER_CANCEL);
 				if (filename == null) {
 					filename = db.getFilenameByUrl(url);
 				}
-				i.putExtra(DoubanFmService.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
-				i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+				i.putExtra(Global.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
+				i.putExtra(Global.EXTRA_MUSIC_URL, url);
 				i.putExtra("uniquevalue", System.currentTimeMillis());
 				ComponentName cn = new ComponentName(context, DoubanFmService.class);
 				i.setComponent(cn);
@@ -223,20 +217,20 @@ public class DoubanFmDownloader {
 				}
 				break;
 			}
-			case DoubanFmService.STATE_CANCELLED: {
+			case Global.STATE_CANCELLED: {
 				
 				notManager.cancel(id);
 				notificationMap.remove(id);
 				
-				Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+				Intent i = new Intent(Global.ACTION_DOWNLOADER_DOWNLOAD);
 				if (filename == null) {
 					filename = db.getFilenameByUrl(url);
 				}
 				
 				Debugger.debug("notifying cancelled download of url=\"" + url + "\"" );
 				
-				i.putExtra(DoubanFmService.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
-				i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+				i.putExtra(Global.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
+				i.putExtra(Global.EXTRA_MUSIC_URL, url);
 				i.putExtra("uniquevalue", System.currentTimeMillis());
 				ComponentName cn = new ComponentName(context, DoubanFmService.class);
 				i.setComponent(cn);
@@ -265,16 +259,16 @@ public class DoubanFmDownloader {
 		        
 		        break;	
 			}
-			case DoubanFmService.STATE_FINISHED: {
+			case Global.STATE_FINISHED: {
 				notManager.cancel(id);
 				notificationMap.remove(id);
 				
-				Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+				Intent i = new Intent(Global.ACTION_DOWNLOADER_DOWNLOAD);
 				if (filename == null) {
 					filename = db.getFilenameByUrl(url);
 				}
-				i.putExtra(DoubanFmService.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
-				i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+				i.putExtra(Global.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
+				i.putExtra(Global.EXTRA_MUSIC_URL, url);
 				i.putExtra("uniquevalue", System.currentTimeMillis());
 				ComponentName cn = new ComponentName(context, DoubanFmService.class);
 				i.setComponent(cn);
@@ -302,7 +296,7 @@ public class DoubanFmDownloader {
 		        
 		        break;			
 			}
-			case DoubanFmService.STATE_ERROR: {
+			case Global.STATE_ERROR: {
 				try {
 					notManager.cancel(id);
 				} catch (Exception e) {
@@ -310,12 +304,12 @@ public class DoubanFmDownloader {
 				}
 				notificationMap.remove(id);
 				
-				Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+				Intent i = new Intent(Global.ACTION_DOWNLOADER_DOWNLOAD);
 				if (filename == null) {
 					filename = db.getFilenameByUrl(url);
 				}
-				i.putExtra(DoubanFmService.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
-				i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
+				i.putExtra(Global.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
+				i.putExtra(Global.EXTRA_MUSIC_URL, url);
 				i.putExtra("uniquevalue", System.currentTimeMillis());
 				ComponentName cn = new ComponentName(context, DoubanFmService.class);
 				i.setComponent(cn);
@@ -429,10 +423,10 @@ public class DoubanFmDownloader {
 				musicfile = getDownloadFile(filename);
 				
 				switch (result) {
-				case DOWNLOAD_ERROR_OK:
+				case Global.DOWNLOAD_ERROR_OK:
 					Debugger.info("Download finish");
 					
-					notifyDownloadStateChanged(DoubanFmService.STATE_FINISHED, filename, url, NO_REASON);
+					notifyDownloadStateChanged(Global.STATE_FINISHED, filename, url, Global.NO_REASON);
 					
 					
 					if (musicfile != null) {
@@ -440,19 +434,19 @@ public class DoubanFmDownloader {
 					}
 					
 					break;
-				case DOWNLOAD_ERROR_IOERROR:
+				case Global.DOWNLOAD_ERROR_IOERROR:
 					Debugger.info("Download error");
 					
-					notifyDownloadStateChanged(DoubanFmService.STATE_ERROR, filename, url, NO_REASON);
+					notifyDownloadStateChanged(Global.STATE_ERROR, filename, url, Global.NO_REASON);
 	
 					if (musicfile.exists()) {
 						musicfile.delete();
 					}
 					break;
-				case DOWNLOAD_ERROR_CANCELLED:
+				case Global.DOWNLOAD_ERROR_CANCELLED:
 					Debugger.info("Download cancelled");
 					
-					notifyDownloadStateChanged(DoubanFmService.STATE_CANCELLED, filename, url, NO_REASON);
+					notifyDownloadStateChanged(Global.STATE_CANCELLED, filename, url, Global.NO_REASON);
 	
 					if (musicfile.exists()) {
 						musicfile.delete();
@@ -481,7 +475,7 @@ public class DoubanFmDownloader {
 				int id = db.getDownloadIdByUrl(url);
 				downloadMap.remove(id);
 				Debugger.info("remaining task " + downloadMap.size());
-				notifyDownloadStateChanged(DoubanFmService.STATE_CANCELLED, filename, url, NO_REASON);
+				notifyDownloadStateChanged(Global.STATE_CANCELLED, filename, url, Global.NO_REASON);
 	
 				if (downloadMap.size() == 0) {
 					close();
@@ -497,7 +491,7 @@ public class DoubanFmDownloader {
 			if (params.length < 2) {
 				Debugger.error("Download task requires more arguments than " 
 						+ params.length);
-				return DOWNLOAD_ERROR_CANCELLED;
+				return Global.DOWNLOAD_ERROR_CANCELLED;
 			}
 			this.url = params[0];
 			this.filename = params[1];
@@ -520,7 +514,7 @@ public class DoubanFmDownloader {
     			httpResponse = new DefaultHttpClient(hp).execute(httpGet);
      		} catch (Exception e) {
     			Debugger.error("Error getting response of downloading music: " + e.toString());
-    			return DOWNLOAD_ERROR_IOERROR;
+    			return Global.DOWNLOAD_ERROR_IOERROR;
     		}
     		
     		Debugger.info("received response");
@@ -533,7 +527,7 @@ public class DoubanFmDownloader {
 			
 			
 			if (isCancelled()) {
-				return DOWNLOAD_ERROR_CANCELLED;
+				return Global.DOWNLOAD_ERROR_CANCELLED;
 			}
 
 			// step 2. create file
@@ -544,13 +538,13 @@ public class DoubanFmDownloader {
 				
 				if (musicfile == null) {
 					Debugger.error("can not get download file");
-					return DOWNLOAD_ERROR_IOERROR;
+					return Global.DOWNLOAD_ERROR_IOERROR;
 				}
 				Debugger.info("got download file, start writing");
 				os = new FileOutputStream(musicfile);
 			} catch (Exception e) {
 				Debugger.error("Error writing file to external storage: " + e.toString());
-				return DOWNLOAD_ERROR_IOERROR;
+				return Global.DOWNLOAD_ERROR_IOERROR;
 			}
 			
 			// step 3. write into file after each read
@@ -561,7 +555,7 @@ public class DoubanFmDownloader {
 				downloadedBytes = 0;
 				while (downloadedBytes < totalBytes) {
 					if (isCancelled())
-						return DOWNLOAD_ERROR_CANCELLED;
+						return Global.DOWNLOAD_ERROR_CANCELLED;
 					int tmpl = is.read(b, 0, DOWNLOAD_BUFFER);
 					if (tmpl == -1)
 						break;
@@ -577,10 +571,10 @@ public class DoubanFmDownloader {
 				os.flush();
 				os.close();
 				publishProgress(100);
-				return DOWNLOAD_ERROR_OK;
+				return Global.DOWNLOAD_ERROR_OK;
 			} catch (Exception e) {
 				Debugger.error("Error getting content of music: " + e.toString());
-				return DOWNLOAD_ERROR_IOERROR;
+				return Global.DOWNLOAD_ERROR_IOERROR;
 			}
 			
 		}

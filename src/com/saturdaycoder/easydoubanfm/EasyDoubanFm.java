@@ -157,7 +157,7 @@ public class EasyDoubanFm extends Activity {
 		buttonSkip.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SKIP);
+				Intent i = new Intent(Global.ACTION_PLAYER_SKIP);
 				i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 				startService(i);
 			}
@@ -169,7 +169,7 @@ public class EasyDoubanFm extends Activity {
 			public void onClick(View v) {
 				//_this.progressBar.setVisibility(ProgressBar.VISIBLE);
 				//_this.imageCover.setVisibility(ImageView.GONE);
-				Intent i = new Intent(DoubanFmService.ACTION_PLAYER_PLAYPAUSE);
+				Intent i = new Intent(Global.ACTION_PLAYER_PLAYPAUSE);
 				i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 				startService(i);
 			}
@@ -179,7 +179,7 @@ public class EasyDoubanFm extends Activity {
 		buttonDownload.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_DOWNLOAD);
+				Intent i = new Intent(Global.ACTION_DOWNLOADER_DOWNLOAD);
 				i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 				startService(i);
 			}
@@ -189,7 +189,7 @@ public class EasyDoubanFm extends Activity {
 		buttonBan.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(DoubanFmService.ACTION_PLAYER_TRASH);
+				Intent i = new Intent(Global.ACTION_PLAYER_TRASH);
 				i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 				startService(i);
 			}
@@ -199,7 +199,7 @@ public class EasyDoubanFm extends Activity {
 		buttonRateUnrate.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(DoubanFmService.ACTION_PLAYER_RATEUNRATE);
+				Intent i = new Intent(Global.ACTION_PLAYER_RATEUNRATE);
 				i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 				startService(i);
 			}
@@ -239,7 +239,7 @@ public class EasyDoubanFm extends Activity {
     		
     	}
 		
-    	Intent i = new Intent(DoubanFmService.ACTION_ACTIVITY_UPDATE);
+    	Intent i = new Intent(Global.ACTION_ACTIVITY_UPDATE);
     	i.setComponent(new ComponentName(this, DoubanFmService.class));
     	startService(i);
     	
@@ -252,7 +252,7 @@ public class EasyDoubanFm extends Activity {
 		   public void run() {
 		    	_this.progressBar.setVisibility(ProgressBar.VISIBLE);
 				_this.imageCover.setVisibility(ImageView.GONE);
-		    	Intent i = new Intent(DoubanFmService.ACTION_PLAYER_ON);
+		    	Intent i = new Intent(Global.ACTION_PLAYER_ON);
 		    	i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 		    	startService(i);
 		   }
@@ -365,7 +365,7 @@ public class EasyDoubanFm extends Activity {
 	        	break;
 	        }
             case MENU_CLOSE_ID: { 
-            	Intent intent = new Intent(DoubanFmService.ACTION_PLAYER_OFF);
+            	Intent intent = new Intent(Global.ACTION_PLAYER_OFF);
 				intent.setComponent(new ComponentName(this, DoubanFmService.class));
 				startService(intent);
 				this.finish();

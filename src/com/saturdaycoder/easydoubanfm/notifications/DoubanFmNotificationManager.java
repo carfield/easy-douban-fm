@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.saturdaycoder.easydoubanfm.Debugger;
 import com.saturdaycoder.easydoubanfm.DoubanFmService;
 import com.saturdaycoder.easydoubanfm.EasyDoubanFm;
+import com.saturdaycoder.easydoubanfm.Global;
 import com.saturdaycoder.easydoubanfm.R;
 import com.saturdaycoder.easydoubanfm.SchedulerActivity;
 import com.saturdaycoder.easydoubanfm.downloader.IDownloaderObserver;
@@ -26,10 +27,6 @@ public class DoubanFmNotificationManager
 								implements ISchedulerObserver, 
 										   IPlayerObserver, 
 										   IDownloaderObserver {
-	
-	public static final int SERVICE_NOTIFICATION_ID = 1;
-	public static final int STOP_NOTIFICATION_ID = SERVICE_NOTIFICATION_ID + 1;
-	public static final int START_NOTIFICATION_ID = SERVICE_NOTIFICATION_ID + 2;
 	
 	private NotificationManager notManager; 
 	private Context context;
@@ -112,16 +109,16 @@ public class DoubanFmNotificationManager
 		int notId = 0;
 		String popText = "";
 		switch (type) {
-		case SchedulerTask.TASK_START:
+		case Global.SCHEDULE_TYPE_START_PLAYER:
 			notText = context.getResources().getString(R.string.notify_start_timer);
 			notIconId = android.R.drawable.ic_dialog_alert;
-			notId = START_NOTIFICATION_ID;
+			notId = Global.NOTIFICATION_ID_SCHEDULE_START;
 			popText = "开启";
 			break;
-		case SchedulerTask.TASK_STOP:
+		case Global.SCHEDULE_TYPE_STOP_PLAYER:
 			notText = context.getResources().getString(R.string.notify_stop_timer);
 			notIconId = android.R.drawable.ic_dialog_alert;
-			notId = STOP_NOTIFICATION_ID;
+			notId = Global.NOTIFICATION_ID_SCHEDULE_STOP;
 			popText = "关闭";
 			break;
 		default:
@@ -139,10 +136,7 @@ public class DoubanFmNotificationManager
 		
 		try {
 			notManager.notify(notId, notification);
-			long remaining = when.getTime() - System.currentTimeMillis();
-			long hours = remaining / (1000 * 60 * 60);
-			long mins = remaining / (1000 * 60) - hours * 60;
-			popNotify("将在" + hours + "小时" + mins + "分后自动" + popText);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -155,19 +149,19 @@ public class DoubanFmNotificationManager
 	}
 	
 	private void cancelAllSchedulerNotifications() {
-		cancelSchedulerNotification(START_NOTIFICATION_ID);
-		cancelSchedulerNotification(STOP_NOTIFICATION_ID);
+		cancelSchedulerNotification(Global.NOTIFICATION_ID_SCHEDULE_START);
+		cancelSchedulerNotification(Global.NOTIFICATION_ID_SCHEDULE_STOP);
 	}
 	
 	private void cancelSchedulerNotification(int type) {
 		Debugger.debug("DoubanFmNotification.onTaskDisabled(" + type + ")");
 		int notId = 0;
 		switch (type) {
-		case SchedulerTask.TASK_START:
-			notId = START_NOTIFICATION_ID;
+		case Global.SCHEDULE_TYPE_START_PLAYER:
+			notId = Global.NOTIFICATION_ID_SCHEDULE_START;
 			break;
-		case SchedulerTask.TASK_STOP:
-			notId = STOP_NOTIFICATION_ID;
+		case Global.SCHEDULE_TYPE_STOP_PLAYER:
+			notId = Global.NOTIFICATION_ID_SCHEDULE_STOP;
 			break;
 		default:
 			return;

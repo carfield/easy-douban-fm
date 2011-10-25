@@ -111,9 +111,9 @@ public class ChannelSelectorActivity extends Activity {
         			startActivityForResult(intent, 0);
                 }
                 else {
-	                Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SELECT_CHANNEL);
+	                Intent i = new Intent(Global.ACTION_PLAYER_SELECT_CHANNEL);
 	                i.setComponent(new ComponentName(ChannelSelectorActivity.this, DoubanFmService.class));
-	                i.putExtra(DoubanFmService.EXTRA_CHANNEL, chan.channelId);
+	                i.putExtra(Global.EXTRA_CHANNEL, chan.channelId);
 	                startService(i);
 	                
 	                ChannelSelectorActivity.this.finish();
@@ -150,8 +150,8 @@ public class ChannelSelectorActivity extends Activity {
     			return;
     		}
     		if (FmChannel.isChannelIdValid(pendingSelChanId)) {
-    			Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SELECT_CHANNEL);
-                i.putExtra(DoubanFmService.EXTRA_CHANNEL, pendingSelChanId);
+    			Intent i = new Intent(Global.ACTION_PLAYER_SELECT_CHANNEL);
+                i.putExtra(Global.EXTRA_CHANNEL, pendingSelChanId);
                 startService(i);
                 
                 ChannelSelectorActivity.this.finish();
