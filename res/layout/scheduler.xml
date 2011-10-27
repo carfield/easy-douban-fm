@@ -22,6 +22,7 @@ android:id="@+id/scroll"
 
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		    android:orientation="horizontal"
+		    android:paddingTop="10dip"
 		    android:layout_width="fill_parent"
 		    android:layout_height="50dip"		   
 		    >
@@ -44,7 +45,11 @@ android:id="@+id/scroll"
  
         <TimePicker
             android:id="@+id/stopTimerPicker"
-            android:layout_width="wrap_content"
+            android:paddingTop="10dip"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:paddingBottom="10dip"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
    	</LinearLayout>
@@ -58,6 +63,7 @@ android:id="@+id/scroll"
    		xmlns:android="http://schemas.android.com/apk/res/android" 
    		android:orientation="horizontal"
    		android:layout_width="fill_parent"
+   		android:paddingTop="10dip"
    		android:layout_height="50dip"   		
    		>
 	    <CheckBox 
@@ -78,7 +84,11 @@ android:id="@+id/scroll"
     </LinearLayout>
     <TimePicker
             android:id="@+id/startTimerPicker"
-            android:layout_width="wrap_content"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:paddingBottom="10dip"
+            android:paddingTop="10dip"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
     <TextView

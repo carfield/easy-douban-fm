@@ -457,15 +457,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		//closeDownloader();
 	}	
 	
-	private Runnable mBanMusicTask = new Runnable() {
-		   public void run() {
-			   dPlayer.banMusic();
-		   }
-		};	
+//	private Runnable mBanMusicTask = new Runnable() {
+//		   public void run() {
+//			   dPlayer.banMusic();
+//		   }
+//		};	
 	private void banMusic() {
 		if (dPlayer.isOpen()) {
-			mHandler.removeCallbacks(mBanMusicTask);
-	        mHandler.postDelayed(mBanMusicTask, 50);			
+			dPlayer.banMusic();
+			//mHandler.removeCallbacks(mBanMusicTask);
+	        //mHandler.postDelayed(mBanMusicTask, 50);			
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
@@ -497,43 +498,49 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		dDownloader.close();
 	}
 
-	private PowerManager.WakeLock wakeLock = null;
-	private Runnable mOpenPlayerTask = new Runnable() {
-	   public void run() {
-
-		   	Notification fgNotification = new Notification(R.drawable.icon,
-					getResources().getString(R.string.app_name),
-			        System.currentTimeMillis());
-			fgNotification.flags |= Notification.FLAG_NO_CLEAR;
-			Intent it = new Intent(DoubanFmService.this, EasyDoubanFm.class);
-			PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 0, it, 0);
-			fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
-			startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
-			
-			//if (wakeLock != null) {
-			//	wakeLock.acquire();
-			//}
-			
-			dPlayer.open();
-		   
-	   }
-	};
+//	private PowerManager.WakeLock wakeLock = null;
+//	private Runnable mOpenPlayerTask = new Runnable() {
+//	   public void run() {
+//
+//		   	Notification fgNotification = new Notification(R.drawable.icon,
+//					getResources().getString(R.string.app_name),
+//			        System.currentTimeMillis());
+//			fgNotification.flags |= Notification.FLAG_NO_CLEAR;
+//			Intent it = new Intent(DoubanFmService.this, EasyDoubanFm.class);
+//			PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 0, it, 0);
+//			fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
+//			startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
+//		
+//			dPlayer.open();
+//		   
+//	   }
+//	};
 
 	private void openPlayer() {
 		// start foreground with notification
-		   if (!dPlayer.isOpen()) {
+//		   if (!dPlayer.isOpen()) {
+//		
+//				mHandler.removeCallbacks(mOpenPlayerTask);
+//		        mHandler.postDelayed(mOpenPlayerTask, Global.SERVICE_COMMAND_DELAY);
+//		   }
+	   	Notification fgNotification = new Notification(R.drawable.icon,
+				getResources().getString(R.string.app_name),
+		        System.currentTimeMillis());
+		fgNotification.flags |= Notification.FLAG_NO_CLEAR;
+		Intent it = new Intent(DoubanFmService.this, EasyDoubanFm.class);
+		PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 0, it, 0);
+		fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
+		startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
 		
-				mHandler.removeCallbacks(mOpenPlayerTask);
-		        mHandler.postDelayed(mOpenPlayerTask, Global.SERVICE_COMMAND_DELAY);
-		   }
+		dPlayer.open();
 	}
 	
-	private Runnable mClosePlayerTask = new Runnable() {
-	   public void run() {
-		   stopForeground(true);
-		   dPlayer.close();
-	   }
-	};
+//	private Runnable mClosePlayerTask = new Runnable() {
+//	   public void run() {
+//		   stopForeground(true);
+//		   dPlayer.close();
+//	   }
+//	};
 	private void closePlayer() {
 
 		
@@ -558,11 +565,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		closePlayer();
 		stopSelf();
 	}
-	private Runnable mResumeMusicTask = new Runnable() {
-		   public void run() {
-			   dPlayer.resumeMusic();
-		   }
-		};	
+//	private Runnable mResumeMusicTask = new Runnable() {
+//		   public void run() {
+//			   dPlayer.resumeMusic();
+//		   }
+//		};	
 	private void resumeMusic() {
 		if (dPlayer.isOpen()) {
 			mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
@@ -579,11 +586,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			dPlayer.resumeMusic();
 		}
 	}
-	private Runnable mPauseMusicTask = new Runnable() {
-		   public void run() {
-			   dPlayer.pauseMusic();
-		   }
-		};	
+//	private Runnable mPauseMusicTask = new Runnable() {
+//		   public void run() {
+//			   dPlayer.pauseMusic();
+//		   }
+//		};	
 	private void pauseMusic() {
 		if (dPlayer.isOpen()) {
 			stopForeground(true);
@@ -623,46 +630,49 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 	}
 	
-	private class SelectChannelRunnable implements Runnable {
-		private int chanId;
-		public SelectChannelRunnable(int chanId) {
-			this.chanId = chanId; 
-		}
-		@Override
-		public void run() {
-			dPlayer.selectChannel(chanId);
-		}
-	}
+//	private class SelectChannelRunnable implements Runnable {
+//		private int chanId;
+//		public SelectChannelRunnable(int chanId) {
+//			this.chanId = chanId; 
+//		}
+//		@Override
+//		public void run() {
+//			dPlayer.selectChannel(chanId);
+//		}
+//	}
 	@Override
 	public void selectChannel(int id) {
+		dPlayer.selectChannel(id);
 		//if (dPlayer.isOpen()) {
-	        mHandler.postDelayed(new SelectChannelRunnable(id), Global.SERVICE_COMMAND_DELAY);
+	        //mHandler.postDelayed(new SelectChannelRunnable(id), Global.SERVICE_COMMAND_DELAY);
 		//}
 	}
 	
-	private Runnable mRateMusicTask = new Runnable() {
-		   public void run() {
-			   dPlayer.rateMusic();
-		   }
-		};		
+//	private Runnable mRateMusicTask = new Runnable() {
+//		   public void run() {
+//			   dPlayer.rateMusic();
+//		   }
+//		};		
 	private void rateMusic() {
 		if (dPlayer.isOpen()) {
-			mHandler.removeCallbacks(mRateMusicTask);
-	        mHandler.postDelayed(mRateMusicTask, Global.SERVICE_COMMAND_DELAY);
+			dPlayer.rateMusic();
+			//mHandler.removeCallbacks(mRateMusicTask);
+	        //mHandler.postDelayed(mRateMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
 		}
 	}
-	private Runnable mUnrateMusicTask = new Runnable() {
-		   public void run() {
-			   dPlayer.unrateMusic();
-		   }
-		};		
+//	private Runnable mUnrateMusicTask = new Runnable() {
+//		   public void run() {
+//			   dPlayer.unrateMusic();
+//		   }
+//		};		
 	private void unrateMusic() {
 		if (dPlayer.isOpen()) {
-			mHandler.removeCallbacks(mUnrateMusicTask);
-	        mHandler.postDelayed(mUnrateMusicTask, Global.SERVICE_COMMAND_DELAY);
+			dPlayer.unrateMusic();
+//			mHandler.removeCallbacks(mUnrateMusicTask);
+//	        mHandler.postDelayed(mUnrateMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
@@ -670,16 +680,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	}
 	
 	
-	private Runnable mNextMusicTask = new Runnable() {
-		   public void run() {
-				dPlayer.skipMusic();
-		        pausedByPhoneCall = false;
-		   }
-		};		
+//	private Runnable mNextMusicTask = new Runnable() {
+//		   public void run() {
+//				dPlayer.skipMusic();
+//		        pausedByPhoneCall = false;
+//		   }
+//		};		
 	private void nextMusic() {
 		if (dPlayer.isOpen()) {
-			mHandler.removeCallbacks(mNextMusicTask);
-	        mHandler.postDelayed(mNextMusicTask, Global.SERVICE_COMMAND_DELAY);
+			dPlayer.skipMusic();
+	        pausedByPhoneCall = false;
+//			mHandler.removeCallbacks(mNextMusicTask);
+//	        mHandler.postDelayed(mNextMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
@@ -687,32 +699,34 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	}
 	
 	
-	private Runnable mNextChannelTask = new Runnable() {
-		   public void run() {
-			   dPlayer.forwardChannel();
-		        pausedByPhoneCall = false;
-		   }
-		};	
+//	private Runnable mNextChannelTask = new Runnable() {
+//		   public void run() {
+//			   dPlayer.forwardChannel();
+//		        pausedByPhoneCall = false;
+//		   }
+//		};	
 	private void nextChannel() {
 		if (dPlayer.isOpen()) {
-			mHandler.removeCallbacks(mNextChannelTask);
-	        mHandler.postDelayed(mNextChannelTask, Global.SERVICE_COMMAND_DELAY);
+			dPlayer.forwardChannel();
+	        pausedByPhoneCall = false;
+//			mHandler.removeCallbacks(mNextChannelTask);
+//	        mHandler.postDelayed(mNextChannelTask, Global.SERVICE_COMMAND_DELAY);
 		}
 	}
 	
 
-	private class DownloadMusicTask implements Runnable {
-		private String url;
-		private String filename;
-		public DownloadMusicTask(String url, String filename) {
-			this.url = url;
-			this.filename = filename;
-		}
-		@Override
-		public void run() {
-			dDownloader.download(url, filename);
-		}
-	}
+//	private class DownloadMusicTask implements Runnable {
+//		private String url;
+//		private String filename;
+//		public DownloadMusicTask(String url, String filename) {
+//			this.url = url;
+//			this.filename = filename;
+//		}
+//		@Override
+//		public void run() {
+//			dDownloader.download(url, filename);
+//		}
+//	}
 
     private void downloadMusic(String url, String filename) {
     	MusicInfo curMusic = null;
@@ -746,24 +760,26 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	Debugger.verbose("download filename is \"" + filename + "\"");
 
     	if (dDownloader.isOpen()) {
-    		mHandler.postDelayed(new DownloadMusicTask(url, filename), Global.SERVICE_COMMAND_DELAY);
+    		//mHandler.postDelayed(new DownloadMusicTask(url, filename), Global.SERVICE_COMMAND_DELAY);
+    		dDownloader.download(url, filename);
     	}
     }
     
     
-    private class CancelDownloadTask implements Runnable {
-    	private String url;
-    	public CancelDownloadTask(String url) {
-    		this.url = url;
-    	}
-    	@Override 
-    	public void run() {
-    		dDownloader.cancel(url);
-    	}
-    }
+//    private class CancelDownloadTask implements Runnable {
+//    	private String url;
+//    	public CancelDownloadTask(String url) {
+//    		this.url = url;
+//    	}
+//    	@Override 
+//    	public void run() {
+//    		dDownloader.cancel(url);
+//    	}
+//    }
     private void cancelDownload(String url) {
     	if (dDownloader.isOpen()) {
-    		mHandler.postDelayed(new CancelDownloadTask(url), Global.SERVICE_COMMAND_DELAY);
+    		dDownloader.cancel(url);
+    		//mHandler.postDelayed(new CancelDownloadTask(url), Global.SERVICE_COMMAND_DELAY);
     	}
     }
     

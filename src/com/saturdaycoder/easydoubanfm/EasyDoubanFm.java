@@ -8,6 +8,7 @@ import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,11 +38,11 @@ public class EasyDoubanFm extends Activity {
 	TextView textTitle;
 	ImageButton buttonSkip;
 	ImageButton buttonPlayPause;
-	TextView textButtonPlayPause;
+	//TextView textButtonPlayPause;
 	ImageButton buttonDownload;
 	ImageButton buttonBan;
 	ImageButton buttonRateUnrate;
-	TextView textButtonRateUnrate;
+	//TextView textButtonRateUnrate;
 	ImageButton buttonMenu;
 	ProgressBar progressBar;
 	ProgressBar progressPower;
@@ -136,9 +137,12 @@ public class EasyDoubanFm extends Activity {
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    	requestWindowFeature(Window.FEATURE_NO_TITLE);
+    	super.onCreate(savedInstanceState);
         //setContentView(R.layout.main);
+        
         setContentView(R.layout.main_activity);
+        
         
 		buttonChannel = (Button)findViewById(R.id.buttonChannel);
 		imageCover = (ImageView)findViewById(R.id.imageCover);
@@ -146,11 +150,11 @@ public class EasyDoubanFm extends Activity {
 		textTitle = (TextView)findViewById(R.id.textTitle);
 		buttonSkip = (ImageButton)findViewById(R.id.buttonNext);
 		buttonPlayPause = (ImageButton)findViewById(R.id.buttonPlayPause);
-		textButtonPlayPause = (TextView)findViewById(R.id.textButtonPlayPause);
+		//textButtonPlayPause = (TextView)findViewById(R.id.textButtonPlayPause);
 		buttonDownload = (ImageButton)findViewById(R.id.buttonDownload);
 		buttonBan = (ImageButton)findViewById(R.id.buttonHate);
 		buttonRateUnrate = (ImageButton)findViewById(R.id.buttonLike);
-		textButtonRateUnrate = (TextView)findViewById(R.id.textButtonRateUnrate);
+		//textButtonRateUnrate = (TextView)findViewById(R.id.textButtonRateUnrate);
 		buttonMenu = (ImageButton)findViewById(R.id.buttonMenu);
 		progressBar = (ProgressBar)findViewById(R.id.progressBar);
 		textPosition = (TextView)findViewById(R.id.textMusicPosition);
@@ -251,7 +255,8 @@ public class EasyDoubanFm extends Activity {
  	
     	//_this = this;
     	
-
+    	this.progressBar.setVisibility(ProgressBar.GONE);
+    	
     	try {
     		Thread.sleep(100,0);
     	} catch (Exception e) {
@@ -464,7 +469,7 @@ public class EasyDoubanFm extends Activity {
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_RATED)) {
-				
+				buttonRateUnrate.setImageResource(R.drawable.btn_rated);
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_STATE_CHANGED)) {
@@ -476,6 +481,8 @@ public class EasyDoubanFm extends Activity {
 				case Global.STATE_IDLE:					
 				case Global.STATE_FINISHED:
 				case Global.STATE_MUSIC_SKIPPED:
+					//imageCover.setVisibility(ImageView.GONE);
+					//progressBar.setVisibility(ProgressBar.VISIBLE);
 					textArtist.setText("");
 					textTitle.setText("");
 					buttonRateUnrate.setImageResource(R.drawable.btn_unrated);
@@ -488,8 +495,11 @@ public class EasyDoubanFm extends Activity {
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
 					break;
 				case Global.STATE_PREPARE:
+					imageCover.setVisibility(ImageView.GONE);
+					progressBar.setVisibility(ProgressBar.VISIBLE);
 					break;
 				case Global.STATE_STARTED:
+					
 					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
 					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
 					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
@@ -504,7 +514,7 @@ public class EasyDoubanFm extends Activity {
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_UNRATED)) {
-				
+				buttonRateUnrate.setImageResource(R.drawable.btn_unrated);
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_PICTURE_STATE_CHANGED)) {
@@ -529,6 +539,8 @@ public class EasyDoubanFm extends Activity {
 					if (bmp != null) {
 						imageCover.setImageBitmap(bmp);
 					}
+					imageCover.setVisibility(ImageView.VISIBLE);
+					progressBar.setVisibility(ProgressBar.GONE);
 				default:
 				}
 			}

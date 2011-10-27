@@ -68,6 +68,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver {
 	
 	private MediaPlayer mPlayer;
 	
+	private final Object channelTableLock = new Object();
+	
 	
 	public DoubanFmPlayer(Context context, Database db) {
 		this.isOpen = false;
@@ -75,12 +77,13 @@ public class DoubanFmPlayer implements IHttpFetcherObserver {
 		this.db = db;
 		//this.picTask = new GetPictureTask();
 		
-		if (db.getChannels().length < 1) {
-			for(FmChannel fc: FmChannel.AllChannels) {
-				db.saveChannel(fc);
+		synchronized(channelTableLock) {
+			if (db.getChannels().length < 1) {
+				for(FmChannel fc: FmChannel.AllChannels) {
+					db.saveChannel(fc);
+				}
 			}
 		}
-		
 		new AsyncChannelTableUpdater().execute();
 		
 	}
@@ -135,18 +138,19 @@ public class DoubanFmPlayer implements IHttpFetcherObserver {
 						@Override
 						public void onBufferingUpdate(MediaPlayer mp, int percent) {
 							isPreparing = false;
-							//Debugger.verbose("media player progress " + percent);
 							
 						}
 					});
 					mPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
 						@Override
 						public boolean onError(MediaPlayer mp, int what, int extra) {
-							isPreparing = false;
-							//reportState(PlayState.ERROR);
-							Debugger.error("media player onError: what=" + what + " extra=" + extra);
-							nextMusic();
-						    return true;
+							synchronized(mPlayer) {
+								isPreparing = false;
+								//reportState(PlayState.ERROR);
+								Debugger.error("media player onError: what=" + what + " extra=" + extra);
+								nextMusic();
+							    return true;
+							}
 						}
 					});
 					mPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
@@ -170,10 +174,12 @@ public class DoubanFmPlayer implements IHttpFetcherObserver {
 						
 						@Override
 						public void onPrepared(MediaPlayer mp) {
-							isPreparing = false;
-							Debugger.info("media player onPrepare");
-							mPlayer.seekTo(0);
-							mPlayer.start();
+							synchronized(mPlayer) {
+								isPreparing = false;
+								Debugger.info("media player onPrepare");
+								mPlayer.seekTo(0);
+								mPlayer.start();
+							}
 						}
 					});
 					mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -341,45 +347,11 @@ public class DoubanFmPlayer implements IHttpFetcherObserver {
 	}
 	
 	public void rateMusic() {
-		synchronized(musicSessionLock) {
-			if (curMusic == null || curMusic.isRated())
-				return;			
-			
-			synchronized(stopReasonLock) {
-				lastStopReason = DoubanFmApi.TYPE_RATE;
-				pendingMusicList.clear();
-				try {
-					fillPendingList();
-					
-					curMusic.rate(true);
-					notifyMusicRated(true);
-				} catch (Exception e) {
-					Debugger.error("error rating music: " + e.toString());
-				}
-				lastStopReason = DoubanFmApi.TYPE_NEW;
-			}
-		}
+		new AsyncMusicRater().execute(true);
 	}
 	
 	public void unrateMusic() {
-		synchronized(musicSessionLock) {
-			if (curMusic == null || !curMusic.isRated())
-				return;
-			
-			synchronized(stopReasonLock) {
-				lastStopReason = DoubanFmApi.TYPE_UNRATE;
-				pendingMusicList.clear();
-				try {
-					fillPendingList();
-					
-					curMusic.rate(false);
-					notifyMusicRated(false);
-				} catch (Exception e) {
-					Debugger.error("error rating music: " + e.toString());
-				}
-				lastStopReason = DoubanFmApi.TYPE_NEW;		
-			}
-		}
+		new AsyncMusicRater().execute(false);
 	}
 	
 	public boolean isMusicRated() {
@@ -391,25 +363,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver {
 	}
 	
 	public void banMusic() {
-    	if (curMusic == null) {
-    		return;
-    	}
-    	
-    	synchronized(stopReasonLock) {
-			lastStopReason = DoubanFmApi.TYPE_BYE;
-			pendingMusicList.clear();
-			try {
-				fillPendingList();
-				
-				notifyMusicBanned();
-				
-			} catch (Exception e) {
-				Debugger.error("error in banMusic: " + e.toString());
-			}
-			lastStopReason = DoubanFmApi.TYPE_NEW;
-    	}
-		
-		nextMusic();		
+		new AsyncMusicBanner().execute();
 	}
 	
 	public void selectChannel(int id) {
@@ -441,29 +395,32 @@ public class DoubanFmPlayer implements IHttpFetcherObserver {
 	}
 	
 	public void forwardChannel() {
+		
 		int chanId = Preference.getSelectedChannel(context);
 		int idx = FmChannel.getChannelIndex(chanId);
 		FmChannel chan = null;
 		
-		while(true) {
-			idx = (idx + 1) % FmChannel.AllChannels.length;
-			chan = FmChannel.AllChannels[idx];
-			if (chan == null)
-				return;
-			if (FmChannel.channelNeedLogin(chan.channelId)){
-				Debugger.debug("forward channel needs login, loginSession = "
-						+ ((loginSession == null)? "y": "n"));
-				if (loginSession == null) {
-					
-					continue;
-				}
-				else {
+		synchronized(channelTableLock) {
+			while(true) {
+				idx = (idx + 1) % FmChannel.AllChannels.length;
+				chan = FmChannel.AllChannels[idx];
+				if (chan == null)
+					return;
+				if (FmChannel.channelNeedLogin(chan.channelId)){
+					Debugger.debug("forward channel needs login, loginSession = "
+							+ ((loginSession == null)? "y": "n"));
+					if (loginSession == null) {
+						
+						continue;
+					}
+					else {
+						break;
+					}
+				} else {
 					break;
 				}
-			} else {
-				break;
-			}
-		} 
+			} 
+		}
 		Debugger.debug("forwarded to channel " + chan.channelId);
 		selectChannel(chan.channelId);
 	}
@@ -843,16 +800,92 @@ public class DoubanFmPlayer implements IHttpFetcherObserver {
 		else return null;
 	}
 	
+	private class AsyncChannelSwitcher extends AsyncTask<Integer, Integer, Integer> {
+
+		@Override
+		protected Integer doInBackground(Integer... params) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
+	
+	private class AsyncMusicRater extends AsyncTask<Boolean, Integer, Integer> {
+
+		@Override
+		protected Integer doInBackground(Boolean... params) {
+			if (params.length < 1)
+				return -1;
+			
+			boolean rated = params[0];
+			
+			synchronized(musicSessionLock) {
+				if (curMusic == null || curMusic.isRated())
+					return 0;			
+				
+				synchronized(stopReasonLock) {
+					lastStopReason = rated? DoubanFmApi.TYPE_RATE: DoubanFmApi.TYPE_UNRATE;
+					pendingMusicList.clear();
+					try {
+						fillPendingList();
+						
+						curMusic.rate(rated);
+						notifyMusicRated(rated);
+					} catch (Exception e) {
+						Debugger.error("error rating music: " + e.toString());
+					}
+					lastStopReason = DoubanFmApi.TYPE_NEW;
+				}
+			}
+			return 0;
+		}
+		
+	}
+	
+	private class AsyncMusicBanner extends AsyncTask<Integer, Integer, Integer> {
+		@Override
+		protected void onPostExecute(Integer i) {
+			if (i == 0)
+				nextMusic();
+		}
+		@Override
+		protected Integer doInBackground(Integer... params) {
+	    	if (curMusic == null) {
+	    		return -1;
+	    	}
+	    	
+	    	synchronized(stopReasonLock) {
+				lastStopReason = DoubanFmApi.TYPE_BYE;
+				pendingMusicList.clear();
+				try {
+					fillPendingList();
+					
+					notifyMusicBanned();
+					
+				} catch (Exception e) {
+					Debugger.error("error in banMusic: " + e.toString());
+				}
+				lastStopReason = DoubanFmApi.TYPE_NEW;
+	    	}
+			
+			return 0;
+		}
+		
+	}
+	
 	private class AsyncChannelTableUpdater extends AsyncTask<Integer, Integer, Integer> {
 
 		@Override
 		protected Integer doInBackground(Integer... arg0) {
+			
 			try {
 				FmChannel[] newChannels = DoubanFmApi.getChannelTable();
 				if (newChannels.length > 0) {
-					db.clearChannels();
-					for (FmChannel dfc: newChannels)
-						db.saveChannel(dfc);
+					synchronized(channelTableLock) {
+						db.clearChannels();
+						for (FmChannel dfc: newChannels)
+							db.saveChannel(dfc);
+					}
 				}
 				return 0;
 			} catch (Exception e) {
