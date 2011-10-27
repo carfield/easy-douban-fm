@@ -10,13 +10,15 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 public class PreferenceActivity extends Activity {
 
 	CheckBox boxShake;
 	Spinner spinnerShake;
-	EditText editShakeThreshold;
+	//EditText editShakeThreshold;
+	SeekBar seekBarShakeThreshold;
 	
 	CheckBox boxMediaButton;
 	Spinner spinnerMediaButton;
@@ -40,7 +42,8 @@ public class PreferenceActivity extends Activity {
 		setContentView(R.layout.preference);
 		
 		boxShake = (CheckBox)findViewById(R.id.cbShakeEnable);
-		editShakeThreshold = (EditText)findViewById(R.id.editShakeThreshold);
+		//editShakeThreshold = (EditText)findViewById(R.id.editShakeThreshold);
+		seekBarShakeThreshold = (SeekBar)findViewById(R.id.seekBarShakeThreshold);
 		boxMediaButton = (CheckBox)findViewById(R.id.cbMediaButtonEnable);
 		boxLongMediaButton = (CheckBox)findViewById(R.id.cbMediaButtonLongEnable);
 		boxCameraButton = (CheckBox)findViewById(R.id.cbCameraButtonEnable);
@@ -57,9 +60,11 @@ public class PreferenceActivity extends Activity {
 		// get stored value
 		boolean shakeEnabled = Preference.getShakeEnable(this); 
 		boxShake.setChecked(shakeEnabled);
-		editShakeThreshold.setEnabled(shakeEnabled);
+		seekBarShakeThreshold.setEnabled(shakeEnabled);
 		spinnerShake.setEnabled(shakeEnabled);
-		editShakeThreshold.setText(String.valueOf(Preference.getShakeThreshold(this)));
+		//editShakeThreshold.setText(String.valueOf(Preference.getShakeThreshold(this)));
+		seekBarShakeThreshold.setMax(Global.shakeLevels.length - 1);
+		seekBarShakeThreshold.setProgress(Preference.getShakeThresholdLevel(this));
 		
 		boolean mediaButtonEnabled = Preference.getMediaButtonEnable(this);
 		boxMediaButton.setChecked(mediaButtonEnabled);
@@ -84,14 +89,14 @@ public class PreferenceActivity extends Activity {
 		boxShake.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
-				editShakeThreshold.setEnabled(checked);
+				seekBarShakeThreshold.setEnabled(checked);
 				Preference.setShakeEnable(PreferenceActivity.this, checked);
 				spinnerShake.setEnabled(checked);
 			}
 		});
 		
 	
-		editShakeThreshold.addTextChangedListener(new TextWatcher() {
+		/*editShakeThreshold.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void beforeTextChanged(CharSequence str, int i, int j, int k) {
 				
@@ -111,6 +116,30 @@ public class PreferenceActivity extends Activity {
 					}
 				} catch (Exception e) {
 					
+				}
+			}
+		});*/
+		seekBarShakeThreshold.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				// TODO Auto-generated method stub
+				if (fromUser) {
+					Debugger.debug("selected shake level " + progress);
+					Preference.setShakeThresholdLevel(PreferenceActivity.this, progress);
 				}
 			}
 		});

@@ -117,7 +117,15 @@ public class ShakeDetector implements SensorEventListener {
         float delta = FloatMath.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ  
                 * deltaZ)  
                 / diffTime * 10000;  
-        if (delta > Preference.getShakeThreshold(mContext)){//shakeThreshold) { // 当加速度的差值大于指定的阈值，认为这是一个摇晃  
+        //if (delta > Preference.getShakeThreshold(mContext)){//shakeThreshold) { // 当加速度的差值大于指定的阈值，认为这是一个摇晃
+        int shakethreshold = 2;
+        try {
+			shakethreshold = Global.shakeLevels[Preference.getShakeThresholdLevel(mContext)];
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        if (delta > shakethreshold) {
             this.notifyListeners();  
         }  
     }  

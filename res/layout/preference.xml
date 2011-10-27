@@ -37,12 +37,14 @@ android:id="@+id/scroll"
 		    	>
 	    	</Spinner>
 	    </LinearLayout>
+
 	   	<LinearLayout
-	   		xmlns:android="http://schemas.android.com/apk/res/android" 
-	   		android:orientation="horizontal"
-	   		android:layout_width="fill_parent"
-	   		android:layout_height="50dip"
-	   		>
+	   	    xmlns:android="http://schemas.android.com/apk/res/android"
+	   	    android:layout_width="fill_parent"
+	   	    android:layout_height="50dip"
+	   	    android:gravity="center"
+	   	    android:orientation="horizontal" >
+
 	   		<TextView 
 	   			android:paddingLeft="40dip"
 	   			android:textAppearance="?android:attr/textAppearanceMedium"
@@ -52,14 +54,21 @@ android:id="@+id/scroll"
 	   			android:layout_weight="1"
 	   			android:layout_width="fill_parent" 
 	   			android:text="@string/text_shake_accuracy" 
-	   			android:id="@+id/textView1" android:gravity="center_vertical"></TextView>
-		    <EditText 
+	   			android:id="@+id/textView1" 
+	   			android:gravity="center_vertical"
+	   			/>
+	   		<SeekBar
+	   		    android:id="@+id/seekBarShakeThreshold"
+	   		    android:layout_width="fill_parent"
+	   		    android:layout_height="fill_parent"
+	   		    android:layout_weight="1" 
+	   		    />
+		    <!-- <EditText 
 		    	android:layout_height="fill_parent" 
 		    	android:id="@+id/editShakeThreshold" 
 		    	android:layout_width="120dip" 
-		    	android:numeric="integer">
-		        
-		    </EditText>
+		    	android:numeric="integer"
+		    	/> -->
 	   	</LinearLayout>
    	</LinearLayout>
    	<TextView

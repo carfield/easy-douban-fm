@@ -2,11 +2,14 @@ package com.saturdaycoder.easydoubanfm;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.saturdaycoder.easydoubanfm.player.HttpFetcher;
+
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.content.BroadcastReceiver;
@@ -27,7 +30,7 @@ public class EasyDoubanFm extends Activity {
 	private static final int MENU_CLOSE_ID = Menu.FIRST + 4;  
 	//private WidgetContent widgetContent;
 
-	private static EasyDoubanFm _this = null;
+	//private static EasyDoubanFm _this = null;
 	Button buttonChannel;
 	ImageView imageCover;
 	TextView textArtist;
@@ -47,9 +50,9 @@ public class EasyDoubanFm extends Activity {
 	int curPos;
 	int duration;
 	
+	PlayerEventListener playerEventListener;
 	
-	
-	public static void setPrepareProgress(int progress) {
+	/*public static void setPrepareProgress(int progress) {
 		Debugger.debug("EasyDoubanFm.setPrepareProgress");
 		if (_this == null) {
 			Debugger.debug("no activity active, skip updating");
@@ -129,7 +132,7 @@ public class EasyDoubanFm extends Activity {
 		default:
 			break;
 		}
-	}
+	}*/
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,6 +225,22 @@ public class EasyDoubanFm extends Activity {
 			}
 			
 		});
+		
+		
+		
+		playerEventListener = new PlayerEventListener();
+		IntentFilter mfilter = new IntentFilter();
+		mfilter.addAction(Global.EVENT_CHANNEL_CHANGED);
+		mfilter.addAction(Global.EVENT_LOGIN_STATE_CHANGED);
+		mfilter.addAction(Global.EVENT_PLAYER_MUSIC_BANNED);
+		mfilter.addAction(Global.EVENT_PLAYER_MUSIC_PREPARE_PROGRESS);
+		mfilter.addAction(Global.EVENT_PLAYER_MUSIC_PROGRESS);
+		mfilter.addAction(Global.EVENT_PLAYER_MUSIC_RATED);
+		mfilter.addAction(Global.EVENT_PLAYER_MUSIC_STATE_CHANGED);
+		mfilter.addAction(Global.EVENT_PLAYER_MUSIC_UNRATED);
+		mfilter.addAction(Global.EVENT_PLAYER_PICTURE_STATE_CHANGED);
+		mfilter.addAction(Global.EVENT_PLAYER_POWER_STATE_CHANGED);
+		registerReceiver(playerEventListener, mfilter);
     }
     
     Timer positionTimer;
@@ -230,7 +249,7 @@ public class EasyDoubanFm extends Activity {
     protected void onStart() {
     	super.onStart();    	
  	
-    	_this = this;
+    	//_this = this;
     	
 
     	try {
@@ -245,13 +264,14 @@ public class EasyDoubanFm extends Activity {
     	
 		mHandler.removeCallbacks(mPositionTask);
 		mHandler.removeCallbacks(mOpenPlayerTask);
-        //mHandler.postDelayed(mOpenPlayerTask, 200);
+        
+		
     }
 
 	private Runnable mOpenPlayerTask = new Runnable() {
 		   public void run() {
-		    	_this.progressBar.setVisibility(ProgressBar.VISIBLE);
-				_this.imageCover.setVisibility(ImageView.GONE);
+		    	//_this.progressBar.setVisibility(ProgressBar.VISIBLE);
+				//_this.imageCover.setVisibility(ImageView.GONE);
 		    	Intent i = new Intent(Global.ACTION_PLAYER_ON);
 		    	i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 		    	startService(i);
@@ -271,11 +291,14 @@ public class EasyDoubanFm extends Activity {
     	super.onStop();
     	mHandler.removeCallbacks(mPositionTask);
     	//positionTimer.cancel();
-    	_this = null;
+    	//_this = null;
     }
     
     @Override
     protected void onDestroy() {
+    	if (playerEventListener != null)
+    		unregisterReceiver(playerEventListener);
+    	
     	super.onDestroy();
     }
  
@@ -408,4 +431,124 @@ public class EasyDoubanFm extends Activity {
         Toast.makeText(this, msg,
                 Toast.LENGTH_LONG).show();
     }
+    
+    private class PlayerEventListener extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			if (context == null || intent == null) {
+				Debugger.error("PlayerEventListener: null context or null intent");
+				return;
+			}
+			
+			String action = intent.getAction();
+			
+			if (action == null) {
+				Debugger.error("PlayerEventListener: null action");
+				return;
+			}
+			
+			Debugger.verbose("PlayerEventListener got action: " + action);
+			
+			if (action.equals(Global.EVENT_PLAYER_MUSIC_BANNED)) {
+				
+			}
+			
+			if (action.equals(Global.EVENT_PLAYER_MUSIC_PREPARE_PROGRESS)) {
+				
+			}
+			
+			if (action.equals(Global.EVENT_PLAYER_MUSIC_PROGRESS)) {
+				
+			}
+			
+			if (action.equals(Global.EVENT_PLAYER_MUSIC_RATED)) {
+				
+			}
+			
+			if (action.equals(Global.EVENT_PLAYER_MUSIC_STATE_CHANGED)) {
+				int state = intent.getIntExtra(Global.EXTRA_STATE, Global.INVALID_STATE);
+				switch (state) {
+				case Global.STATE_CANCELLED:
+				case Global.STATE_ERROR:
+				case Global.STATE_FAILED:
+				case Global.STATE_IDLE:					
+				case Global.STATE_FINISHED:
+				case Global.STATE_MUSIC_SKIPPED:
+					textArtist.setText("");
+					textTitle.setText("");
+					buttonRateUnrate.setImageResource(R.drawable.btn_unrated);
+					buttonPlayPause.setImageResource(R.drawable.btn_pause);
+					break;
+				case Global.STATE_MUSIC_PAUSED:
+					buttonPlayPause.setImageResource(R.drawable.btn_play);
+					break;
+				case Global.STATE_MUSIC_RESUMED:
+					buttonPlayPause.setImageResource(R.drawable.btn_pause);
+					break;
+				case Global.STATE_PREPARE:
+					break;
+				case Global.STATE_STARTED:
+					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
+					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
+					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
+					textArtist.setText(artist);
+					textTitle.setText(title);
+					buttonRateUnrate.setImageResource(israted? R.drawable.btn_rated: R.drawable.btn_unrated);
+					buttonPlayPause.setImageResource(R.drawable.btn_pause);
+					break;
+				default:
+					break;
+				}
+			}
+			
+			if (action.equals(Global.EVENT_PLAYER_MUSIC_UNRATED)) {
+				
+			}
+			
+			if (action.equals(Global.EVENT_PLAYER_PICTURE_STATE_CHANGED)) {
+				int picState = intent.getIntExtra(Global.EXTRA_STATE, Global.INVALID_STATE);
+				switch (picState) {
+				case Global.STATE_ERROR:
+				case Global.STATE_CANCELLED:
+				case Global.STATE_IDLE:
+				case Global.STATE_PREPARE:
+					break;
+				case Global.STATE_STARTED:
+				case Global.STATE_FINISHED:
+					String url = intent.getStringExtra(Global.EXTRA_PICTURE_URL);
+					byte[] picdata = HttpFetcher.getInstance().getContent(url);
+					
+					if (picdata == null) {
+						Debugger.error("HttpFetcher can't find " + url);
+						return;
+					}
+					Bitmap bmp = BitmapFactory.decodeByteArray(picdata, 0, picdata.length);
+					Debugger.debug("PlayerEventListener.onReceive set image");
+					if (bmp != null) {
+						imageCover.setImageBitmap(bmp);
+					}
+				default:
+				}
+			}
+			
+			if (action.equals(Global.EVENT_CHANNEL_CHANGED)) {
+				String chan = intent.getStringExtra(Global.EXTRA_CHANNEL);
+				if (chan != null && !chan.equals("")) {
+					buttonChannel.setText(chan);
+				}
+			}
+			
+			if (action.equals(Global.EVENT_LOGIN_STATE_CHANGED)) {
+				
+			}
+			
+			if (action.equals(Global.EVENT_PLAYER_POWER_STATE_CHANGED)) {
+				
+			}
+		}
+    	
+    }
+    
 }

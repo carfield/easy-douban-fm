@@ -64,8 +64,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	Database db;
 	
 	// Event Listeners
-	private PhoneCallListener phoneCallListener;
-	private PhoneControlListener phoneControlListener;
+	private CallListener callListener;
+	private ShakingListener shakeControlListener;
 	private ShakeDetector shakeDetector;
 	
 	
@@ -153,12 +153,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		
 		// listens to the call state event
-		phoneCallListener = new PhoneCallListener();
+		callListener = new CallListener();
 		IntentFilter phoneFilter = new IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-		registerReceiver(phoneCallListener, phoneFilter);
+		registerReceiver(callListener, phoneFilter);
 
 		// listens to hard button event
-		//phoneControlListener = new PhoneControlListener();
+		shakeControlListener = new ShakingListener();
 		//IntentFilter mfilter = new IntentFilter();
 		//mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
 		//mfilter.addAction(Intent.ACTION_CAMERA_BUTTON);
@@ -167,7 +167,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		// listens to shake event
 		shakeDetector = new ShakeDetector(this);		
-		shakeDetector.registerOnShakeListener(phoneControlListener);		
+		shakeDetector.registerOnShakeListener(shakeControlListener);		
 		try {
 			shakeDetector.start();
 		} catch (Exception e) {
@@ -421,19 +421,15 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         
         try {
 			if (shakeDetector != null ) {
-				shakeDetector.unregisterOnShakeListener(phoneControlListener);
+				if (shakeControlListener != null)
+					shakeDetector.unregisterOnShakeListener(shakeControlListener);
 				shakeDetector.stop();
 				shakeDetector = null;
 			}
         
-        	//if (phoneControlListener != null) {
-        	//	unregisterReceiver(phoneControlListener);
-        	//	phoneControlListener = null;
-        	//}
-        	
-        	if (phoneCallListener != null) {
-        		unregisterReceiver(phoneCallListener);
-        		phoneCallListener = null;
+        	if (callListener != null) {
+        		unregisterReceiver(callListener);
+        		callListener = null;
         	}
         } catch (Exception e) {
         	
@@ -522,7 +518,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		   
 	   }
 	};
-	
+
 	private void openPlayer() {
 		// start foreground with notification
 		   if (!dPlayer.isOpen()) {
@@ -825,12 +821,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     private void updateActivity() {
     	WidgetContent content = getCurrentWidgetContent();    	
 
-    	EasyDoubanFm.updateContents(content);
+    	//EasyDoubanFm.updateContents(content);
     	
     	int curPos = dPlayer.getCurPosition();
     	int curDur = dPlayer.getCurDuration();
     	
-    	EasyDoubanFm.updatePosition(curPos, curDur);
+    	//EasyDoubanFm.updatePosition(curPos, curDur);
     }
     
     
@@ -845,7 +841,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	//private Map<Integer, Notification> notifications = new HashMap<Integer, Notification>(); 
 	private boolean pausedByPhoneCall = false;
 	//private final Object pausedByPhoneCallLock = new Object();
-	private class PhoneCallListener extends BroadcastReceiver {
+	private class CallListener extends BroadcastReceiver {
 		//boolean pausedByCall = false;
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -910,7 +906,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 	}
 	
-	private class PhoneControlListener implements ShakeDetector.OnShakeListener {
+	private class ShakingListener implements ShakeDetector.OnShakeListener {
 		@Override
 		public void onShake(Context context) {
 			Debugger.info("Detected SHAKING!!!");

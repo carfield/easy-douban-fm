@@ -8,6 +8,7 @@ public class Preference {
 	private static final int VALUE_DEFAULT_AUTO_CLOSE_MINUTES = 60;
 	private static final int VALUE_DEFAULT_MAX_IDLE_MINUTES = 30;
 	private static final int VALUE_DEFAULT_SHAKE_THRESHOLD = 5000;
+	private static final int VALUE_DEFAULT_SHAKE_THRESHOLD_LEVEL = 2;
 	private static final int VALUE_DEFAULT_SOCKET_TIMEOUT = 5000;
 	private static final int VALUE_DEFAULT_CONNECTION_TIMEOUT = 3000;
 	private static final int VALUE_DEFAULT_MEDIA_BUTTON_LONG_PRESS_THRESHOLD = 2;
@@ -23,6 +24,7 @@ public class Preference {
 	private static final String KEY_MEDIA_BUTTON_ENABLE = "media_button_enable";
 	private static final String KEY_MEDIA_BUTTON_LONG_ENABLE = "media_button_long_enable";
 	private static final String KEY_SHAKE_THRESHOLD = "shake_threshold";
+	private static final String KEY_SHAKE_THRESHOLD_LEVEL = "shake_threshold_level";
 	private static final String KEY_MEDIA_BUTTON_LONG_PRESS_THRESHOLD = "media_button_long_press_threshold";
 	private static final String KEY_SHAKE_ENABLE = "shake_enable";
 	private static final String KEY_LOGIN_ENABLE = "login";
@@ -130,6 +132,18 @@ public class Preference {
 	public static int getShakeThreshold(Context context) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		return pref.getInt(KEY_SHAKE_THRESHOLD, VALUE_DEFAULT_SHAKE_THRESHOLD);
+	}
+	
+	public static void setShakeThresholdLevel(Context context, int value) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putInt(KEY_SHAKE_THRESHOLD_LEVEL, value);
+		ed.commit();
+	}
+	
+	public static int getShakeThresholdLevel(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getInt(KEY_SHAKE_THRESHOLD_LEVEL, VALUE_DEFAULT_SHAKE_THRESHOLD_LEVEL);
 	}
 	
 	public static void setMediaButtonLongPressThreshold(Context context, int value) {

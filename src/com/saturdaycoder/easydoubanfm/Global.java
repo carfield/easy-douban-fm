@@ -41,6 +41,7 @@ public class Global {
 	public static final String EXTRA_LOGIN_USERNAME = "extra.LOGIN_USERNAME";
 	public static final String EXTRA_LOGIN_PASSWD = "extra.LOGIN_PASSWD";
 	
+		
 	// extra for scheduler
 	public static final String EXTRA_SCHEDULE_TYPE = "extra.SCHEDULE_TYPE";
 	public static final String EXTRA_SCHEDULE_TIME = "extra.SCHEDULE_TIME";
@@ -71,6 +72,9 @@ public class Global {
 	public static final String EXTRA_MUSIC_ISRATED = "extra.MUSIC_ISRATED";
 	public static final String EXTRA_CHANNEL = "extra.CHANNEL";
 	public static final String EXTRA_REASON = "extra.REASON";
+	
+	// picture data
+	public static final String EXTRA_PICTURE = "extra.PICTURE";
 	
 	// schedule types
 	public static final int SCHEDULE_TYPE_STOP_PLAYER = 0;
@@ -104,6 +108,7 @@ public class Global {
 	public static final int REASON_DOWNLOAD_STORAGE_IO_ERROR = 14;
 	public static final int REASON_DOWNLOAD_INVALID_FILENAME = 15;
 	public static final int REASON_API_REQUEST_ERROR = 16;
+	public static final int REASON_CANCELLED = 17;
 	
 	
 	public static final int DOWNLOAD_DEFAULT_SESSIONID = 4;
@@ -129,4 +134,18 @@ public class Global {
 	public static final int NO_REASON = -1;
 	public static final int INVALID_DOWNLOAD_ID = -1;
 
+	
+	// shake threshold
+	public static final int[] shakeLevels = new int[] {
+		2000,
+		3000,
+		5000,
+		7500,
+		10000,
+		15000,
+		20000,
+	};
+	
+	
+	
 }
