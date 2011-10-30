@@ -154,19 +154,19 @@ public class HttpFetcher {
     		}
     		if (bytearray == null) {
     			for (IHttpFetcherObserver o: observerList)
-    				o.onFetchFailure(url, reason);
+    				o.onHttpFetchFailure(url, reason);
         		return;
     		}
      		
     		if (isCancelled()) {
     			for (IHttpFetcherObserver o: observerList)
-    				o.onFetchFailure(url, reason);
+    				o.onHttpFetchFailure(url, reason);
     			return;
     		}
     		
     		contentMap.put(url, bytearray);
     		for (IHttpFetcherObserver o: observerList)
-				o.onFetchSuccess(url);
+				o.onHttpFetchSuccess(url);
         }
     }
 
