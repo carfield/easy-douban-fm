@@ -17,7 +17,7 @@ public class WidgetContent {
 		channel = res.getString(R.string.text_channel_unselected);
 		picture = BitmapFactory.decodeResource(res, R.drawable.default_album);
 		artist = title = "";
-		onState = EasyDoubanFmWidget.STATE_OFF;
+		onState = Global.STATE_IDLE;//EasyDoubanFmWidget.STATE_OFF;
 		rated = false;
 		paused = false;
 	}

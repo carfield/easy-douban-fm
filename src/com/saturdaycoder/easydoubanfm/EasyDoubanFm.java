@@ -457,7 +457,7 @@ public class EasyDoubanFm extends Activity {
 			Debugger.verbose("PlayerEventListener got action: " + action);
 			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_BANNED)) {
-				
+				popNotify("该音乐已被禁止播放");
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_PREPARE_PROGRESS)) {
@@ -488,17 +488,31 @@ public class EasyDoubanFm extends Activity {
 					buttonRateUnrate.setImageResource(R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
 					break;
-				case Global.STATE_MUSIC_PAUSED:
+				case Global.STATE_MUSIC_PAUSED: {
+					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
+					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
+					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
+					textArtist.setText(artist);
+					textTitle.setText(title);
+					buttonRateUnrate.setImageResource(israted? R.drawable.btn_rated: R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_play);
 					break;
-				case Global.STATE_MUSIC_RESUMED:
+				}
+				case Global.STATE_MUSIC_RESUMED: {
+					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
+					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
+					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
+					textArtist.setText(artist);
+					textTitle.setText(title);
+					buttonRateUnrate.setImageResource(israted? R.drawable.btn_rated: R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
 					break;
+				}
 				case Global.STATE_PREPARE:
 					imageCover.setVisibility(ImageView.GONE);
 					progressBar.setVisibility(ProgressBar.VISIBLE);
 					break;
-				case Global.STATE_STARTED:
+				case Global.STATE_STARTED: {
 					
 					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
 					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
@@ -508,6 +522,7 @@ public class EasyDoubanFm extends Activity {
 					buttonRateUnrate.setImageResource(israted? R.drawable.btn_rated: R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
 					break;
+				}
 				default:
 					break;
 				}
@@ -516,6 +531,8 @@ public class EasyDoubanFm extends Activity {
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_UNRATED)) {
 				buttonRateUnrate.setImageResource(R.drawable.btn_unrated);
 			}
+			
+			
 			
 			if (action.equals(Global.EVENT_PLAYER_PICTURE_STATE_CHANGED)) {
 				int picState = intent.getIntExtra(Global.EXTRA_STATE, Global.INVALID_STATE);

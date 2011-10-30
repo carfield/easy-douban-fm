@@ -111,13 +111,13 @@ public class DoubanFmNotificationManager
 		switch (type) {
 		case Global.SCHEDULE_TYPE_START_PLAYER:
 			notText = context.getResources().getString(R.string.notify_start_timer);
-			notIconId = android.R.drawable.ic_dialog_alert;
+			notIconId = android.R.drawable.ic_lock_idle_alarm;
 			notId = Global.NOTIFICATION_ID_SCHEDULE_START;
 			popText = "开启";
 			break;
 		case Global.SCHEDULE_TYPE_STOP_PLAYER:
 			notText = context.getResources().getString(R.string.notify_stop_timer);
-			notIconId = android.R.drawable.ic_dialog_alert;
+			notIconId = android.R.drawable.ic_lock_idle_alarm;
 			notId = Global.NOTIFICATION_ID_SCHEDULE_STOP;
 			popText = "关闭";
 			break;

@@ -80,7 +80,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		//this.picTask = new GetPictureTask();
 		
 		synchronized(channelTableLock) {
-			if (db.getChannels().length < 1) {
+			if (db.getChannels() == null || db.getChannels().length < 1) {
 				for(FmChannel fc: FmChannel.AllChannels) {
 					db.saveChannel(fc);
 				}
@@ -442,6 +442,40 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		
 	}
 	
+	public void notifyFullStatus() {
+		WidgetContent wc = EasyDoubanFmWidget.getContent(context);
+		
+		notifyPowerStateChanged(wc.onState);
+		
+		switch(wc.onState) {
+		case Global.STATE_IDLE:
+			break;
+		case Global.STATE_PREPARE:
+			notifyMusicStateChanged(Global.STATE_PREPARE, null, Global.NO_REASON);
+			break;
+		case Global.STATE_STARTED:
+			if (curMusic != null) {
+				int chanid = Preference.getSelectedChannel(context);
+				notifyChannelChanged(chanid, 
+						db.getChannelInfo(chanid).name);
+				
+				if (!wc.paused)
+					notifyMusicStateChanged(Global.STATE_MUSIC_RESUMED, curMusic, Global.NO_REASON);
+				else
+					notifyMusicStateChanged(Global.STATE_MUSIC_PAUSED, curMusic, Global.NO_REASON);
+				//if (wc.picture != null) {
+				notifyPictureStateChanged(Global.STATE_FINISHED, curMusic.pictureUrl, Global.NO_REASON);
+				//}
+			}
+			//if (wc.paused) {
+			//	notifyMusicPaused();
+			//}
+			break;
+		default:
+			break;
+		}
+	}
+	
 	public boolean login(String username, String passwd) {
 		if (username == null || username.equals("") 
 				|| passwd == null || passwd.equals("")) {
@@ -528,11 +562,13 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		
 		switch(powerState) {
 		case Global.STATE_PREPARE:
-			wc.onState = EasyDoubanFmWidget.STATE_PREPARE;
+			wc.onState = powerState;
+			//wc.onState = ;
 			EasyDoubanFmWidget.updateContent(context, wc, null);
 			break;
 		case Global.STATE_IDLE:
-			wc.onState = EasyDoubanFmWidget.STATE_OFF;
+			//wc.onState = EasyDoubanFmWidget.STATE_OFF;
+			wc.onState = powerState;
 			wc.channel = context.getResources().getString(R.string.text_channel_unselected);
 			wc.rated = false;
 			wc.artist = wc.title = "";
@@ -540,7 +576,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 			EasyDoubanFmWidget.updateContent(context, wc, null);
 			break;
 		case Global.STATE_STARTED:
-			wc.onState = EasyDoubanFmWidget.STATE_ON;
+			//wc.onState = EasyDoubanFmWidget.STATE_ON;
+			wc.onState = powerState;
 			EasyDoubanFmWidget.updateContent(context, wc, null);
 			break;
 		default:
@@ -610,11 +647,19 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 			break;
 		case Global.STATE_MUSIC_PAUSED:
 			content.paused = true;
+			intent.putExtra(Global.EXTRA_MUSIC_ARTIST, musicInfo.artist);
+			intent.putExtra(Global.EXTRA_MUSIC_ISRATED, musicInfo.isRated());
+			intent.putExtra(Global.EXTRA_MUSIC_TITLE, musicInfo.title);
+			
 			EasyDoubanFmWidget.updateContent(context, content, null);
 			//EasyDoubanFm.updateContents(content);
 			break;
 		case Global.STATE_MUSIC_RESUMED:
 			content.paused = false;
+			intent.putExtra(Global.EXTRA_MUSIC_ARTIST, musicInfo.artist);
+			intent.putExtra(Global.EXTRA_MUSIC_ISRATED, musicInfo.isRated());
+			intent.putExtra(Global.EXTRA_MUSIC_TITLE, musicInfo.title);
+			
 			EasyDoubanFmWidget.updateContent(context, content, null);
 			//EasyDoubanFm.updateContents(content);
 			break;
@@ -625,7 +670,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		context.sendBroadcast(intent);
 	}
 	
-	private void notifyPictureStateChanged(int picState, Bitmap pic, int reason) {
+	/*private void notifyPictureStateChanged(int picState, Bitmap pic, int reason) {
 		WidgetContent content = EasyDoubanFmWidget.getContent(context);
 		switch (picState) {
 		case Global.STATE_ERROR:
@@ -655,6 +700,39 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		}
 		
 		
+	}*/
+	
+	private void notifyPictureStateChanged(int state, String picurl, int reason) {
+		//WidgetContent content = EasyDoubanFmWidget.getContent(context);
+		switch (state) {
+		case Global.STATE_ERROR:
+		case Global.STATE_CANCELLED:
+		case Global.STATE_IDLE:
+			//break;
+		case Global.STATE_PREPARE:
+			//content.picture = defaultAlbumPic;
+			//EasyDoubanFmWidget.updateContent(context, content, null);
+			break;
+		case Global.STATE_STARTED:
+		case Global.STATE_FINISHED:
+			if (HttpFetcher.getInstance().finishedKeySet().contains(picurl)) {
+				byte[] bytes = HttpFetcher.getInstance().getContent(picurl);
+				
+				// decode bitmap and update widgets
+				Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+				WidgetContent content = EasyDoubanFmWidget.getContent(context);
+				content.picture = bmp;
+				EasyDoubanFmWidget.updateContent(context, content, null);
+				
+				// send broadcast to notify activity
+				Intent i = new Intent(Global.EVENT_PLAYER_PICTURE_STATE_CHANGED);
+				i.putExtra(Global.EXTRA_STATE, Global.STATE_FINISHED);
+				i.putExtra(Global.EXTRA_PICTURE_URL, picurl);
+				context.sendBroadcast(i);
+			}
+			break;
+		default:
+		}
 	}
 
 	private void notifyMusicProgress(int progress) {
@@ -1094,21 +1172,9 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 
 	@Override
 	public void onHttpFetchSuccess(String url) {
-		if (HttpFetcher.getInstance().finishedKeySet().contains(url)) {
-			byte[] bytes = HttpFetcher.getInstance().getContent(url);
-			
-			// decode bitmap and update widgets
-			Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-			WidgetContent content = EasyDoubanFmWidget.getContent(context);
-			content.picture = bmp;
-			EasyDoubanFmWidget.updateContent(context, content, null);
-			
-			// send broadcast to notify activity
-			Intent i = new Intent(Global.EVENT_PLAYER_PICTURE_STATE_CHANGED);
-			i.putExtra(Global.EXTRA_STATE, Global.STATE_FINISHED);
-			i.putExtra(Global.EXTRA_PICTURE_URL, url);
-			context.sendBroadcast(i);
-		}
+		
+		
+		notifyPictureStateChanged(Global.STATE_FINISHED, url, Global.NO_REASON);
 	}
 
 	@Override

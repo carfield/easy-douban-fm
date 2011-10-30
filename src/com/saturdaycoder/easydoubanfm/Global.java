@@ -146,6 +146,24 @@ public class Global {
 		20000,
 	};
 	
-	
-	
+	// long press threshold
+	public static final int[] longPressLevels = new int[] {
+		500,
+		1000,
+		1500,
+		2000,
+		2500,
+		3000,
+	};
+
+	// shut down on idle threshold
+	public static final int[] idleLevels = new int[] {
+		0,
+		5,
+		10,
+		15,
+		20,
+		30,
+		60,		
+	};
 }

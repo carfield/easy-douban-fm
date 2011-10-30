@@ -27,19 +27,19 @@ public class WidgetUpdater extends BroadcastReceiver{
 				content.picture = BitmapFactory.decodeResource(context.getResources(), R.drawable.default_album);
 				content.artist = "";
 				content.title = "";
-				content.onState = EasyDoubanFmWidget.STATE_OFF;
+				content.onState = state;//Global.STATE_IDLE;//EasyDoubanFmWidget.STATE_OFF;
 				EasyDoubanFmWidget.updateContent(context, content, null);
 				return;
 			}
 			case Global.STATE_PREPARE: {
 				WidgetContent content = EasyDoubanFmWidget.getContent(context);
-				content.onState = EasyDoubanFmWidget.STATE_PREPARE;
+				content.onState = state;//EasyDoubanFmWidget.STATE_PREPARE;
 				EasyDoubanFmWidget.updateContent(context, content, null);
 				return;
 			}
 			case Global.STATE_STARTED: {
 				WidgetContent content = EasyDoubanFmWidget.getContent(context);
-				content.onState = EasyDoubanFmWidget.STATE_ON;
+				content.onState = state;//EasyDoubanFmWidget.STATE_ON;
 				EasyDoubanFmWidget.updateContent(context, content, null);
 				return;
 			}

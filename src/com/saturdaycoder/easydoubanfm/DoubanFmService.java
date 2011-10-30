@@ -825,7 +825,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	} else {
     		content.artist = content.title = "";
     		content.channel = getResources().getString(R.string.text_channel_unselected);
-    		content.onState = EasyDoubanFmWidget.STATE_OFF;
+    		content.onState = Global.STATE_IDLE;
     		content.paused = false;
     		content.rated = false;
     		content.picture = null;//BitmapFactory.decodeResource(getResources(), R.drawable.default_album);
@@ -839,8 +839,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
     	//EasyDoubanFm.updateContents(content);
     	
-    	int curPos = dPlayer.getCurPosition();
-    	int curDur = dPlayer.getCurDuration();
+    	//int curPos = dPlayer.getCurPosition();
+    	//int curDur = dPlayer.getCurDuration();
+    	
+    	//if (dPlayer.isOpen()) {
+    	dPlayer.notifyFullStatus();
+    	//}
     	
     	//EasyDoubanFm.updatePosition(curPos, curDur);
     }

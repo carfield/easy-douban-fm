@@ -15,9 +15,9 @@ import android.content.Intent;
 
 
 public class EasyDoubanFmWidget extends AppWidgetProvider {
-	public static final int STATE_ON = 1;
-	public static final int STATE_PREPARE = 0;
-	public static final int STATE_OFF = -1;
+	//public static final int STATE_ON = 1;
+	//public static final int STATE_PREPARE = 0;
+	//public static final int STATE_OFF = -1;
 	
 	private static boolean enabled = false;
 	
@@ -72,14 +72,14 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 			
 			// on/off state
 			switch(content.onState) {
-			case STATE_ON:
+			case Global.STATE_STARTED:
 				//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
 	
 				break;
-			case STATE_PREPARE:
+			case Global.STATE_PREPARE:
 				//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_pause);
 				break;
-			case STATE_OFF:
+			case Global.STATE_IDLE:
 				//updateViews.setImageViewResource(R.id.buttonOnOff, R.drawable.btn_play);
 				updateViews.setImageViewResource(R.id.buttonPlayPause, R.drawable.btn_play);
 				break;
