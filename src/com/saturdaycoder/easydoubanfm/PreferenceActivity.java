@@ -1,4 +1,7 @@
 package com.saturdaycoder.easydoubanfm;
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
+
 import android.app.*;
 import android.os.Bundle;
 import android.text.Editable;
@@ -45,6 +48,9 @@ public class PreferenceActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.preference);
+		// Look up the AdView as a resource and load a request.
+	    AdView adView = (AdView)this.findViewById(R.id.adView);
+	    adView.loadAd(new AdRequest());
 		
 		boxShake = (CheckBox)findViewById(R.id.cbShakeEnable);
 		textShakeHint = (TextView)findViewById(R.id.textShakeHint);
@@ -426,6 +432,16 @@ public class PreferenceActivity extends Activity {
             }
         };
         spinnerCameraButton.setOnItemSelectedListener(oislCameraButton);
+        
+        
+        
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+
 	}
 	
 	@Override

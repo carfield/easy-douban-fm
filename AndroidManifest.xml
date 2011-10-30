@@ -7,8 +7,6 @@
 
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- uses-permission android:name="android.permission.WAKE_LOCK" /> -->
-    <!-- <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" /> -->
     <uses-permission android:name="android.permission.INTERNET" /> 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -75,6 +73,10 @@
                   android:theme="@android:style/Theme.Dialog"
                   android:launchMode="singleTask"
                   android:label="" >
+        </activity>
+        
+        <activity android:name="com.google.ads.AdActivity"
+              	  android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" >
         </activity>
         
     </application>

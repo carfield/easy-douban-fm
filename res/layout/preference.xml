@@ -5,12 +5,25 @@ android:id="@+id/scroll"
             android:layout_height="fill_parent"
             android:background="@drawable/ios5background" 
             >
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     
     >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+	 	 <com.google.ads.AdView android:id="@+id/adView"
+	                         android:layout_width="wrap_content"
+	                         android:layout_height="wrap_content"
+	                         ads:adUnitId="a14ead609d3bbf9"
+	                         ads:adSize="BANNER"
+	                         />
+	</LinearLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    android:orientation="vertical"
 	    android:layout_width="fill_parent"
@@ -247,5 +260,7 @@ android:id="@+id/scroll"
     	android:layout_width="fill_parent"
     	android:layout_height="1dp"
     	/>
+
+
 </LinearLayout>
 </ScrollView>
