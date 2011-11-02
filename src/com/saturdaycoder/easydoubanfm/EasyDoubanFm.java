@@ -26,7 +26,7 @@ import android.widget.*;
 public class EasyDoubanFm extends Activity {
 	private static final int MENU_LOGIN_ID = Menu.FIRST;
 	private static final int MENU_ABOUT_ID = Menu.FIRST + 1;
-	private static final int MENU_TIMER_ID = Menu.FIRST + 2;
+	private static final int MENU_SETTING_ID = Menu.FIRST + 2;
 	private static final int MENU_FEEDBACK_ID = Menu.FIRST + 3;
 	private static final int MENU_CLOSE_ID = Menu.FIRST + 4;  
 	//private WidgetContent widgetContent;
@@ -134,6 +134,7 @@ public class EasyDoubanFm extends Activity {
 			break;
 		}
 	}*/
+	private PositionUpdateThread posUpdateThread = new PositionUpdateThread();
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,7 +142,7 @@ public class EasyDoubanFm extends Activity {
     	super.onCreate(savedInstanceState);
         //setContentView(R.layout.main);
         
-        setContentView(R.layout.main_activity);
+        setContentView(R.layout.main);
         
         
 		buttonChannel = (Button)findViewById(R.id.buttonChannel);
@@ -224,7 +225,7 @@ public class EasyDoubanFm extends Activity {
 		buttonMenu.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(EasyDoubanFm.this, PreferenceActivity.class);
+				Intent i = new Intent(EasyDoubanFm.this, SchedulerActivity.class);
 				startActivity(i);
 			}
 			
@@ -244,11 +245,14 @@ public class EasyDoubanFm extends Activity {
 		mfilter.addAction(Global.EVENT_PLAYER_MUSIC_UNRATED);
 		mfilter.addAction(Global.EVENT_PLAYER_PICTURE_STATE_CHANGED);
 		mfilter.addAction(Global.EVENT_PLAYER_POWER_STATE_CHANGED);
+		mfilter.addAction(Global.EVENT_PLAYER_MUSIC_POSITION);
 		registerReceiver(playerEventListener, mfilter);
+		
+		
     }
     
     Timer positionTimer;
-    UpdatePositionTask positionTask = new UpdatePositionTask();
+    //UpdatePositionTask positionTask = new UpdatePositionTask();
     @Override
     protected void onStart() {
     	super.onStart();    	
@@ -268,12 +272,12 @@ public class EasyDoubanFm extends Activity {
     	startService(i);
     	
 		mHandler.removeCallbacks(mPositionTask);
-		mHandler.removeCallbacks(mOpenPlayerTask);
+		//mHandler.removeCallbacks(mOpenPlayerTask);
         
-		
+		//posUpdateThread.start();
     }
 
-	private Runnable mOpenPlayerTask = new Runnable() {
+	/*private Runnable mOpenPlayerTask = new Runnable() {
 		   public void run() {
 		    	//_this.progressBar.setVisibility(ProgressBar.VISIBLE);
 				//_this.imageCover.setVisibility(ImageView.GONE);
@@ -282,7 +286,7 @@ public class EasyDoubanFm extends Activity {
 		    	startService(i);
 		   }
 		};
-    
+    */
     @Override
     protected void onResume() {
     	super.onResume();
@@ -297,6 +301,7 @@ public class EasyDoubanFm extends Activity {
     	mHandler.removeCallbacks(mPositionTask);
     	//positionTimer.cancel();
     	//_this = null;
+    	//posUpdateThread.stop();
     }
     
     @Override
@@ -310,13 +315,15 @@ public class EasyDoubanFm extends Activity {
     Handler mHandler = new Handler();
 	private Runnable mPositionTask = new Runnable() {
 		   public void run() {
-				synchronized(EasyDoubanFm.class) {
-					curPos += 1000;
-				}
-				textPosition.setText(DateFormat.format("mm:ss", curPos).toString() 
-						+ " / " + DateFormat.format("mm:ss", duration).toString());	
-				
-				mHandler.postDelayed(mPositionTask, 1000);
+			   if (curPos != -1 && duration != -1) {
+					synchronized(EasyDoubanFm.class) {
+						curPos += 1000;
+					
+						textPosition.setText(DateFormat.format("mm:ss", curPos).toString() 
+								+ " / " + DateFormat.format("mm:ss", duration).toString());	
+					}
+			   }
+			   mHandler.postDelayed(mPositionTask, 1000);
 		   }
 		};	
 		
@@ -345,10 +352,10 @@ public class EasyDoubanFm extends Activity {
         super.onCreateOptionsMenu(aMenu);
     	boolean loggedIn = Preference.getLogin(this);
         aMenu.add(0, MENU_LOGIN_ID, 0, loggedIn? "账户登出": "账户登入");
-        aMenu.add(0, MENU_ABOUT_ID, 0, "使用说明");
-        aMenu.add(0, MENU_TIMER_ID, 0, "设置定时");
+        aMenu.add(0, MENU_ABOUT_ID, 0, "关于");
+        aMenu.add(0, MENU_SETTING_ID, 0, "设置");
         aMenu.add(0, MENU_FEEDBACK_ID, 0, "意见反馈");           
-        aMenu.add(0, MENU_CLOSE_ID, 0, "退出程序");
+        aMenu.add(0, MENU_CLOSE_ID, 0, "退出");
         return true;  
           
     }  
@@ -399,9 +406,9 @@ public class EasyDoubanFm extends Activity {
 				this.finish();
                 break;  
             }
-            case MENU_TIMER_ID: { 
+            case MENU_SETTING_ID: { 
             	Intent intent = new Intent();
-    			intent.setClass(EasyDoubanFm.this, SchedulerActivity.class);
+    			intent.setClass(EasyDoubanFm.this, SettingsActivity.class);
     			startActivity(intent);
                 break;  
             }
@@ -435,6 +442,42 @@ public class EasyDoubanFm extends Activity {
     {
         Toast.makeText(this, msg,
                 Toast.LENGTH_LONG).show();
+    }
+    
+    private boolean pauseFlag = false;
+    private class PositionUpdateThread extends Thread {
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			
+			//super.run();
+			long lasttime = System.currentTimeMillis();
+			while (true) {
+				if (!pauseFlag) {
+					if (duration != -1 && curPos != -1)	{
+						curPos += System.currentTimeMillis() - lasttime;
+						
+						textPosition.setText(DateFormat.format("mm:ss", curPos).toString()
+								+ " / " + DateFormat.format("mm:ss", duration).toString());
+					}
+					
+				} else {
+					// display nothing
+					textPosition.setText("");
+				}
+				
+				lasttime = System.currentTimeMillis();
+				
+				try {
+					Thread.sleep(1000, 0);
+				} catch (Exception e) {
+					
+				}
+				
+			}
+		}
+    	
     }
     
     private class PlayerEventListener extends BroadcastReceiver {
@@ -472,6 +515,19 @@ public class EasyDoubanFm extends Activity {
 				buttonRateUnrate.setImageResource(R.drawable.btn_rated);
 			}
 			
+			if (action.equals(Global.EVENT_PLAYER_MUSIC_POSITION)) {
+				//buttonRateUnrate.setImageResource(R.drawable.btn_rated);
+				curPos = intent.getIntExtra(Global.EXTRA_MUSIC_POSITION, -1);
+				duration = intent.getIntExtra(Global.EXTRA_MUSIC_DURATION, -1);
+				
+				/*if (dur != -1 && pos != -1) {
+					 
+					duration = dur;
+				} else {
+					
+				}*/
+			}
+			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_STATE_CHANGED)) {
 				int state = intent.getIntExtra(Global.EXTRA_STATE, Global.INVALID_STATE);
 				switch (state) {
@@ -483,12 +539,16 @@ public class EasyDoubanFm extends Activity {
 				case Global.STATE_MUSIC_SKIPPED:
 					//imageCover.setVisibility(ImageView.GONE);
 					//progressBar.setVisibility(ProgressBar.VISIBLE);
+					mHandler.removeCallbacks(mPositionTask);
 					textArtist.setText("");
 					textTitle.setText("");
+					duration = -1;
 					buttonRateUnrate.setImageResource(R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
 					break;
 				case Global.STATE_MUSIC_PAUSED: {
+					//pauseFlag = true;
+					mHandler.removeCallbacks(mPositionTask);
 					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
 					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
 					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
@@ -499,6 +559,8 @@ public class EasyDoubanFm extends Activity {
 					break;
 				}
 				case Global.STATE_MUSIC_RESUMED: {
+					//pauseFlag = false;
+					
 					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
 					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
 					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
@@ -506,11 +568,15 @@ public class EasyDoubanFm extends Activity {
 					textTitle.setText(title);
 					buttonRateUnrate.setImageResource(israted? R.drawable.btn_rated: R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
+					mHandler.removeCallbacks(mPositionTask);
+					mHandler.postDelayed(mPositionTask, 0);
 					break;
 				}
 				case Global.STATE_PREPARE:
+					
 					imageCover.setVisibility(ImageView.GONE);
 					progressBar.setVisibility(ProgressBar.VISIBLE);
+					//mHandler.postDelayed(mPositionTask, 1000);
 					break;
 				case Global.STATE_STARTED: {
 					
@@ -521,6 +587,8 @@ public class EasyDoubanFm extends Activity {
 					textTitle.setText(title);
 					buttonRateUnrate.setImageResource(israted? R.drawable.btn_rated: R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
+					mHandler.removeCallbacks(mPositionTask);
+					mHandler.postDelayed(mPositionTask, 0);
 					break;
 				}
 				default:

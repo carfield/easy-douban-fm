@@ -69,6 +69,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	private final Object loginLock = new Object();
 	
 	private MediaPlayer mPlayer;
+	private boolean playerReset = false;
 	
 	private final Object channelTableLock = new Object();
 	
@@ -184,6 +185,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 								try {
 									mPlayer.seekTo(0);
 									mPlayer.start();
+									notifyMusicPosition(mPlayer.getCurrentPosition(), 
+											mPlayer.getDuration());
 								} catch (Exception e) {
 									e.printStackTrace();
 								}
@@ -356,11 +359,11 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	}
 	
 	public void rateMusic() {
-		new AsyncMusicRater().execute(true);
+		new AsyncMusicRater(true).execute();
 	}
 	
 	public void unrateMusic() {
-		new AsyncMusicRater().execute(false);
+		new AsyncMusicRater(false).execute();
 	}
 	
 	public boolean isMusicRated() {
@@ -394,6 +397,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 			e.printStackTrace();
 		}
 		
+		playListManager.reset(id);
 		//pendingMusicList.clear();
 		lastStopReason = DoubanFmApi.TYPE_NEW;
 
@@ -551,6 +555,14 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void notifyMusicPosition(int pos, int dur) {
+
+		Intent i = new Intent(Global.EVENT_PLAYER_MUSIC_POSITION);
+		i.putExtra(Global.EXTRA_MUSIC_POSITION, pos);
+		i.putExtra(Global.EXTRA_MUSIC_DURATION, dur);
+		context.sendBroadcast(i);
 	}
 	
 	private void notifyMusicPrepareProgress(int progress) {
@@ -883,17 +895,21 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		
 	}
 	
-	private class AsyncMusicRater extends AsyncTask<Boolean, Integer, Integer> {
-		@Override
-		protected void onPreExecute() {
-			
+	private class AsyncMusicRater extends AsyncTask<Integer, Integer, Integer> {
+		private boolean rate;
+		public AsyncMusicRater(boolean rate) {
+			this.rate = rate;
 		}
 		@Override
-		protected Integer doInBackground(Boolean... params) {
-			if (params.length < 1)
-				return -1;
+		protected void onPreExecute() {
+			notifyMusicRated(rate);
+		}
+		@Override
+		protected Integer doInBackground(Integer... params) {
+			//if (params.length < 1)
+			//	return -1;
 			
-			boolean rated = params[0];
+			boolean rated = rate;//params[0];
 			
 			synchronized(musicSessionLock) {
 				if (curMusic == null || curMusic.isRated())
@@ -983,6 +999,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		protected void onPreExecute() {
 			//synchronized(mPlayer) {
 			mPlayer.reset();
+			notifyMusicPosition(-1, -1);
+				//playerReset = true;
 			//}
 			notifyMusicStateChanged( Global.STATE_PREPARE, null, NO_REASON);			
 		}
@@ -995,46 +1013,29 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 				return;
 			}
 			// mPlayer prepare
-			//mPlayer.reset();
 			isPreparing = true;
+			
 			try {
 				mPlayer.setDataSource(curMusic.musicUrl);
+				mPlayer.prepareAsync();
+				// report music info (artist, title, rated)
+		    	notifyMusicStateChanged( Global.STATE_STARTED, curMusic, NO_REASON);	    	
+				
+		    	//picTask.execute(curMusic.pictureUrl);
+				HttpFetcher.getInstance().fetch(curMusic.pictureUrl);
 			} catch (IOException e) {
-				Debugger.warn("media player setDataSource IO error! " + e.toString());
+				Debugger.error("media player setDataSource IO error! " + e.toString());
 				notifyMusicStateChanged(Global.STATE_ERROR, null,
 								Global.REASON_NETWORK_IO_ERROR);
 			    return;
+			} catch (IllegalStateException e) {
+				Debugger.warn("media player illegal state! " + e.toString());
+				return;
+			} catch (Exception e) {
+				Debugger.error("media player unexpected error! " + e.toString());
+				return;
 			}
-			
-			mPlayer.prepareAsync();
-
-			// report music info (artist, title, rated)
-	    	notifyMusicStateChanged( Global.STATE_STARTED, curMusic, NO_REASON);	    	
-			
-	    	//picTask.execute(curMusic.pictureUrl);
-			HttpFetcher.getInstance().fetch(curMusic.pictureUrl);
-		    
-			
-			/*try {
-				mPlayer.prepare();
-			} catch (IllegalStateException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			mPlayer.seekTo(0);
-			mPlayer.start();*/
-		    // secretly pre-fetch play list
-		    /*if (pendingMusicList.size() < 1) {
-		    	try {
-		    		fillPendingList();
-		    	} catch (IOException e) {
-		    		Debugger.error("network error filling pending list: " + e.toString());
-		    	}
-		    }*/	    		
+						
         }
 		@Override
 		protected Integer doInBackground(String... arg0) {

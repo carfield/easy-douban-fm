@@ -17,7 +17,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-public class PreferenceActivity extends Activity {
+public class PlayerSettingActivity extends Activity {
 
 	CheckBox boxShake;
 	Spinner spinnerShake;
@@ -47,10 +47,8 @@ public class PreferenceActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.preference);
-		// Look up the AdView as a resource and load a request.
-	    AdView adView = (AdView)this.findViewById(R.id.adView);
-	    adView.loadAd(new AdRequest());
+		setContentView(R.layout.playersetting);
+
 		
 		boxShake = (CheckBox)findViewById(R.id.cbShakeEnable);
 		textShakeHint = (TextView)findViewById(R.id.textShakeHint);
@@ -132,7 +130,7 @@ public class PreferenceActivity extends Activity {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
 				seekBarShakeThreshold.setEnabled(checked);
-				Preference.setShakeEnable(PreferenceActivity.this, checked);
+				Preference.setShakeEnable(PlayerSettingActivity.this, checked);
 				spinnerShake.setEnabled(checked);
 			}
 		});
@@ -181,7 +179,7 @@ public class PreferenceActivity extends Activity {
 				// TODO Auto-generated method stub
 				if (fromUser) {
 					Debugger.debug("selected shake level " + progress);
-					Preference.setShakeThresholdLevel(PreferenceActivity.this, progress);
+					Preference.setShakeThresholdLevel(PlayerSettingActivity.this, progress);
 					int shakeaccuracy  = Global.shakeLevels[2];
 					try {
 						shakeaccuracy = Global.shakeLevels[progress];
@@ -213,7 +211,7 @@ public class PreferenceActivity extends Activity {
 				// TODO Auto-generated method stub
 				if (fromUser) {
 					Debugger.debug("selected longpress level " + progress);
-					Preference.setLongPressThresholdLevel(PreferenceActivity.this, progress);
+					Preference.setLongPressThresholdLevel(PlayerSettingActivity.this, progress);
 					double longpresst  = Global.longPressLevels[2] / 1000.0;
 					try {
 						longpresst = Global.longPressLevels[progress] / 1000.0;
@@ -247,7 +245,7 @@ public class PreferenceActivity extends Activity {
 				// TODO Auto-generated method stub
 				if (fromUser) {
 					Debugger.debug("selected idle level " + progress);
-					Preference.setIdleThresholdLevel(PreferenceActivity.this, progress);
+					Preference.setIdleThresholdLevel(PlayerSettingActivity.this, progress);
 					int idlemins = 15;
 					try {
 						idlemins = Global.idleLevels[progress];
@@ -311,7 +309,7 @@ public class PreferenceActivity extends Activity {
 		boxMediaButton.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
-				Preference.setMediaButtonEnable(PreferenceActivity.this, checked);
+				Preference.setMediaButtonEnable(PlayerSettingActivity.this, checked);
 				spinnerMediaButton.setEnabled(checked);
 			}
 		});
@@ -319,7 +317,7 @@ public class PreferenceActivity extends Activity {
 		boxLongMediaButton.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
-				Preference.setMediaButtonLongEnable(PreferenceActivity.this, checked);
+				Preference.setMediaButtonLongEnable(PlayerSettingActivity.this, checked);
 				spinnerLongMediaButton.setEnabled(checked);
 				//editMediaButtonLongPressThreshold.setEnabled(checked);
 				seekBarLongPressThreshold.setEnabled(checked);
@@ -329,7 +327,7 @@ public class PreferenceActivity extends Activity {
 		boxCameraButton.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
-				Preference.setCameraButtonEnable(PreferenceActivity.this, checked);
+				Preference.setCameraButtonEnable(PlayerSettingActivity.this, checked);
 				spinnerCameraButton.setEnabled(checked);
 			}
 		});
@@ -337,7 +335,7 @@ public class PreferenceActivity extends Activity {
 		boxShutdownOnIdleButton.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
-				Preference.setShutdownOnIdleEnable(PreferenceActivity.this, checked);
+				Preference.setShutdownOnIdleEnable(PlayerSettingActivity.this, checked);
 				//editShutdownOnIdle.setEnabled(checked);
 				seekBarIdleThreshold.setEnabled(checked);
 			}
@@ -377,7 +375,7 @@ public class PreferenceActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
-                  Preference.setQuickAction(PreferenceActivity.this, 
+                  Preference.setQuickAction(PlayerSettingActivity.this, 
                 		  Global.QUICKCONTROL_SHAKE, position);
             }
   
@@ -392,7 +390,7 @@ public class PreferenceActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
-                  Preference.setQuickAction(PreferenceActivity.this, 
+                  Preference.setQuickAction(PlayerSettingActivity.this, 
                 		  Global.QUICKCONTROL_MEDIA_BUTTON, position);
             }
   
@@ -407,7 +405,7 @@ public class PreferenceActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
-                  Preference.setQuickAction(PreferenceActivity.this, 
+                  Preference.setQuickAction(PlayerSettingActivity.this, 
                 		  Global.QUICKCONTROL_MEDIA_BUTTON_LONG, position);
             }
   
@@ -423,7 +421,7 @@ public class PreferenceActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
-                  Preference.setQuickAction(PreferenceActivity.this, 
+                  Preference.setQuickAction(PlayerSettingActivity.this, 
                 		  Global.QUICKCONTROL_CAMERA_BUTTON, position);
             }
   
@@ -440,7 +438,6 @@ public class PreferenceActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		
 
 	}
 	

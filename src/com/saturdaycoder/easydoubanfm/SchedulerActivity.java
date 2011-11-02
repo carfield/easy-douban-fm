@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
@@ -68,7 +69,7 @@ public class SchedulerActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		
-		setContentView(R.layout.scheduler);		
+		setContentView(R.layout.schedulersetting);		
 		
 		
 		/*mServiceConn = new ServiceConnection(){
@@ -101,7 +102,14 @@ public class SchedulerActivity extends Activity {
 			stopTimePicker.setCurrentHour(stopTime.getHours());
 			stopTimePicker.setCurrentMinute(stopTime.getMinutes());
 		} else {
-			Date newdate = new Date(System.currentTimeMillis() + 30 * 60 * 1000);
+			long lastStopTime = Preference.getLastScheduledStopTime(this);
+			Date newdate;
+			if (lastStopTime == 0) {
+				newdate = new Date(System.currentTimeMillis() + 30 * 60 * 1000);
+			} else {
+				newdate = new Date(lastStopTime);	
+			}
+			
 			stopTimePicker.setCurrentHour(newdate.getHours());
 			stopTimePicker.setCurrentMinute(newdate.getMinutes());
 		}
@@ -113,7 +121,13 @@ public class SchedulerActivity extends Activity {
 			startTimePicker.setCurrentHour(startTime.getHours());
 			startTimePicker.setCurrentMinute(startTime.getMinutes());
 		} else {
-			Date newdate = new Date(System.currentTimeMillis() + 8 * 60 * 60 * 1000);
+			long lastStartTime = Preference.getLastScheduledStartTime(this);
+			Date newdate;
+			if (lastStartTime == 0) {
+				newdate = new Date(System.currentTimeMillis() + 8 * 60 * 60 * 1000);
+			} else {
+				newdate = new Date(lastStartTime);
+			}
 			startTimePicker.setCurrentHour(newdate.getHours());
 			startTimePicker.setCurrentMinute(newdate.getMinutes());
 		}
@@ -274,6 +288,72 @@ public class SchedulerActivity extends Activity {
 			}
         	
         });
+        
+        ArrayAdapter adapter = ArrayAdapter.createFromResource(
+                this, R.array.options_timer_list, android.R.layout.simple_spinner_item);
+        //设置下拉样式  android里面给大家提供了丰富的样式和功能图片
+        
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //为下拉列表设置适配器
+        spinnerStopTimers.setAdapter(adapter);
+        spinnerStartTimers.setAdapter(adapter);
+        
+        spinnerStopTimers.setSelection(0);
+        spinnerStartTimers.setSelection(0);
+        
+        OnItemSelectedListener oislStop =  new OnItemSelectedListener() {
+        	long[] futuremillis = new long[] {
+        			0,
+            		30 * 60 * 1000,
+            		60 * 60 * 1000,
+            		2 * 60 * 60 * 1000,
+            		8 * 60 * 60 * 1000,
+            };
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int position, long id) {
+                  //Preference.setQuickAction(SchedulerActivity.this, 
+                //		  Global.QUICKCONTROL_SHAKE, position);
+            	if (position >= 1 && position < futuremillis.length) {
+            		Date time = new Date(System.currentTimeMillis() + futuremillis[position]);
+            		stopTimePicker.setCurrentHour(time.getHours());
+        			stopTimePicker.setCurrentMinute(time.getMinutes());
+            	}
+            }
+  
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        };
+        spinnerStopTimers.setOnItemSelectedListener(oislStop);
+        
+        
+        OnItemSelectedListener oislStart =  new OnItemSelectedListener() {
+        	long[] futuremillis = new long[] {
+        			0,
+            		30 * 60 * 1000,
+            		60 * 60 * 1000,
+            		2 * 60 * 60 * 1000,
+            		8 * 60 * 60 * 1000,
+            };
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int position, long id) {
+                  //Preference.setQuickAction(SchedulerActivity.this, 
+                //		  Global.QUICKCONTROL_SHAKE, position);
+            	if (position >= 1 && position < futuremillis.length) {
+            		Date time = new Date(System.currentTimeMillis() + futuremillis[position]);
+            		startTimePicker.setCurrentHour(time.getHours());
+        			startTimePicker.setCurrentMinute(time.getMinutes());
+            	}
+            }
+  
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        };
+        spinnerStartTimers.setOnItemSelectedListener(oislStart);
+        
 	}
 	
 	@Override

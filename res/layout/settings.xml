@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical" >
+	<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
+				android:id="@+id/scroll" 
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:background="@drawable/ios5background" 
+	            >
+		<LinearLayout
+		    xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"
+		    android:gravity="center_vertical"
+		    android:orientation="vertical" >
+
+			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	            	xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+	            	android:orientation="vertical"
+	            	android:layout_width="fill_parent"
+	            	android:layout_height="fill_parent"
+	            	android:layout_weight="1">
+				<com.google.ads.AdView android:id="@+id/adView"
+	                        android:layout_width="fill_parent"
+	                        android:layout_height="fill_parent"
+	                        ads:adUnitId="a14ead609d3bbf9"
+	                        ads:adSize="BANNER"
+	                        ads:loadAdOnCreate="true"
+	                        >
+	   			</com.google.ads.AdView>
+			</LinearLayout>
+		    <Button 
+			    android:id="@+id/buttonPlayerSetting" 
+			    android:textSize="20dip"     
+			    android:paddingTop="10dip"
+			    android:paddingBottom="10dip"
+			    android:textColor="#ffffff"   
+			    android:background="@drawable/btn_channel"		    
+			    android:text="播放器设置" 
+			    android:layout_height="wrap_content" 
+			    android:layout_width="fill_parent"
+			    android:gravity="center_vertical"
+			    android:layout_weight="2"
+			    />
+		   	<TextView
+		    	android:id="@+id/border01"
+		    	android:background="@drawable/divider_horizontal"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="1dp"
+		    	/>
+		    <Button 
+			    android:id="@+id/buttonSchedulerSetting" 
+			    android:textSize="20dip"     
+			    android:paddingTop="10dip"
+			    android:paddingBottom="10dip" 
+			    android:textColor="#ffffff"   
+			    android:gravity="center_vertical"
+			    android:background="@drawable/btn_channel"		    
+			    android:text="定时器设置" 
+			    android:layout_height="wrap_content" 
+			    android:layout_width="fill_parent"
+			    android:layout_weight="2"
+			    />
+		    <TextView
+		    	android:id="@+id/border02"
+		    	android:background="@drawable/divider_horizontal"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="1dp"
+		    	/>
+		    <Button 
+			    android:id="@+id/buttonAdClick" 
+			   	android:textSize="20dip"     
+			    android:paddingTop="10dip"
+			    android:paddingBottom="10dip"  
+			    android:textColor="#ffffff"   
+			    android:gravity="center_vertical"
+			    android:background="@drawable/btn_channel"		    
+			    android:text="帮作者点击广告以示支持" 
+			    android:layout_height="wrap_content" 
+			    android:layout_width="fill_parent"
+			    android:layout_weight="2" 		    
+			    />
+		    <TextView
+		    	android:id="@+id/border03"
+		    	android:background="@drawable/divider_horizontal"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="1dp"
+		    	/>
+		    <!-- <Button 
+			    android:id="@+id/buttonThrowEgg" 
+			    android:textSize="20dip"     
+			    android:paddingTop="10dip"
+			    android:paddingBottom="10dip"
+			    android:textColor="#ffffff"   
+			    android:background="@drawable/btn_channel"		    
+			    android:text="给作者扔个臭鸡蛋" 
+			    android:layout_height="wrap_content" 
+			    android:layout_width="fill_parent"
+			    android:layout_weight="2" 		    
+			    />
+		    <TextView
+		    	android:id="@+id/border04"
+		    	android:background="@drawable/divider_horizontal"
+		    	android:layout_width="fill_parent"
+		    	android:layout_height="1dp"
+		    	/>
+			 -->
+		</LinearLayout>
+
+	</ScrollView>
+
+</LinearLayout>

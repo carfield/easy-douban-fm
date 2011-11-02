@@ -53,10 +53,10 @@
                   android:label="选择频道" >
         </activity>
         
-        <activity android:name="PreferenceActivity" 
+        <activity android:name=".PlayerSettingActivity" 
                   
                   android:launchMode="singleTask"
-                  android:label="偏好设定" >
+                  android:label="播放器设置" >
         </activity>
         
         <activity android:name="IntroductionActivity" 
@@ -64,9 +64,18 @@
                   android:label="使用简介" >
         </activity>
         
+        <activity android:name="SettingsActivity" 
+                  android:launchMode="singleTask"
+                  android:label="设置" >
+        </activity>
+        
+        <activity android:name="AdClickActivity" 
+                  android:label="广告" >
+        </activity>
+        
         <activity android:name="SchedulerActivity" 
                   android:launchMode="singleTask"
-                  android:label="定时器" >
+                  android:label="定时器设置" >
         </activity>
         
         <activity android:name="LoginActivity" 

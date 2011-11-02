@@ -57,7 +57,8 @@
     <string name="radio_enable_stop_timer">定时关闭</string>
     <string name="radio_enable_start_timer">起床定时</string>
     
-        
+    <string name="text_show_ad">支持一下作者，显示并点击广告</string>
+    <string name="text_hide_ad">隐藏广告</string>
         
     <string name="button_name_ban">禁播</string>
     <string name="button_name_rate">加心</string>
@@ -79,10 +80,11 @@
     </string-array>
     <string name="options_timer_list">快速定时</string>
     <string-array name="options_timer_list">
-        <item>半小时</item>
-        <item>1小时</item>
-        <item>2小时</item>
-        <item>8小时</item>        
+        <item>快速选择时间</item>
+        <item>半小时后</item>
+        <item>1小时后</item>
+        <item>2小时后</item>
+        <item>8小时后</item>        
     </string-array>
     <string name="text_error_network">由于网络原因登录失败</string>
     <string name="changelog">

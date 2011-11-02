@@ -81,6 +81,7 @@ public class SchedulerManager {
 		stopTask.cancel();
 		stopTask.schedule(stoptime);
 		Preference.setScheduledStopTime(context, stoptime.getTime());
+		Preference.setLastScheduledStopTime(context, stoptime.getTime());
 	}
 	
 	public void cancelScheduleStop() {
@@ -94,6 +95,7 @@ public class SchedulerManager {
 		startTask.cancel();
 		startTask.schedule(starttime);
 		Preference.setScheduledStartTime(context, starttime.getTime());
+		Preference.setLastScheduledStartTime(context, starttime.getTime());
 	}
 	
 	public void cancelScheduleStart() {

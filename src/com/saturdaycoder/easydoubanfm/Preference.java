@@ -43,6 +43,23 @@ public class Preference {
 	private static final String KEY_SCHEDULED_STOP = "scheduled_stop_at";
 	private static final String KEY_SCHEDULED_START = "scheduled_start_at";
 
+	private static final String KEY_SHOW_AD = "show_ad";
+	
+	private static final String KEY_LAST_SCHEDULED_STOP = "last_scheduled_stop_at";
+	private static final String KEY_LAST_SCHEDULED_START = "last_scheduled_start_at";
+	
+	public static boolean getShowAd(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getBoolean(KEY_SHOW_AD, true);
+	}
+	public static boolean setShowAd(Context context, boolean show) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putBoolean(KEY_SHOW_AD, show);
+		ed.commit();
+		//Debugger.info("##### saved channel = " + c);
+		return true;
+	}
 	//private static SharedPreferences pref = null;
 	public static int getSelectedChannel(Context context) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
@@ -328,6 +345,31 @@ public class Preference {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
 		ed.putLong(KEY_SCHEDULED_START, millis);
+		ed.commit();
+	}
+	public static long getLastScheduledStopTime(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getLong(KEY_LAST_SCHEDULED_STOP, VALUE_INVALID_SCHEDULED_TIME);
+		
+	}
+	
+	public static void setLastScheduledStopTime(Context context, long millis) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putLong(KEY_LAST_SCHEDULED_STOP, millis);
+		ed.commit();
+	}
+	
+	public static long getLastScheduledStartTime(Context context) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		return pref.getLong(KEY_LAST_SCHEDULED_START, VALUE_INVALID_SCHEDULED_TIME);
+		
+	}
+	
+	public static void setLastScheduledStartTime(Context context, long millis) {
+		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putLong(KEY_LAST_SCHEDULED_START, millis);
 		ed.commit();
 	}
 }

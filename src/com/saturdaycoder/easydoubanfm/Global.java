@@ -62,6 +62,7 @@ public class Global {
 	public static final String EVENT_PLAYER_MUSIC_RATED = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_RATED";
 	public static final String EVENT_PLAYER_MUSIC_UNRATED = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_UNRATED";
 	public static final String EVENT_PLAYER_MUSIC_BANNED = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_BANNED";
+	public static final String EVENT_PLAYER_MUSIC_POSITION = BROADCAST_PREFIX + ".event.PLAYER_MUSIC_POSITION";
 	
 	// common extra
 	public static final String EXTRA_STATE = "extra.STATE";
@@ -69,6 +70,8 @@ public class Global {
 	public static final String EXTRA_DOWNLOAD_SESSION = "extra.DOWNLOAD_SESSION";
 	public static final String EXTRA_MUSIC_TITLE = "extra.MUSIC_TITLE";
 	public static final String EXTRA_MUSIC_ARTIST = "extra.MUSIC_ARTIST";
+	public static final String EXTRA_MUSIC_DURATION = "extra.MUSIC_DURATION";
+	public static final String EXTRA_MUSIC_POSITION = "extra.MUSIC_POSITION";
 	public static final String EXTRA_MUSIC_ISRATED = "extra.MUSIC_ISRATED";
 	public static final String EXTRA_CHANNEL = "extra.CHANNEL";
 	public static final String EXTRA_REASON = "extra.REASON";

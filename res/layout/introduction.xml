@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
+android:id="@+id/scroll" 
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@drawable/ios5background" 
+            >
+<LinearLayout 
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    
+    >
+<TextView
+    android:paddingLeft="10dip"
+    android:paddingTop="10dip"
+    android:paddingBottom="10dip"
+    android:paddingRight="10dip" 
+    android:text="@string/intro_main"
+    android:textColor="#30f030"
+    android:textSize="16dip"
+    android:id="@+id/textIntro"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    />
+<TextView
+    android:paddingLeft="10dip"
+    android:paddingTop="10dip"
+    android:paddingBottom="10dip"
+    android:paddingRight="10dip" 
+    android:text="@string/intro_main0"
+    android:textSize="16dip"
+    android:id="@+id/textIntro"
+    android:textColor="#ff8030"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    />
+<TextView
+    android:paddingLeft="10dip"
+    android:paddingTop="10dip"
+    android:paddingBottom="10dip"
+    android:paddingRight="10dip" 
+    android:text="Changelog"
+    android:textSize="16dip"
+    android:id="@+id/textIntro"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    />
+<TextView
+    android:paddingLeft="10dip"
+    android:paddingTop="10dip"
+    android:paddingBottom="10dip"
+    android:paddingRight="10dip" 
+    android:text="@string/changelog"
+    android:textSize="16dip"
+    android:id="@+id/textIntro"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    />
+</LinearLayout>
+</ScrollView>
