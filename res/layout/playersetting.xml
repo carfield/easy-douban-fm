@@ -65,7 +65,7 @@
 	   	</LinearLayout>
 	   	<TextView
 	    	android:id="@+id/border01"
-	    	android:background="@drawable/divider_horizontal"
+	    	android:background="@drawable/divider_horizontal_highlight"
 	    	android:layout_width="fill_parent"
 	    	android:layout_height="1dp"
 	    	/>
@@ -96,7 +96,7 @@
 	    </LinearLayout>
 	    <TextView
 	    	android:id="@+id/border02"
-	    	android:background="@drawable/divider_horizontal"
+	    	android:background="@drawable/divider_horizontal_highlight"
 	    	android:layout_width="fill_parent"
 	    	android:layout_height="1dp"
 	    	/> 
@@ -147,7 +147,7 @@
 		   		    />
 	    <TextView
 	    	android:id="@+id/border02"
-	    	android:background="@drawable/divider_horizontal"
+	    	android:background="@drawable/divider_horizontal_highlight"
 	    	android:layout_width="fill_parent"
 	    	android:layout_height="1dp"
 	    	/>
@@ -193,7 +193,7 @@
 	    </LinearLayout>
 	    <TextView
 	    	android:id="@+id/border03"
-	    	android:background="@drawable/divider_horizontal"
+	    	android:background="@drawable/divider_horizontal_highlight"
 	    	android:layout_width="fill_parent"
 	    	android:layout_height="1dp"
 	    	/>
@@ -245,7 +245,7 @@
 		</LinearLayout>
 		<TextView
 	    	android:id="@+id/border04"
-	    	android:background="@drawable/divider_horizontal"
+	    	android:background="@drawable/divider_horizontal_highlight"
 	    	android:layout_width="fill_parent"
 	    	android:layout_height="1dp"
 	    	/>

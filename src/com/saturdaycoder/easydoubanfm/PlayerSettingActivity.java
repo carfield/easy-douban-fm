@@ -431,7 +431,7 @@ public class PlayerSettingActivity extends Activity {
         };
         spinnerCameraButton.setOnItemSelectedListener(oislCameraButton);
         
-        
+
         
 	}
 	

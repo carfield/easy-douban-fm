@@ -29,20 +29,18 @@ public class EasyDoubanFm extends Activity {
 	private static final int MENU_SETTING_ID = Menu.FIRST + 2;
 	private static final int MENU_FEEDBACK_ID = Menu.FIRST + 3;
 	private static final int MENU_CLOSE_ID = Menu.FIRST + 4;  
-	//private WidgetContent widgetContent;
 
-	//private static EasyDoubanFm _this = null;
 	Button buttonChannel;
 	ImageView imageCover;
 	TextView textArtist;
 	TextView textTitle;
 	ImageButton buttonSkip;
 	ImageButton buttonPlayPause;
-	//TextView textButtonPlayPause;
+
 	ImageButton buttonDownload;
 	ImageButton buttonBan;
 	ImageButton buttonRateUnrate;
-	//TextView textButtonRateUnrate;
+
 	ImageButton buttonMenu;
 	ProgressBar progressBar;
 	ProgressBar progressPower;
@@ -53,89 +51,7 @@ public class EasyDoubanFm extends Activity {
 	
 	PlayerEventListener playerEventListener;
 	
-	/*public static void setPrepareProgress(int progress) {
-		Debugger.debug("EasyDoubanFm.setPrepareProgress");
-		if (_this == null) {
-			Debugger.debug("no activity active, skip updating");
-			return;
-		}
-		
-		_this.imageCover.setVisibility(ImageView.GONE);
-		_this.progressBar.setVisibility(ProgressBar.VISIBLE);
-	}
-	
-	public static void updatePosition(int pos, int dur) {
-		Debugger.debug("EasyDoubanFm.updatePosition");
-		if (_this == null) {
-			Debugger.debug("no activity active, skip updating");
-			return;
-		}
-		synchronized(EasyDoubanFm.class) {
-			_this.curPos = pos;
-			_this.duration = dur;
-		}
 
-		_this.textPosition.setText(DateFormat.format("mm:ss", pos).toString() 
-				+ " / " + DateFormat.format("mm:ss", dur).toString());	
-	}
-	
-	public static void updateContents(WidgetContent content) {
-		Debugger.debug("EasyDoubanFm.updateContents");
-		if (_this == null) {
-			Debugger.debug("no activity active, skip updating");
-			return;
-		}
-		
-		// channel text
-		_this.buttonChannel.setText(content.channel);
-		// picture
-		if (content.picture == null) {
-			_this.progressBar.setVisibility(ProgressBar.VISIBLE);
-			_this.imageCover.setVisibility(ImageView.GONE);
-			//_this.imageCover.setImageResource(R.drawable.default_album);
-		}
-		else {
-			_this.imageCover.setVisibility(ImageView.VISIBLE);
-			_this.progressBar.setVisibility(ProgressBar.GONE);
-			_this.imageCover.setImageBitmap(content.picture);
-		}
-		// music artist
-		_this.textArtist.setText(content.artist);
-		// music title
-		_this.textTitle.setText(content.title);
-		// pause
-		_this.buttonPlayPause.setImageResource(content.paused? R.drawable.btn_play: R.drawable.btn_pause);
-		_this.textButtonPlayPause.setText(content.paused? _this.getResources().getString(R.string.button_name_play): _this.getResources().getString(R.string.button_name_pause));
-		_this.mHandler.removeCallbacks(_this.mPositionTask);
-		if (!content.paused) {
-			_this.mHandler.postDelayed(_this.mPositionTask, 1000);
-		}
-		// rate/unrate
-		_this.buttonRateUnrate.setImageResource(content.rated? R.drawable.btn_rated: R.drawable.btn_unrated);
-		_this.textButtonRateUnrate.setText(content.rated? _this.getResources().getString(R.string.button_name_unrate): _this.getResources().getString(R.string.button_name_rate));
-		// on/off
-		switch(content.onState) {
-		case EasyDoubanFmWidget.STATE_OFF: {
-			_this.buttonPlayPause.setImageResource(R.drawable.btn_play);
-			_this.textButtonPlayPause.setText(_this.getResources().getString(R.string.button_name_play));
-			_this.mHandler.removeCallbacks(_this.mPositionTask);
-			_this.progressBar.setVisibility(ProgressBar.GONE);
-			_this.imageCover.setVisibility(ImageView.VISIBLE);
-			_this.imageCover.setImageResource(R.drawable.default_album);
-			break;
-		}
-		case EasyDoubanFmWidget.STATE_ON: {
-			break;
-		}
-		case EasyDoubanFmWidget.STATE_PREPARE: {
-			break;
-		}
-		default:
-			break;
-		}
-	}*/
-	private PositionUpdateThread posUpdateThread = new PositionUpdateThread();
-	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -408,7 +324,7 @@ public class EasyDoubanFm extends Activity {
             }
             case MENU_SETTING_ID: { 
             	Intent intent = new Intent();
-    			intent.setClass(EasyDoubanFm.this, SettingsActivity.class);
+    			intent.setClass(EasyDoubanFm.this, PlayerSettingActivity.class);
     			startActivity(intent);
                 break;  
             }
@@ -442,42 +358,6 @@ public class EasyDoubanFm extends Activity {
     {
         Toast.makeText(this, msg,
                 Toast.LENGTH_LONG).show();
-    }
-    
-    private boolean pauseFlag = false;
-    private class PositionUpdateThread extends Thread {
-
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			
-			//super.run();
-			long lasttime = System.currentTimeMillis();
-			while (true) {
-				if (!pauseFlag) {
-					if (duration != -1 && curPos != -1)	{
-						curPos += System.currentTimeMillis() - lasttime;
-						
-						textPosition.setText(DateFormat.format("mm:ss", curPos).toString()
-								+ " / " + DateFormat.format("mm:ss", duration).toString());
-					}
-					
-				} else {
-					// display nothing
-					textPosition.setText("");
-				}
-				
-				lasttime = System.currentTimeMillis();
-				
-				try {
-					Thread.sleep(1000, 0);
-				} catch (Exception e) {
-					
-				}
-				
-			}
-		}
-    	
     }
     
     private class PlayerEventListener extends BroadcastReceiver {
@@ -516,16 +396,9 @@ public class EasyDoubanFm extends Activity {
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_POSITION)) {
-				//buttonRateUnrate.setImageResource(R.drawable.btn_rated);
 				curPos = intent.getIntExtra(Global.EXTRA_MUSIC_POSITION, -1);
 				duration = intent.getIntExtra(Global.EXTRA_MUSIC_DURATION, -1);
-				
-				/*if (dur != -1 && pos != -1) {
-					 
-					duration = dur;
-				} else {
-					
-				}*/
+
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_STATE_CHANGED)) {
@@ -537,35 +410,35 @@ public class EasyDoubanFm extends Activity {
 				case Global.STATE_IDLE:					
 				case Global.STATE_FINISHED:
 				case Global.STATE_MUSIC_SKIPPED:
-					//imageCover.setVisibility(ImageView.GONE);
-					//progressBar.setVisibility(ProgressBar.VISIBLE);
 					mHandler.removeCallbacks(mPositionTask);
 					textArtist.setText("");
 					textTitle.setText("");
+					textPosition.setText("");
 					duration = -1;
 					buttonRateUnrate.setImageResource(R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
 					break;
 				case Global.STATE_MUSIC_PAUSED: {
-					//pauseFlag = true;
 					mHandler.removeCallbacks(mPositionTask);
 					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
 					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
 					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
-					textArtist.setText(artist);
-					textTitle.setText(title);
+					if (artist != null && !artist.equals(""))
+						textArtist.setText(artist);
+					if (title != null && !title.equals(""))
+						textTitle.setText(title);
 					buttonRateUnrate.setImageResource(israted? R.drawable.btn_rated: R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_play);
 					break;
 				}
 				case Global.STATE_MUSIC_RESUMED: {
-					//pauseFlag = false;
-					
 					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
 					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
 					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
-					textArtist.setText(artist);
-					textTitle.setText(title);
+					if (artist != null && !artist.equals(""))
+						textArtist.setText(artist);
+					if (title != null && !title.equals(""))
+						textTitle.setText(title);
 					buttonRateUnrate.setImageResource(israted? R.drawable.btn_rated: R.drawable.btn_unrated);
 					buttonPlayPause.setImageResource(R.drawable.btn_pause);
 					mHandler.removeCallbacks(mPositionTask);
@@ -573,13 +446,12 @@ public class EasyDoubanFm extends Activity {
 					break;
 				}
 				case Global.STATE_PREPARE:
-					
 					imageCover.setVisibility(ImageView.GONE);
 					progressBar.setVisibility(ProgressBar.VISIBLE);
 					//mHandler.postDelayed(mPositionTask, 1000);
+					textPosition.setText("正在缓冲");
 					break;
 				case Global.STATE_STARTED: {
-					
 					String artist = intent.getStringExtra(Global.EXTRA_MUSIC_ARTIST);
 					String title = intent.getStringExtra(Global.EXTRA_MUSIC_TITLE);
 					boolean israted = intent.getBooleanExtra(Global.EXTRA_MUSIC_ISRATED, false);
@@ -642,7 +514,19 @@ public class EasyDoubanFm extends Activity {
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_POWER_STATE_CHANGED)) {
-				
+				int state = intent.getIntExtra(Global.EXTRA_STATE, Global.INVALID_STATE);
+				if (state == Global.STATE_STARTED) {
+					
+				}
+				if (state == Global.STATE_IDLE) {
+					textPosition.setText("");
+					textTitle.setText("");
+					textArtist.setText("");
+					buttonRateUnrate.setImageResource(R.drawable.btn_unrated);
+					buttonPlayPause.setImageResource(R.drawable.btn_play);
+					imageCover.setImageResource(R.drawable.default_album);
+					buttonChannel.setText(R.string.text_channel_unselected);
+				}
 			}
 		}
     	

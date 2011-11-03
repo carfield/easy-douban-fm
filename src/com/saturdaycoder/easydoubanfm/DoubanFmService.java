@@ -572,8 +572,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 //		};	
 	private void resumeMusic() {
 		if (dPlayer.isOpen()) {
-			mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
-			// start foreground with notification
+			/*mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
 			Notification fgNotification = new Notification(R.drawable.icon,
 					getResources().getString(R.string.app_name),
 			        System.currentTimeMillis());
@@ -582,7 +581,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 			PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
 			fgNotification.setLatestEventInfo(this, "", "", pi);		
 			startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
-			
+			*/
 			dPlayer.resumeMusic();
 		}
 	}
@@ -593,17 +592,20 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 //		};	
 	private void pauseMusic() {
 		if (dPlayer.isOpen()) {
-			stopForeground(true);
+			//stopForeground(true);
 			dPlayer.pauseMusic();
 	        // make sure the service will shut down on its own if it was
 	        // just started but not bound to and nothing is playing
 	        mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
 	        
 	        if (Preference.getShutdownOnIdleEnable(this)) {
-	        	int delay = Preference.getMaxIdleTime(this);
-	        	Debugger.debug("shutdown on idle is activated: delay is " + delay);
+	        	int delaylevel = Preference.getIdleThresholdLevel(this);
+	        	if (delaylevel <0 || delaylevel >= Global.idleLevels.length)
+	        		delaylevel = 3;
+	        	
+	        	Debugger.debug("shutdown on idle is activated: delay is " + Global.idleLevels[delaylevel]);
 		        Message msg = mDelayedPausedStopHandler.obtainMessage();
-		        mDelayedPausedStopHandler.sendMessageDelayed(msg, 60000 * delay + 500);
+		        mDelayedPausedStopHandler.sendMessageDelayed(msg, 60000 * Global.idleLevels[delaylevel] + 500);
 		        //return START_STICKY;
 	        } else {
 	        	Debugger.debug("shutdown on idle is NOT activated");

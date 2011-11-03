@@ -2,6 +2,7 @@ package com.saturdaycoder.easydoubanfm;
 
 import java.util.Date;
 
+import com.google.ads.AdView;
 import com.saturdaycoder.easydoubanfm.scheduling.SchedulerManager;
 
 import android.app.Activity;
@@ -15,6 +16,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -31,17 +34,20 @@ public class SchedulerActivity extends Activity {
 	Spinner spinnerStartTimers;
 	TimePicker startTimePicker;
 	
+	CheckBox checkboxShowAd;
 	SchedulerManager schedManager;
+	
+	AdView adView;
 	
 	//IDoubanFmService mDoubanFm;
 	//ServiceConnection mServiceConn;
 	
-	static final long[] predefinedTimerList = new long[] {
+	/*static final long[] predefinedTimerList = new long[] {
 		30 * 60 * 1000,
 		60 * 60 * 1000,
 		2 * 60 * 60 * 1000,
 		8 * 60 * 60 * 1000,
-	};
+	};*/
 	
 	private void doSchedule(int type, Date time) {
 		Intent i = new Intent(Global.ACTION_SCHEDULER_COMMAND);
@@ -84,6 +90,45 @@ public class SchedulerActivity extends Activity {
         		mServiceConn, BIND_AUTO_CREATE);*/
         
 		schedManager = SchedulerManager.getInstance(this);
+		
+		adView = (AdView)findViewById(R.id.adView);
+		
+		checkboxShowAd = (CheckBox)findViewById(R.id.radioShowAd);
+		
+		if (Preference.getShowAd(this)) {
+			checkboxShowAd.setChecked(true);
+			adView.setVisibility(AdView.VISIBLE);
+			checkboxShowAd.setText(R.string.text_ad_shown);
+		} else {
+			checkboxShowAd.setChecked(false);
+			adView.setVisibility(AdView.INVISIBLE);
+			checkboxShowAd.setText(R.string.text_ad_hidden);
+		}
+		checkboxShowAd.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				if (isChecked) {
+					
+					Preference.setShowAd(SchedulerActivity.this, true);
+					adView.setVisibility(AdView.VISIBLE);
+					checkboxShowAd.setText(R.string.text_ad_shown);
+				} else {
+					Preference.setShowAd(SchedulerActivity.this, false);
+					
+					adView.setVisibility(AdView.GONE);
+					//adView.loadAd(new AdRequest());
+					checkboxShowAd.setText(R.string.text_ad_hidden);
+					
+				}
+				
+			}
+			
+		});
+		
+
+		checkboxShowAd.setEnabled(true);
 		
 		boxEnableStopTimer = (CheckBox)findViewById(R.id.cbEnableStopTimer);
 		spinnerStopTimers = (Spinner)findViewById(R.id.spinnerStopTimerShortcut);
@@ -163,7 +208,7 @@ public class SchedulerActivity extends Activity {
 			}
 		});
 		
-		OnItemSelectedListener oislStopTimer =  new OnItemSelectedListener() {
+		/*OnItemSelectedListener oislStopTimer =  new OnItemSelectedListener() {
       	  
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
@@ -183,7 +228,7 @@ public class SchedulerActivity extends Activity {
             	
             }
         };
-        spinnerStopTimers.setOnItemSelectedListener(oislStopTimer);
+        spinnerStopTimers.setOnItemSelectedListener(oislStopTimer);*/
         
         stopTimePicker.setOnTimeChangedListener(new OnTimeChangedListener() {
 
@@ -242,7 +287,7 @@ public class SchedulerActivity extends Activity {
 			}
 		});
 		
-		OnItemSelectedListener oislStartTimer =  new OnItemSelectedListener() {
+		/*OnItemSelectedListener oislStartTimer =  new OnItemSelectedListener() {
       	  
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
@@ -262,7 +307,7 @@ public class SchedulerActivity extends Activity {
             	
             }
         };
-        spinnerStartTimers.setOnItemSelectedListener(oislStartTimer);
+        spinnerStartTimers.setOnItemSelectedListener(oislStartTimer);*/
         
         startTimePicker.setOnTimeChangedListener(new OnTimeChangedListener() {
 

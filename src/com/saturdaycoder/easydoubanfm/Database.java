@@ -238,5 +238,40 @@ public class Database extends SQLiteOpenHelper {
 		}
 		else return null;
 	}
-
+	
+	public int getChannelIndex(int chanId) {
+		int i = 0;
+		FmChannel[] chans = getChannels();
+		for (; i < chans.length; ++i) {
+			if (chans[i].channelId == chanId) {
+				return i;
+			}
+		}
+		
+		return -1;
+		
+		
+	}
+	public int getFirstPublicChannel() {
+		FmChannel[] chans = getChannels();
+		for (int i = 0; i < chans.length; ++i) {
+			if (chans[i].channelId > 0) {
+				return chans[i].channelId;
+			}
+		}
+		return 0;
+	}
+	public boolean isChannelIdValid(int id) {
+		//boolean chanFound = false;
+		FmChannel[] chans = getChannels();
+		for (int i = 0; i < chans.length; ++i) {
+			if (id == chans[i].channelId) {
+				//chanFound = true;
+				//break;
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }

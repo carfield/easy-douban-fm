@@ -143,7 +143,7 @@ public class Preference {
 		return pref.getBoolean(KEY_SHAKE_ENABLE, true);
 	}
 	
-	public static void setShakeThreshold(Context context, int value) {
+	/*public static void setShakeThreshold(Context context, int value) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
 		ed.putInt(KEY_SHAKE_THRESHOLD, value);
@@ -153,7 +153,7 @@ public class Preference {
 	public static int getShakeThreshold(Context context) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		return pref.getInt(KEY_SHAKE_THRESHOLD, VALUE_DEFAULT_SHAKE_THRESHOLD);
-	}
+	}*/
 	
 	public static void setShakeThresholdLevel(Context context, int value) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
@@ -191,7 +191,7 @@ public class Preference {
 		return pref.getInt(KEY_IDLE_THRESHOLD_LEVEL, VALUE_DEFAULT_IDLE_THRESHOLD_LEVEL);
 	}
 	
-	public static void setMediaButtonLongPressThreshold(Context context, int value) {
+	/*public static void setMediaButtonLongPressThreshold(Context context, int value) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		Editor ed = pref.edit();
 		ed.putInt(KEY_MEDIA_BUTTON_LONG_PRESS_THRESHOLD, value);
@@ -201,7 +201,7 @@ public class Preference {
 	public static int getMediaButtonLongPressThreshold(Context context) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		return pref.getInt(KEY_MEDIA_BUTTON_LONG_PRESS_THRESHOLD, VALUE_DEFAULT_MEDIA_BUTTON_LONG_PRESS_THRESHOLD);
-	}
+	}*/
 	
 	public static void setMediaButtonEnable(Context context, boolean enable) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
@@ -297,7 +297,7 @@ public class Preference {
 		ed.commit();
 	}
 	
-	public static int getMaxIdleTime(Context context) {
+	/*public static int getMaxIdleTime(Context context) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);
 		return pref.getInt(KEY_MAX_IDLE_TIME, VALUE_DEFAULT_MAX_IDLE_MINUTES);
 	}
@@ -307,7 +307,7 @@ public class Preference {
 		Editor ed = pref.edit();
 		ed.putInt(KEY_MAX_IDLE_TIME, minutes);
 		ed.commit();
-	}
+	}*/
 	
 	public static int getAutoCloseTime(Context context) {
 		SharedPreferences pref = context.getSharedPreferences(PREF_SETTINGS_FILENAME, Context.MODE_PRIVATE);

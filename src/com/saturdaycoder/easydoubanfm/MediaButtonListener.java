@@ -13,8 +13,11 @@ public class MediaButtonListener extends BroadcastReceiver {
 
 	private boolean handleMediaButtonControl(Context context, 
 			int keycode, int keyaction, long keytime) {
-
 		synchronized(mediaButtonDownLock) {
+			int longpresslevel = Preference.getLongPressThresholdLevel(context);
+			if (longpresslevel < 0 || longpresslevel >= Global.longPressLevels.length)
+				longpresslevel = 2;
+		
 			Debugger.debug("keycode = " + keycode + " action = " + keyaction 
 					+ " eventtime = " + keytime);
 
@@ -24,7 +27,7 @@ public class MediaButtonListener extends BroadcastReceiver {
 					mediaButtonDownStartTime = keytime;
 				}
 				else if (mediaButtonDownStartTime != -1 &&
-						keytime - mediaButtonDownStartTime > 1000 * Preference.getMediaButtonLongPressThreshold(context)) {
+						keytime - mediaButtonDownStartTime > 1000 * Global.longPressLevels[longpresslevel]) {
 					mediaButtonDownStartTime = -1;
 					Debugger.info("MEDIA BUTTON LONG PRESS");
 					if (Preference.getMediaButtonLongEnable(context)) {
@@ -41,7 +44,7 @@ public class MediaButtonListener extends BroadcastReceiver {
 					if (mediaButtonDownStartTime == -1 || keytime < mediaButtonDownStartTime) {
 						Debugger.info("MEDIA BUTTON PRESSED but wrong start time");						
 					}
-					else if (keytime - mediaButtonDownStartTime > 1000 * Preference.getMediaButtonLongPressThreshold(context)) {
+					else if (keytime - mediaButtonDownStartTime > 1000 * Global.longPressLevels[longpresslevel]) {
 						Debugger.info("MEDIA BUTTON LONG PRESS");
 						if (Preference.getMediaButtonLongEnable(context)) {							
 							QuickAction.doQuickAction(context,

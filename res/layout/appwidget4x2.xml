@@ -46,7 +46,7 @@
 		    	/>	    
 		  <ImageButton 
 	    		android:scaleType="fitCenter"
-	    		android:src="@drawable/btn_menu"
+	    		android:src="@drawable/btn_clock"
 	    		android:background="@drawable/transparent"
 	    		android:id="@+id/buttonMenu"
 	    		android:layout_weight="1" 

@@ -82,7 +82,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		
 		synchronized(channelTableLock) {
 			if (db.getChannels() == null || db.getChannels().length < 1) {
-				for(FmChannel fc: FmChannel.AllChannels) {
+				for(FmChannel fc: FmChannel.PreinstalledChannels) {
 					db.saveChannel(fc);
 				}
 			}
@@ -232,10 +232,10 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 										
 					// if channel not exist, or it need login but not logged in
 					// find the first public channel to select
-					if (!FmChannel.isChannelIdValid(ci)
+					if (!db.isChannelIdValid(ci)
 							|| (FmChannel.channelNeedLogin(ci) && loginSession == null)) {
 						// selected channel not exist
-						ci = FmChannel.getFirstPublicChannel();
+						ci = db.getFirstPublicChannel();
 						
 						Preference.selectChannel(context, ci);
 						
@@ -410,13 +410,13 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	public void forwardChannel() {
 		
 		int chanId = Preference.getSelectedChannel(context);
-		int idx = FmChannel.getChannelIndex(chanId);
+		int idx = db.getChannelIndex(chanId);
 		FmChannel chan = null;
 		
 		synchronized(channelTableLock) {
 			while(true) {
-				idx = (idx + 1) % FmChannel.AllChannels.length;
-				chan = FmChannel.AllChannels[idx];
+				idx = (idx + 1) % FmChannel.PreinstalledChannels.length;
+				chan = FmChannel.PreinstalledChannels[idx];
 				if (chan == null)
 					return;
 				if (FmChannel.channelNeedLogin(chan.channelId)){
@@ -508,6 +508,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 					Preference.setLogin(context, true);
 					
 					try {
+						playListManager.reset(loginSession, Preference.getSelectedChannel(context));
 						notifyLoginStateChanged(Global.STATE_STARTED, NO_REASON);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -548,7 +549,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		synchronized(loginLock) {
 			Preference.setLogin(context, false);
 			loginSession = null;
-			
+			playListManager.reset(null, Preference.getSelectedChannel(context));
 			try {
 				notifyLoginStateChanged(Global.STATE_IDLE, NO_REASON);
 			} catch (Exception e) {
@@ -899,37 +900,33 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		private boolean rate;
 		public AsyncMusicRater(boolean rate) {
 			this.rate = rate;
+			playListManager.reset();
 		}
 		@Override
 		protected void onPreExecute() {
 			notifyMusicRated(rate);
+			curMusic.rate(rate);
+		}
+		@Override
+		protected void onPostExecute(Integer result) {
+			if (result != 0) {
+				notifyMusicRated(!rate);
+				curMusic.rate(!rate);
+				popNotify("无法标记喜爱歌曲");
+			}
 		}
 		@Override
 		protected Integer doInBackground(Integer... params) {
-			//if (params.length < 1)
-			//	return -1;
-			
-			boolean rated = rate;//params[0];
-			
-			synchronized(musicSessionLock) {
+			//synchronized(musicSessionLock) {
 				if (curMusic == null || curMusic.isRated())
 					return 0;			
 				
-				synchronized(stopReasonLock) {
-					lastStopReason = rated? DoubanFmApi.TYPE_RATE: DoubanFmApi.TYPE_UNRATE;
-					/*pendingMusicList.clear();
-					try {
-						fillPendingList();
-						
-						curMusic.rate(rated);
-						notifyMusicRated(rated);
-					} catch (Exception e) {
-						Debugger.error("error rating music: " + e.toString());
-					}*/
+				//synchronized(stopReasonLock) {
+					lastStopReason = rate? DoubanFmApi.TYPE_RATE: DoubanFmApi.TYPE_UNRATE;
 					playListManager.prefetchAsync(lastStopReason);
 					lastStopReason = DoubanFmApi.TYPE_NEW;
-				}
-			}
+				//}
+			//}
 			return 0;
 		}
 		

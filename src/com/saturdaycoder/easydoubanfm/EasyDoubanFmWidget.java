@@ -253,7 +253,7 @@ public class EasyDoubanFmWidget extends AppWidgetProvider {
 		remoteViews.setOnClickPendingIntent(R.id.buttonPlayPause, playPausePendingIntent);
 	
 		// Menu button
-		Intent menuIntent = new Intent(context, PlayerSettingActivity.class);
+		Intent menuIntent = new Intent(context, SchedulerActivity.class);
 		
 		PendingIntent menuPendingIntent = PendingIntent.getActivity(context, 
 				(int)System.currentTimeMillis(), menuIntent, 0);

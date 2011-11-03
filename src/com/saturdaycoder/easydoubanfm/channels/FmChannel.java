@@ -19,10 +19,13 @@ public class FmChannel {
 	public static boolean channelNeedLogin(int chanId) {
 		return (chanId == 0);
 	}
-	public static int getChannelIndex(int chanId) {
+	
+	
+	
+	/*public static int getChannelIndex(int chanId) {
 		int i = 0;
-		for (; i < AllChannels.length; ++i) {
-			if (AllChannels[i].channelId == chanId) {
+		for (; i < PreinstalledChannels.length; ++i) {
+			if (PreinstalledChannels[i].channelId == chanId) {
 				return i;
 			}
 		}
@@ -50,7 +53,7 @@ public class FmChannel {
 			}
 		}
 		return false;
-	}
+	}*/
 	
 	public FmChannel(int channelId, String abbrEn, String nameEn, String name, int seqId) {
 		this.channelId = channelId;
@@ -61,7 +64,7 @@ public class FmChannel {
 	}
 	public static final FmChannel PrivateChannel = new FmChannel(0, "", "Personal Radio", "私人频道", 0);
 	
-	public static final FmChannel[] AllChannels = new FmChannel[] {
+	public static final FmChannel[] PreinstalledChannels = new FmChannel[] {
 		PrivateChannel,
 		new FmChannel(1, "CH", "Chinese", "华语", 1),
 		new FmChannel(2, "EN", "Euro-American", "欧美", 2),

@@ -149,7 +149,8 @@ public class ChannelSelectorActivity extends Activity {
     		if (resultCode != RESULT_OK) {
     			return;
     		}
-    		if (FmChannel.isChannelIdValid(pendingSelChanId)) {
+    		Database db = new Database(this);
+    		if (db.isChannelIdValid(pendingSelChanId)) {
     			Intent i = new Intent(Global.ACTION_PLAYER_SELECT_CHANNEL);
                 i.putExtra(Global.EXTRA_CHANNEL, pendingSelChanId);
                 startService(i);

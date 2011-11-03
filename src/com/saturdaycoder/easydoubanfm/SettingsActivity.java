@@ -34,17 +34,17 @@ public class SettingsActivity extends Activity {
 		
 		btnPlayerSetting = (Button)findViewById(R.id.buttonPlayerSetting);
 		btnSchedulerSetting = (Button)findViewById(R.id.buttonSchedulerSetting);
-		btnAdClick = (Button)findViewById(R.id.buttonAdClick);
+		//btnAdClick = (Button)findViewById(R.id.buttonAdClick);
 		//btnThrowEgg = (Button)findViewById(R.id.buttonThrowEgg);
 		
 		boolean showad = Preference.getShowAd(this);
 		if (showad) {
 			//adView.loadAd(new AdRequest());
 			adView.setVisibility(AdView.VISIBLE);
-			btnAdClick.setText(R.string.text_hide_ad);
+			//btnAdClick.setText(R.string.text_hide_ad);
 		} else {
 			adView.setVisibility(AdView.GONE);
-			btnAdClick.setText(R.string.text_show_ad);
+			//btnAdClick.setText(R.string.text_show_ad);
 		}
 		
 		btnPlayerSetting.setOnClickListener(new Button.OnClickListener() {
@@ -70,23 +70,21 @@ public class SettingsActivity extends Activity {
 		btnAdClick.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//Intent intent = new Intent();
-
-    			//intent.setClass(SettingsActivity.this, AdClickActivity.class);
-    			//startActivity(intent);
+				
 				if (Preference.getShowAd(SettingsActivity.this)) {
 					
 					Preference.setShowAd(SettingsActivity.this, false);
 					adView.setVisibility(AdView.GONE);
-					btnAdClick.setText(R.string.text_show_ad);
+					//btnAdClick.setText(R.string.text_show_ad);
 				} else {
 					Preference.setShowAd(SettingsActivity.this, true);
 					
 					adView.setVisibility(AdView.VISIBLE);
 					//adView.loadAd(new AdRequest());
-					btnAdClick.setText(R.string.text_hide_ad);
+					//btnAdClick.setText(R.string.text_hide_ad);
 					popNotify("感谢您的支持！广告将会显示在页面上方");
 				}
+				
 			}
 		});
 		/*btnThrowEgg.setOnClickListener(new Button.OnClickListener() {
@@ -111,10 +109,10 @@ public class SettingsActivity extends Activity {
 		if (Preference.getShowAd(this)) {
 			//adView.loadAd(new AdRequest());
 			adView.setVisibility(AdView.VISIBLE);
-			btnAdClick.setText(R.string.text_hide_ad);
+			//btnAdClick.setText(R.string.text_hide_ad);
 		} else {
 			adView.setVisibility(AdView.GONE);
-			btnAdClick.setText(R.string.text_show_ad);
+			//btnAdClick.setText(R.string.text_show_ad);
 		}
 	}
 	

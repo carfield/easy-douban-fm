@@ -14,7 +14,7 @@
     <string name="button_confirm_login_text">登录</string>
     <string name="text_login_email">E-Mail地址</string>
     <string name="text_login_passwd">密码</string>
-    <string name="text_channel_unselected">点击选择频道</string>
+    <string name="text_channel_unselected">点这里选择频道</string>
     <string name="text_channel_updating">正在更新频道列表</string>
     <string name="text_channel_closing">正在关闭电台...</string>
     <string name="public_channel_name">公共频道</string>
@@ -57,8 +57,8 @@
     <string name="radio_enable_stop_timer">定时关闭</string>
     <string name="radio_enable_start_timer">起床定时</string>
     
-    <string name="text_show_ad">支持一下作者，显示并点击广告</string>
-    <string name="text_hide_ad">隐藏广告</string>
+    <string name="text_ad_shown">广告已显示</string>
+    <string name="text_ad_hidden">广告已隐藏</string>
         
     <string name="button_name_ban">禁播</string>
     <string name="button_name_rate">加心</string>
