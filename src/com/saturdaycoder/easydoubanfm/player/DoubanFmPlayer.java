@@ -53,11 +53,19 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	//private ArrayList<MusicInfo> pendingMusicList = new ArrayList<MusicInfo>();
 	
 	private MusicInfo curMusic = null;
+	//private MusicInfo getCurrentMusic() {
+		
+	//}
+	
+	//private MusicInfo getLastMusic() {
+		
+	//}
 	private MusicInfo lastMusic = null;
+	
 	private boolean isPreparing = false;
 	private final Object musicSessionLock = new Object();
 	
-	private PlayListManager playListManager = new PlayListManager(MAX_PENDING_COUNT, MAX_HISTORY_COUNT);
+	private DoubanPlayListManager playListManager = new DoubanPlayListManager(MAX_PENDING_COUNT, MAX_HISTORY_COUNT);
 	
 	private Bitmap curPic = null;
 	//private GetPictureTask picTask = null;
@@ -241,7 +249,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 						
 					}
 					
-					
+					playListManager.setChannel(ci);
 					FmChannel c = db.getChannelInfo(ci);
 					
 					try {
@@ -359,10 +367,12 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	}
 	
 	public void rateMusic() {
+		Debugger.verbose("Player.rateMusic");
 		new AsyncMusicRater(true).execute();
 	}
 	
 	public void unrateMusic() {
+		Debugger.verbose("Player.unrateMusic");
 		new AsyncMusicRater(false).execute();
 	}
 	
@@ -397,8 +407,9 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 			e.printStackTrace();
 		}
 		
-		playListManager.reset(id);
-		//pendingMusicList.clear();
+		playListManager.setChannel(id);
+		playListManager.clearList();
+
 		lastStopReason = DoubanFmApi.TYPE_NEW;
 
 		if (isOpen()) {
@@ -508,7 +519,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 					Preference.setLogin(context, true);
 					
 					try {
-						playListManager.reset(loginSession, Preference.getSelectedChannel(context));
+						playListManager.setLoginSession(loginSession);
+						playListManager.setChannel(Preference.getSelectedChannel(context));
 						notifyLoginStateChanged(Global.STATE_STARTED, NO_REASON);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -549,7 +561,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		synchronized(loginLock) {
 			Preference.setLogin(context, false);
 			loginSession = null;
-			playListManager.reset(null, Preference.getSelectedChannel(context));
+			playListManager.setLoginSession(null);
+			playListManager.setChannel(Preference.getSelectedChannel(context));
 			try {
 				notifyLoginStateChanged(Global.STATE_IDLE, NO_REASON);
 			} catch (Exception e) {
@@ -787,8 +800,14 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		content.rated = rated;
 		EasyDoubanFmWidget.updateContent(context, content, null);
 		//EasyDoubanFm.updateContents(content);
-		Intent i = new Intent(Global.EVENT_PLAYER_MUSIC_RATED);
+		Intent i;
+		if (rated) {
+			i = new Intent(Global.EVENT_PLAYER_MUSIC_RATED);
+		} else {
+			i = new Intent(Global.EVENT_PLAYER_MUSIC_UNRATED);
+		}
 		context.sendBroadcast(i);
+		
 	}
 	
 	private void notifyMusicPaused() {
@@ -883,7 +902,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	}
 	
 	private MusicInfo getNextMusic() {
-		return playListManager.pop(DoubanFmApi.TYPE_NEW);
+		return playListManager.getNext();//forward(DoubanFmApi.TYPE_NEW);
 	}
 	
 	private class AsyncChannelSwitcher extends AsyncTask<Integer, Integer, Integer> {
@@ -900,12 +919,12 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		private boolean rate;
 		public AsyncMusicRater(boolean rate) {
 			this.rate = rate;
-			playListManager.reset();
+			
 		}
 		@Override
 		protected void onPreExecute() {
 			notifyMusicRated(rate);
-			curMusic.rate(rate);
+			
 		}
 		@Override
 		protected void onPostExecute(Integer result) {
@@ -918,13 +937,23 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		@Override
 		protected Integer doInBackground(Integer... params) {
 			//synchronized(musicSessionLock) {
-				if (curMusic == null || curMusic.isRated())
+				if (curMusic == null){ 
+					Debugger.warn("no music is playing");
 					return 0;			
+				}
+				
+				if (curMusic.isRated() == rate) {
+					Debugger.warn("no need to do anything");
+					return 0;
+				}
+			
+				curMusic.rate(rate);
+				playListManager.clearList();
 				
 				//synchronized(stopReasonLock) {
-					lastStopReason = rate? DoubanFmApi.TYPE_RATE: DoubanFmApi.TYPE_UNRATE;
-					playListManager.prefetchAsync(lastStopReason);
-					lastStopReason = DoubanFmApi.TYPE_NEW;
+				lastStopReason = rate? DoubanFmApi.TYPE_RATE: DoubanFmApi.TYPE_UNRATE;
+				playListManager.requestList(lastStopReason);
+				lastStopReason = DoubanFmApi.TYPE_NEW;
 				//}
 			//}
 			return 0;
@@ -952,8 +981,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 				//pendingMusicList.clear();
 				try {
 					//fillPendingList();
-					playListManager.reset();
-					playListManager.prefetch(lastStopReason);
+					playListManager.clearList();
+					playListManager.requestList(lastStopReason);
 					
 
 					
@@ -1188,13 +1217,13 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	}
 
 	@Override
-	public void onPlayListFetchSuccess(int count) {
+	public void onPlayListChanged(int count) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onPlayListFetchFailure(int reason) {
+	public void onPlayListError(int reason) {
 		// TODO Auto-generated method stub
 		
 	}

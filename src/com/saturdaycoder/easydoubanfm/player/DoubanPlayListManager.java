@@ -1,6 +1,7 @@
 package com.saturdaycoder.easydoubanfm.player;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.LinkedList;
 
@@ -9,14 +10,16 @@ import com.saturdaycoder.easydoubanfm.Preference;
 import com.saturdaycoder.easydoubanfm.apis.DoubanFmApi;
 
 import android.os.AsyncTask;
-public class PlayListManager {
+public class DoubanPlayListManager implements IPlayListManager {
 	private int numPrefetch;
 	private int numHistory;
+	private int fetchThreshold = 2;
 	//private User user;
 	//private Cookie cookie;
 	private LoginSession session = null;
 	private int channel;
 	
+	//private MusicInfo curMusic = null;
 	private Queue<MusicInfo> playList = new LinkedList<MusicInfo>();
 	private Queue<MusicInfo> historyList = new LinkedList<MusicInfo>();
 	
@@ -32,12 +35,19 @@ public class PlayListManager {
 			observerList.remove(o);
 	}
 	
-	public PlayListManager(int numPrefetch, int numHistory) {
+	public DoubanPlayListManager(int numPrefetch, int numHistory) {
 		this.numPrefetch = numPrefetch;
 		this.numHistory = numHistory;
 	}
 	
-	public void reset() {
+	public void setLoginSession(LoginSession session) {
+		this.session = session;
+	}
+	
+	public void setChannel(int chan) {
+		this.channel = chan;
+	}
+	/*public void reset() {
 		synchronized(playList) {
 			playList.clear();
 		}
@@ -50,12 +60,14 @@ public class PlayListManager {
 		this.channel = channel;
 	}
 	
+	
+	
 	public void reset(LoginSession session, int channel) {
 		this.session = session;
 		reset(channel);
 	}
 	
-	public MusicInfo pop(char reason) {
+	public MusicInfo forward(char reason) {
 		if (playList.size() < 1) {
 			prefetch(reason);
 			//while (playList.size() < 1);
@@ -89,19 +101,21 @@ public class PlayListManager {
 	public void prefetchAsync(char reason) {
 		new AsyncPlayListFetcher().execute(reason);
 	}
-	
+	*/
 	private Integer doPrefetch(char reason) {
 		String cursid = "";
 		
 		String[] historySids = null;
 		if (historyList.size() > 0) {
 			
-			cursid = historyList.poll().sid;
+			cursid = historyList.peek().sid;
 				
 			if (historyList.size() > 0) {
+				MusicInfo[] infos = new MusicInfo[historyList.size()];
 				historySids = new String[historyList.size()];
+				infos = historyList.toArray(infos);
 				for (int i = 0; i < historySids.length; ++i)
-					historySids[i] = historyList.poll().sid;
+					historySids[i] = infos[i].sid;
 			}
 		}
 		MusicInfo[] musics = null;		
@@ -111,7 +125,6 @@ public class PlayListManager {
 			musics = DoubanFmApi.report(session, channel, 
 						cursid, reason, historySids);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			Debugger.error("IO error fetching new list, current size " + playList.size());
 			return -1;
@@ -142,5 +155,63 @@ public class PlayListManager {
 			return doPrefetch(params[0]);
 		}
 		
+	}
+
+	@Override
+	public void requestList(char reason) {
+		doPrefetch(reason);
+	}
+	
+	
+	
+	@Override
+	public void requestListAsync(char reason) {
+		new AsyncPlayListFetcher().execute(reason);
+	}
+
+	@Override
+	public void clearList() {
+		synchronized(playList) {
+			playList.clear();
+		}
+	}
+
+	@Override
+	public List<MusicInfo> getList() {
+		// don't support
+		return null;
+	}
+
+	@Override
+	public MusicInfo getNext() {
+		if (playList.size() < 1) {
+			doPrefetch(DoubanFmApi.TYPE_NEW);
+		}
+		
+		MusicInfo mi = playList.poll();
+		if (mi == null) {
+			Debugger.warn("null playlist item. back");
+			return null;
+		}
+		
+		// save history
+		historyList.add(mi);
+		
+		// keep only the latest history
+		while (historyList.size() > numHistory) {			
+			historyList.poll();
+		}
+		
+		// if not enough list items, prefetch it
+		if (playList.size() < fetchThreshold) {
+			requestListAsync(DoubanFmApi.TYPE_END);
+		}
+		return mi;
+	}
+
+	@Override
+	public MusicInfo getLast() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
