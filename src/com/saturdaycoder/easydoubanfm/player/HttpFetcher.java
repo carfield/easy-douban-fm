@@ -3,6 +3,8 @@ package com.saturdaycoder.easydoubanfm.player;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,7 +23,7 @@ import com.saturdaycoder.easydoubanfm.Utility;
 
 public class HttpFetcher {
 	private ArrayList<IHttpFetcherObserver> observerList = new ArrayList<IHttpFetcherObserver>();
-	private Map<String, byte[]> contentMap = new HashMap<String, byte[]>();
+	private Map<String, byte[]> contentMap = new LinkedHashMap<String, byte[]>();
 	private Map<String, FetcherTask> taskMap = new HashMap<String, FetcherTask>();
 	private static HttpFetcher inst = new HttpFetcher();
 	public static HttpFetcher getInstance() {
@@ -165,6 +167,15 @@ public class HttpFetcher {
     		}
     		
     		contentMap.put(url, bytearray);
+    		
+    		while (contentMap.size() > 10)
+    		{
+    			Iterator<String> iter = contentMap.keySet().iterator(); 
+    			if (iter.hasNext()) {
+    				contentMap.remove(iter.next());
+    			}
+    		}
+    		
     		for (IHttpFetcherObserver o: observerList)
 				o.onHttpFetchSuccess(url);
         }

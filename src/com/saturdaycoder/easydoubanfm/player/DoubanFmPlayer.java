@@ -49,17 +49,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	private boolean isOpen = false;
 	private Context context = null;
 	private Database db = null;
-	//private ArrayList<MusicInfo> musicHistory = new ArrayList<MusicInfo>();
-	//private ArrayList<MusicInfo> pendingMusicList = new ArrayList<MusicInfo>();
 	
 	private MusicInfo curMusic = null;
-	//private MusicInfo getCurrentMusic() {
-		
-	//}
-	
-	//private MusicInfo getLastMusic() {
-		
-	//}
 	private MusicInfo lastMusic = null;
 	
 	private boolean isPreparing = false;
@@ -68,7 +59,6 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	private DoubanPlayListManager playListManager = new DoubanPlayListManager(MAX_PENDING_COUNT, MAX_HISTORY_COUNT);
 	
 	private Bitmap curPic = null;
-	//private GetPictureTask picTask = null;
 	
 	private char lastStopReason = DoubanFmApi.TYPE_NEW;
 	private final Object stopReasonLock = new Object();
