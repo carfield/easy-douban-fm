@@ -35,26 +35,26 @@
         
         <receiver android:name="MediaButtonListener">
             <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.intent.action.MEDIA_BUTTON" 
+                    	android:priority="100"/>
             </intent-filter>
         </receiver>
         
         <receiver android:name="CameraButtonListener">
             <intent-filter>
-                <action android:name="android.intent.action.CAMERA_BUTTON" />
+                <action android:name="android.intent.action.CAMERA_BUTTON" 
+                    	android:priority="100"/>
             </intent-filter>
         </receiver>
         
 		<service android:name="DoubanFmService" />        
         
-        <activity android:name="ChannelSelectorActivity" 
-                  
+        <activity android:name="ChannelSelectorActivity"                   
                   android:launchMode="singleTask"
                   android:label="选择频道" >
         </activity>
         
-        <activity android:name=".PlayerSettingActivity" 
-                  
+        <activity android:name=".PlayerSettingActivity"                   
                   android:launchMode="singleTask"
                   android:label="播放器设置" >
         </activity>
@@ -62,15 +62,6 @@
         <activity android:name="IntroductionActivity" 
                   android:launchMode="singleTask"
                   android:label="使用简介" >
-        </activity>
-        
-        <activity android:name="SettingsActivity" 
-                  android:launchMode="singleTask"
-                  android:label="设置" >
-        </activity>
-        
-        <activity android:name="AdClickActivity" 
-                  android:label="广告" >
         </activity>
         
         <activity android:name="SchedulerActivity" 

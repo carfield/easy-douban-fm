@@ -75,7 +75,7 @@ public class SchedulerActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		
-		setContentView(R.layout.schedulersetting);		
+		setContentView(R.layout.schedulersetting_linear);		
 		
 		
 		/*mServiceConn = new ServiceConnection(){

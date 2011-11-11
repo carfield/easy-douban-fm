@@ -392,6 +392,8 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 		}
 		
 		try {
+			notifyMusicPosition(-1, -1);
+			notifyMusicStateChanged( Global.STATE_PREPARE, null, NO_REASON);	
 			notifyChannelChanged(chan.channelId, chan.name);
 		} catch (Exception e) {
 			e.printStackTrace();

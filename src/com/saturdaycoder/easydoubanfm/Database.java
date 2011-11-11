@@ -8,16 +8,15 @@ import java.util.ArrayList;
 import com.saturdaycoder.easydoubanfm.channels.FmChannel;
 
 import android.content.ContentValues;
-//import android.content.SharedPreferences;
-//import android.content.SharedPreferences.Editor;
+
 public class Database extends SQLiteOpenHelper {
 	private static final int INVALID_DOWNLOAD_ID = -1;
 	
 	private static final String DATABASE_NAME = "userdb.sqlite";
 	private static final int DB_VERSION = 2;
+	
 	protected Database(Context context) {
 		super(context, DATABASE_NAME, null, DB_VERSION);
-		//this.context = context;
 	}
 	@Override
 	public void onCreate(SQLiteDatabase db) {
@@ -29,7 +28,6 @@ public class Database extends SQLiteOpenHelper {
 		db.execSQL("CREATE TABLE downloads (id INTEGER primary key, "
 				+ " url TEXT DEFAULT '', "
 				+ " filename TEXT DEFAULT '')");
-		//selectChannel(0);
 	}
 	
 	@Override
@@ -138,7 +136,7 @@ public class Database extends SQLiteOpenHelper {
 	
 	public int getDownloadIdByUrl(String url) {
 		SQLiteDatabase db = this.getWritableDatabase();
-		//ArrayList<String> list = new ArrayList<String>();
+
 		Cursor cursor = db.rawQuery("select id from downloads where url='" + url + "'", null);
 		if (cursor.moveToFirst()) 
 		{
@@ -148,7 +146,6 @@ public class Database extends SQLiteOpenHelper {
 	}
 	public String getFilenameByUrl(String url) {
 		SQLiteDatabase db = this.getWritableDatabase();
-		//ArrayList<String> list = new ArrayList<String>();
 		Cursor cursor = db.rawQuery("select filename from downloads where url='" + url + "'", null);
 		if (cursor.moveToFirst()) 
 		{
@@ -159,7 +156,6 @@ public class Database extends SQLiteOpenHelper {
 	
 	public String getFilenameById(int id) {
 		SQLiteDatabase db = this.getWritableDatabase();
-		//ArrayList<String> list = new ArrayList<String>();
 		Cursor cursor = db.rawQuery("select filename from downloads where id=" + id, null);
 		if (cursor.moveToFirst()) 
 		{
@@ -169,7 +165,6 @@ public class Database extends SQLiteOpenHelper {
 	}
 	public String getDownloadUrlById(int id) {
 		SQLiteDatabase db = this.getWritableDatabase();
-		//ArrayList<String> list = new ArrayList<String>();
 		Cursor cursor = db.rawQuery("select url from downloads where id=" + id, null);
 		if (cursor.moveToFirst()) 
 		{
@@ -210,11 +205,6 @@ public class Database extends SQLiteOpenHelper {
 		{
 			do {
 				FmChannel dfc = new FmChannel(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getInt(4));
-				//dfc.channelId = cursor.getInt(0);
-				//dfc.abbrEn = cursor.getString(1);
-				//dfc.nameEn = cursor.getString(2);
-				//dfc.name = cursor.getString(3);
-				//dfc.seqId = cursor.getInt(4);
 				list.add(dfc);
 			} while(cursor.moveToNext());
 			FmChannel[] dfcs = new FmChannel[list.size()];
@@ -229,11 +219,6 @@ public class Database extends SQLiteOpenHelper {
 		if (cursor.moveToFirst()) 
 		{
 			FmChannel dfc = new FmChannel(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getInt(4));
-			//dfc.channelId = cursor.getInt(0);
-			//dfc.abbrEn = cursor.getString(1);
-			//dfc.nameEn = cursor.getString(2);
-			//dfc.name = cursor.getString(3);
-			//dfc.seqId = cursor.getInt(4);
 			return dfc;
 		}
 		else return null;
@@ -262,12 +247,10 @@ public class Database extends SQLiteOpenHelper {
 		return 0;
 	}
 	public boolean isChannelIdValid(int id) {
-		//boolean chanFound = false;
 		FmChannel[] chans = getChannels();
 		for (int i = 0; i < chans.length; ++i) {
 			if (id == chans[i].channelId) {
-				//chanFound = true;
-				//break;
+
 				return true;
 			}
 		}

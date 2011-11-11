@@ -14,12 +14,10 @@ public class DoubanPlayListManager implements IPlayListManager {
 	private int numPrefetch;
 	private int numHistory;
 	private int fetchThreshold = 2;
-	//private User user;
-	//private Cookie cookie;
+
 	private LoginSession session = null;
 	private int channel;
 	
-	//private MusicInfo curMusic = null;
 	private Queue<MusicInfo> playList = new LinkedList<MusicInfo>();
 	private Queue<MusicInfo> historyList = new LinkedList<MusicInfo>();
 	
@@ -47,61 +45,7 @@ public class DoubanPlayListManager implements IPlayListManager {
 	public void setChannel(int chan) {
 		this.channel = chan;
 	}
-	/*public void reset() {
-		synchronized(playList) {
-			playList.clear();
-		}
-	}
-	
-	public void reset(int channel) {
-		synchronized(playList) {
-			playList.clear();
-		}
-		this.channel = channel;
-	}
-	
-	
-	
-	public void reset(LoginSession session, int channel) {
-		this.session = session;
-		reset(channel);
-	}
-	
-	public MusicInfo forward(char reason) {
-		if (playList.size() < 1) {
-			prefetch(reason);
-			//while (playList.size() < 1);
-		}
-		
-		MusicInfo mi = playList.poll();
-		if (mi == null) {
-			Debugger.warn("null playlist item. back");
-			return null;
-		}
-		
-		// save history
-		historyList.add(mi);
-		
-		// keep only the latest history
-		if (historyList.size() > numHistory) {			
-			historyList.poll();
-		}
-		
-		// if not enough list items, prefetch it
-		if (playList.size() < 2) {
-			prefetchAsync(reason);
-		}
-		return mi;
-	}
-	
-	public void prefetch(char reason) {
-		doPrefetch(reason);
-	}
-	
-	public void prefetchAsync(char reason) {
-		new AsyncPlayListFetcher().execute(reason);
-	}
-	*/
+
 	private Integer doPrefetch(char reason) {
 		String cursid = "";
 		

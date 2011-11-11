@@ -67,7 +67,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private CallListener callListener;
 	private ShakingListener shakeControlListener;
 	private ShakeDetector shakeDetector;
-	
+	private CameraButtonListener cameraButtonListener;
+	private MediaButtonListener mediaButtonListener;	
 	
 	// for service foreground notification
 	private Notification fgNotification;	
@@ -135,15 +136,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		mDelayedStopHandler.removeCallbacksAndMessages(null);
 		mDelayedPausedStopHandler.removeCallbacksAndMessages(null);	
-		//lastStopReason = DoubanFmApi.TYPE_NEW;
 
 		db = new Database(this);
 		dPlayer = new DoubanFmPlayer(this, db);
 		dDownloader = new DoubanFmDownloader(this, db);
 		
-		//PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		//wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "EasyDoubanFm");
- 
 		// work-around on gingerbread restart bug: onStartCommand will not execute,
 		// so update widgets here
 		if (android.os.Build.VERSION.SDK_INT == 9 
@@ -159,11 +156,24 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
 		// listens to hard button event
 		shakeControlListener = new ShakingListener();
-		//IntentFilter mfilter = new IntentFilter();
-		//mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
-		//mfilter.addAction(Intent.ACTION_CAMERA_BUTTON);
-		//mfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-		//registerReceiver(phoneControlListener, mfilter);
+		
+		// media button
+		if (mediaButtonListener == null) {
+			mediaButtonListener = new MediaButtonListener();
+		}		
+		IntentFilter mfilter = new IntentFilter();
+		mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
+		mfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+		registerReceiver(mediaButtonListener, mfilter);
+		
+		// media button
+		if (cameraButtonListener == null) {
+			cameraButtonListener = new CameraButtonListener();
+		}		
+		IntentFilter cfilter = new IntentFilter();
+		cfilter.addAction(Intent.ACTION_CAMERA_BUTTON);
+		cfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+		registerReceiver(cameraButtonListener, cfilter);
 		
 		// listens to shake event
 		shakeDetector = new ShakeDetector(this);		
@@ -427,6 +437,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				shakeDetector = null;
 			}
         
+			// media button
+			if (mediaButtonListener != null) {
+				unregisterReceiver(mediaButtonListener);
+				mediaButtonListener = null;
+			}		
+			
+			// media button
+			if (cameraButtonListener == null) {
+				unregisterReceiver(cameraButtonListener);
+				cameraButtonListener = null;
+			}		
+			
         	if (callListener != null) {
         		unregisterReceiver(callListener);
         		callListener = null;
@@ -453,20 +475,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	@Override
 	public void onLowMemory() {
 		Debugger.warn("SERVICE ONLOWMEMORY");
-		//closePlayer();
-		//closeDownloader();
 	}	
 	
-//	private Runnable mBanMusicTask = new Runnable() {
-//		   public void run() {
-//			   dPlayer.banMusic();
-//		   }
-//		};	
 	private void banMusic() {
 		if (dPlayer.isOpen()) {
 			dPlayer.banMusic();
-			//mHandler.removeCallbacks(mBanMusicTask);
-	        //mHandler.postDelayed(mBanMusicTask, 50);			
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
@@ -475,17 +488,12 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 
 	@Override
 	public boolean login(String email, String passwd) {
-		//if (dPlayer.isOpen()) {
-			return dPlayer.login(email, passwd);
-		//}
-		//return false;
+		return dPlayer.login(email, passwd);
 	}
 
 	//@Override
 	private void logout() {
-		//if (dPlayer.isOpen()) {
-			dPlayer.logout();
-		//}
+		dPlayer.logout();
 	}
 	
 
@@ -498,31 +506,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		dDownloader.close();
 	}
 
-//	private PowerManager.WakeLock wakeLock = null;
-//	private Runnable mOpenPlayerTask = new Runnable() {
-//	   public void run() {
-//
-//		   	Notification fgNotification = new Notification(R.drawable.icon,
-//					getResources().getString(R.string.app_name),
-//			        System.currentTimeMillis());
-//			fgNotification.flags |= Notification.FLAG_NO_CLEAR;
-//			Intent it = new Intent(DoubanFmService.this, EasyDoubanFm.class);
-//			PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 0, it, 0);
-//			fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
-//			startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
-//		
-//			dPlayer.open();
-//		   
-//	   }
-//	};
-
 	private void openPlayer() {
-		// start foreground with notification
-//		   if (!dPlayer.isOpen()) {
-//		
-//				mHandler.removeCallbacks(mOpenPlayerTask);
-//		        mHandler.postDelayed(mOpenPlayerTask, Global.SERVICE_COMMAND_DELAY);
-//		   }
 	   	Notification fgNotification = new Notification(R.drawable.icon,
 				getResources().getString(R.string.app_name),
 		        System.currentTimeMillis());
@@ -535,27 +519,17 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		dPlayer.open();
 	}
 	
-//	private Runnable mClosePlayerTask = new Runnable() {
-//	   public void run() {
-//		   stopForeground(true);
-//		   dPlayer.close();
-//	   }
-//	};
 	private void closePlayer() {
 
 		
 		Debugger.debug("DoubanFm Control Service unregistered");
-		//if (dPlayer.isOpen()) {
+
 		stopForeground(true);
 		dPlayer.close();
         pausedByPhoneCall = false;
         
         SchedulerManager.getInstance(this).cancelScheduleStop();
 		
-		//if (wakeLock != null) {
-		//	wakeLock.release();
-		//}
-		//}
 	}
 	
 	private void closeService() {
@@ -565,34 +539,15 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		closePlayer();
 		stopSelf();
 	}
-//	private Runnable mResumeMusicTask = new Runnable() {
-//		   public void run() {
-//			   dPlayer.resumeMusic();
-//		   }
-//		};	
+
 	private void resumeMusic() {
 		if (dPlayer.isOpen()) {
-			/*mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
-			Notification fgNotification = new Notification(R.drawable.icon,
-					getResources().getString(R.string.app_name),
-			        System.currentTimeMillis());
-			fgNotification.flags |= Notification.FLAG_NO_CLEAR;
-			Intent it = new Intent(this, EasyDoubanFm.class);
-			PendingIntent pi = PendingIntent.getActivity(this, 0, it, 0);
-			fgNotification.setLatestEventInfo(this, "", "", pi);		
-			startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
-			*/
 			dPlayer.resumeMusic();
 		}
 	}
-//	private Runnable mPauseMusicTask = new Runnable() {
-//		   public void run() {
-//			   dPlayer.pauseMusic();
-//		   }
-//		};	
+
 	private void pauseMusic() {
 		if (dPlayer.isOpen()) {
-			//stopForeground(true);
 			dPlayer.pauseMusic();
 	        // make sure the service will shut down on its own if it was
 	        // just started but not bound to and nothing is playing
@@ -632,104 +587,46 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 	}
 	
-//	private class SelectChannelRunnable implements Runnable {
-//		private int chanId;
-//		public SelectChannelRunnable(int chanId) {
-//			this.chanId = chanId; 
-//		}
-//		@Override
-//		public void run() {
-//			dPlayer.selectChannel(chanId);
-//		}
-//	}
 	@Override
 	public void selectChannel(int id) {
 		dPlayer.selectChannel(id);
-		//if (dPlayer.isOpen()) {
-	        //mHandler.postDelayed(new SelectChannelRunnable(id), Global.SERVICE_COMMAND_DELAY);
-		//}
 	}
 	
-//	private Runnable mRateMusicTask = new Runnable() {
-//		   public void run() {
-//			   dPlayer.rateMusic();
-//		   }
-//		};		
 	private void rateMusic() {
 		if (dPlayer.isOpen()) {
 			dPlayer.rateMusic();
-			//mHandler.removeCallbacks(mRateMusicTask);
-	        //mHandler.postDelayed(mRateMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
 		}
 	}
-//	private Runnable mUnrateMusicTask = new Runnable() {
-//		   public void run() {
-//			   dPlayer.unrateMusic();
-//		   }
-//		};		
+
 	private void unrateMusic() {
 		if (dPlayer.isOpen()) {
 			dPlayer.unrateMusic();
-//			mHandler.removeCallbacks(mUnrateMusicTask);
-//	        mHandler.postDelayed(mUnrateMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
 		}
 	}
 	
-	
-//	private Runnable mNextMusicTask = new Runnable() {
-//		   public void run() {
-//				dPlayer.skipMusic();
-//		        pausedByPhoneCall = false;
-//		   }
-//		};		
 	private void nextMusic() {
 		if (dPlayer.isOpen()) {
 			dPlayer.skipMusic();
 	        pausedByPhoneCall = false;
-//			mHandler.removeCallbacks(mNextMusicTask);
-//	        mHandler.postDelayed(mNextMusicTask, Global.SERVICE_COMMAND_DELAY);
 		}
 		else {
 			popNotify(getResources().getString(R.string.warning_not_open));
 		}
 	}
 	
-	
-//	private Runnable mNextChannelTask = new Runnable() {
-//		   public void run() {
-//			   dPlayer.forwardChannel();
-//		        pausedByPhoneCall = false;
-//		   }
-//		};	
 	private void nextChannel() {
 		if (dPlayer.isOpen()) {
 			dPlayer.forwardChannel();
 	        pausedByPhoneCall = false;
-//			mHandler.removeCallbacks(mNextChannelTask);
-//	        mHandler.postDelayed(mNextChannelTask, Global.SERVICE_COMMAND_DELAY);
 		}
 	}
 	
-
-//	private class DownloadMusicTask implements Runnable {
-//		private String url;
-//		private String filename;
-//		public DownloadMusicTask(String url, String filename) {
-//			this.url = url;
-//			this.filename = filename;
-//		}
-//		@Override
-//		public void run() {
-//			dDownloader.download(url, filename);
-//		}
-//	}
-
     private void downloadMusic(String url, String filename) {
     	MusicInfo curMusic = null;
     	if (dPlayer.isOpen()) {
@@ -767,21 +664,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	}
     }
     
-    
-//    private class CancelDownloadTask implements Runnable {
-//    	private String url;
-//    	public CancelDownloadTask(String url) {
-//    		this.url = url;
-//    	}
-//    	@Override 
-//    	public void run() {
-//    		dDownloader.cancel(url);
-//    	}
-//    }
     private void cancelDownload(String url) {
     	if (dDownloader.isOpen()) {
     		dDownloader.cancel(url);
-    		//mHandler.postDelayed(new CancelDownloadTask(url), Global.SERVICE_COMMAND_DELAY);
     	}
     }
     
@@ -838,17 +723,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     
     private void updateActivity() {
     	WidgetContent content = getCurrentWidgetContent();    	
-
-    	//EasyDoubanFm.updateContents(content);
-    	
-    	//int curPos = dPlayer.getCurPosition();
-    	//int curDur = dPlayer.getCurDuration();
-    	
-    	//if (dPlayer.isOpen()) {
     	dPlayer.notifyFullStatus();
-    	//}
-    	
-    	//EasyDoubanFm.updatePosition(curPos, curDur);
     }
     
     
@@ -857,12 +732,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
     	EasyDoubanFmWidget.updateContent(this, content, null);
     }
     
-
-	
-	
-	//private Map<Integer, Notification> notifications = new HashMap<Integer, Notification>(); 
 	private boolean pausedByPhoneCall = false;
-	//private final Object pausedByPhoneCallLock = new Object();
+
 	private class CallListener extends BroadcastReceiver {
 		//boolean pausedByCall = false;
 		@Override
@@ -942,4 +813,14 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		}
 	}
 	
+	
+	private class AsyncNewVersionChecker extends AsyncTask<Context, Integer, String> {
+
+		@Override
+		protected String doInBackground(Context... params) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}
 }

@@ -18,8 +18,6 @@ import android.view.Window;
 import android.content.ServiceConnection;
 
 public class ChannelSelectorActivity extends Activity {
-	//private Button buttonConfirmChannel;
-	//private Button buttonUpdateChannels;
 	private ListView listChannels;
 	Database db;
 	ArrayList<FmChannel> channelList;
@@ -27,14 +25,14 @@ public class ChannelSelectorActivity extends Activity {
 	ServiceConnection mServiceConn;
 	Button buttonLogin;
 	Button buttonLogout;
-	//bool loggedIn;
+
 	int pendingSelChanId;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Debugger.verbose("ChannelSelector onCreate");
 		super.onCreate(savedInstanceState);
-		//requestWindowFeature(Window.FEATURE_NO_TITLE);  
+
 		setContentView(R.layout.channelselector);
 
 		pendingSelChanId = -1;
@@ -76,7 +74,12 @@ public class ChannelSelectorActivity extends Activity {
 				
 				buttonLogin.setVisibility(Button.VISIBLE);
 				buttonLogout.setVisibility(Button.GONE);
-				loadChannelList();
+				try {
+					loadChannelList();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 
@@ -114,13 +117,24 @@ public class ChannelSelectorActivity extends Activity {
 	                Intent i = new Intent(Global.ACTION_PLAYER_SELECT_CHANNEL);
 	                i.setComponent(new ComponentName(ChannelSelectorActivity.this, DoubanFmService.class));
 	                i.putExtra(Global.EXTRA_CHANNEL, chan.channelId);
-	                startService(i);
+	                //startService(i);
+	                new AsyncServiceStarter().execute(i);
 	                
 	                ChannelSelectorActivity.this.finish();
                 }
         	}
 		});
-		
+	}
+	
+	private class AsyncServiceStarter extends AsyncTask<Intent, Integer, Integer> {
+
+		@Override
+		protected Integer doInBackground(Intent... params) {
+			if (params.length < 1)
+				return 0;
+			startService(params[0]);
+			return 0;
+		}
 		
 	}
 	
@@ -135,33 +149,44 @@ public class ChannelSelectorActivity extends Activity {
 			buttonLogin.setVisibility(Button.GONE);
 			buttonLogout.setVisibility(Button.VISIBLE);
 		}
-    	loadChannelList();
+		
+    	try {
+			loadChannelList();
+		} catch (Exception e) {
+			e.printStackTrace();
+			popNotify("读取频道列表出错，请稍后再试");
+		}
 
 		
     }
 	
-	 @Override
+	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-    	Debugger.debug( "onActivityResult: " + requestCode + ", " + resultCode );
-    	switch (requestCode) {
-    	case 0: {
-    		if (resultCode != RESULT_OK) {
-    			return;
-    		}
-    		Database db = new Database(this);
-    		if (db.isChannelIdValid(pendingSelChanId)) {
-    			Intent i = new Intent(Global.ACTION_PLAYER_SELECT_CHANNEL);
-                i.putExtra(Global.EXTRA_CHANNEL, pendingSelChanId);
-                startService(i);
-                
-                ChannelSelectorActivity.this.finish();
-    		}
-    		break;
-    	}
-    	default:
-    		break;
-    	}
+    	try {
+			Debugger.debug( "onActivityResult: " + requestCode + ", " + resultCode );
+			switch (requestCode) {
+			case 0: {
+				if (resultCode != RESULT_OK) {
+					return;
+				}
+				Database db = new Database(this);
+				if (db.isChannelIdValid(pendingSelChanId)) {
+					Intent i = new Intent(Global.ACTION_PLAYER_SELECT_CHANNEL);
+			        i.putExtra(Global.EXTRA_CHANNEL, pendingSelChanId);
+			        startService(i);
+			        
+			        ChannelSelectorActivity.this.finish();
+				}
+				break;
+			}
+			default:
+				break;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 	
 	private void loadChannelList() {

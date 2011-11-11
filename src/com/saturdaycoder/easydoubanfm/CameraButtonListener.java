@@ -7,14 +7,17 @@ import android.content.Intent;
 public class CameraButtonListener extends BroadcastReceiver {
 	private boolean handleCameraButtonControl(Context context) {		
 		Debugger.info("ACTION_CAMERA_BUTTON heard");
-//		if (!dPlayer.isOpen()) {
-//			return false;
-//		}
+
 		if (!Preference.getCameraButtonEnable(context)) {
 			return false;
 		}		
 
-		return QuickAction.doQuickAction(context, Preference.getQuickAction(context, Global.QUICKCONTROL_CAMERA_BUTTON));
+		try {
+			return QuickAction.doQuickAction(context, Preference.getQuickAction(context, Global.QUICKCONTROL_CAMERA_BUTTON));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
