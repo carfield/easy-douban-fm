@@ -280,7 +280,7 @@ public class Preference {
 		else if (control.equals(Global.QUICKCONTROL_MEDIA_BUTTON_LONG))
 			res = pref.getInt(control, Global.QUICKACT_NEXT_CHANNEL);
 		else if (control.equals(Global.QUICKCONTROL_CAMERA_BUTTON))
-			res = pref.getInt(control, Global.QUICKACT_DOWNLOAD_MUSIC);
+			res = pref.getInt(control, Global.QUICKACT_RATE_DOWNLOAD_MUSIC);
 		else
 			res = pref.getInt(control, Global.QUICKACT_NONE);
 		

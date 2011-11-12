@@ -69,7 +69,7 @@ public class Database extends SQLiteOpenHelper {
 			}
 		}
 		
-		int i = 2;
+		int i = Global.NOTIFICATION_ID_DOWNLOAD_MIN;
 		for (; i < Integer.MAX_VALUE; ++i) {
 			if (!list.contains(i)) {
 				break;

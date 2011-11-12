@@ -459,6 +459,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 			break;
 		case Global.STATE_PREPARE:
 			notifyMusicStateChanged(Global.STATE_PREPARE, null, Global.NO_REASON);
+			notifyMusicPosition(-1, -1);
 			break;
 		case Global.STATE_STARTED:
 			if (curMusic != null) {
@@ -470,13 +471,12 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 					notifyMusicStateChanged(Global.STATE_MUSIC_RESUMED, curMusic, Global.NO_REASON);
 				else
 					notifyMusicStateChanged(Global.STATE_MUSIC_PAUSED, curMusic, Global.NO_REASON);
-				//if (wc.picture != null) {
+				
 				notifyPictureStateChanged(Global.STATE_FINISHED, curMusic.pictureUrl, Global.NO_REASON);
-				//}
+				notifyMusicPosition(getCurPosition(), getCurDuration());
+				
 			}
-			//if (wc.paused) {
-			//	notifyMusicPaused();
-			//}
+			
 			break;
 		default:
 			break;
@@ -878,7 +878,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	}*/
 	
 	public int getCurPosition() {
-		if (isOpen() && mPlayer != null && mPlayer.isPlaying()) {
+		if (isOpen() && mPlayer != null){// && mPlayer.isPlaying()) {
 			return mPlayer.getCurrentPosition();
 		}
 		
@@ -886,7 +886,7 @@ public class DoubanFmPlayer implements IHttpFetcherObserver, IPlayListObserver {
 	}
 	
 	public int getCurDuration() {
-		if (isOpen() && mPlayer != null && mPlayer.isPlaying()) {
+		if (isOpen() && mPlayer != null){// && mPlayer.isPlaying()) {
 			return mPlayer.getDuration();
 		}
 		

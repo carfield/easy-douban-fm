@@ -53,12 +53,14 @@
 				    	android:text="@string/radio_enable_stop_timer" 
 				    	android:id="@+id/cbEnableStopTimer" 
 				    	android:textColor="#ffffff"
-				    	android:layout_width="fill_parent" 
+				    	android:layout_width="wrap_content"
+				    	android:layout_weight="1" 
 				    	android:layout_height="fill_parent">
 				    </CheckBox>
 				    <Spinner 		    	
 				    	android:layout_width="wrap_content" 
-				    	android:layout_height="fill_parent" 
+				    	android:layout_height="fill_parent"
+				    	android:layout_weight="1" 
 				    	android:id="@+id/spinnerStopTimerShortcut"
 				    	android:prompt="@string/options_timer_list"
 				    	>
@@ -91,12 +93,14 @@
 			    	android:text="@string/radio_enable_start_timer" 
 			    	android:id="@+id/cbEnableStartTimer" 
 			    	android:textColor="#ffffff"
-			    	android:layout_width="fill_parent" 
+			    	android:layout_weight="1"
+			    	android:layout_width="wrap_content" 
 			    	android:layout_height="fill_parent">
 			    </CheckBox>
 			    <Spinner 
 			    	android:layout_width="wrap_content" 
 			    	android:layout_height="fill_parent" 
+			    	android:layout_weight="1"
 			    	android:id="@+id/spinnerStartTimerShortcut"
 			    	android:prompt="@string/options_timer_list"
 			    	>

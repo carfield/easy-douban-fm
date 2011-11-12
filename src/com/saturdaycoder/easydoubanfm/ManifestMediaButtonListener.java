@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.os.Parcelable;
 import android.view.KeyEvent;
 
-public class MediaButtonListener extends BroadcastReceiver {
-	private boolean isMediaButtonDown = false;
-	private long mediaButtonDownStartTime = -1;
+public class ManifestMediaButtonListener extends BroadcastReceiver {
+	private static boolean isMediaButtonDown;
+	private static long mediaButtonDownStartTime;
 	private static final Object mediaButtonDownLock = new Object();
 
 	private boolean handleMediaButtonControl(Context context, 

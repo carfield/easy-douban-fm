@@ -148,7 +148,7 @@ public class DoubanPlayListManager implements IPlayListManager {
 		
 		// if not enough list items, prefetch it
 		if (playList.size() < fetchThreshold) {
-			requestListAsync(DoubanFmApi.TYPE_END);
+			requestListAsync(DoubanFmApi.TYPE_NEW);
 		}
 		return mi;
 	}

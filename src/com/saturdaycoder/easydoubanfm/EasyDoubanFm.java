@@ -26,9 +26,10 @@ import android.widget.*;
 public class EasyDoubanFm extends Activity {
 	private static final int MENU_LOGIN_ID = Menu.FIRST;
 	private static final int MENU_ABOUT_ID = Menu.FIRST + 1;
-	private static final int MENU_SETTING_ID = Menu.FIRST + 2;
-	private static final int MENU_FEEDBACK_ID = Menu.FIRST + 3;
-	private static final int MENU_CLOSE_ID = Menu.FIRST + 4;  
+	private static final int MENU_VERSION_CHECK = Menu.FIRST + 2;
+	private static final int MENU_SETTING_ID = Menu.FIRST + 3;
+	private static final int MENU_FEEDBACK_ID = Menu.FIRST + 4;
+	private static final int MENU_CLOSE_ID = Menu.FIRST + 5;  
 
 	Button buttonChannel;
 	ImageView imageCover;
@@ -269,6 +270,7 @@ public class EasyDoubanFm extends Activity {
     	boolean loggedIn = Preference.getLogin(this);
         aMenu.add(0, MENU_LOGIN_ID, 0, loggedIn? "账户登出": "账户登入");
         aMenu.add(0, MENU_ABOUT_ID, 0, "关于");
+        aMenu.add(0, MENU_VERSION_CHECK, 0, "检查新版本");
         aMenu.add(0, MENU_SETTING_ID, 0, "设置");
         aMenu.add(0, MENU_FEEDBACK_ID, 0, "意见反馈");           
         aMenu.add(0, MENU_CLOSE_ID, 0, "退出");
@@ -326,6 +328,13 @@ public class EasyDoubanFm extends Activity {
             	Intent intent = new Intent();
     			intent.setClass(EasyDoubanFm.this, PlayerSettingActivity.class);
     			startActivity(intent);
+                break;  
+            }
+            case MENU_VERSION_CHECK: { 
+            	Intent intent = new Intent(Global.ACTION_VERSION_CHECK);
+				intent.setComponent(new ComponentName(this, DoubanFmService.class));
+				startService(intent);
+				
                 break;  
             }
             case MENU_FEEDBACK_ID: {
@@ -398,7 +407,14 @@ public class EasyDoubanFm extends Activity {
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_POSITION)) {
 				curPos = intent.getIntExtra(Global.EXTRA_MUSIC_POSITION, -1);
 				duration = intent.getIntExtra(Global.EXTRA_MUSIC_DURATION, -1);
-
+				Debugger.debug("pos=" + curPos + ", dur=" + duration);
+				if (curPos != -1 && duration != -1) {
+					synchronized(EasyDoubanFm.class) {
+						textPosition.setText(DateFormat.format("mm:ss", curPos).toString() 
+								+ " / " + DateFormat.format("mm:ss", duration).toString());	
+					}
+				}
+			   
 			}
 			
 			if (action.equals(Global.EVENT_PLAYER_MUSIC_STATE_CHANGED)) {

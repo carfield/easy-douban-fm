@@ -33,19 +33,17 @@
             </meta-data>
         </receiver>
         
-        <receiver android:name="MediaButtonListener">
+        <receiver android:name="ManifestMediaButtonListener">
             <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" 
-                    	android:priority="100"/>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
         
-        <receiver android:name="CameraButtonListener">
+        <!-- <receiver android:name="CameraButtonListener">
             <intent-filter>
-                <action android:name="android.intent.action.CAMERA_BUTTON" 
-                    	android:priority="100"/>
+                <action android:name="android.intent.action.CAMERA_BUTTON"/>
             </intent-filter>
-        </receiver>
+        </receiver> -->
         
 		<service android:name="DoubanFmService" />        
         

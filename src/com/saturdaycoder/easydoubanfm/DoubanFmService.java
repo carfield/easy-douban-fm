@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -48,6 +49,7 @@ import android.graphics.BitmapFactory;
 import android.os.Message;
 import org.apache.http.params.*;
 
+import com.saturdaycoder.easydoubanfm.VersionManager.VersionInfo;
 import com.saturdaycoder.easydoubanfm.apis.DoubanFmApi;
 import com.saturdaycoder.easydoubanfm.channels.FmChannel;
 import com.saturdaycoder.easydoubanfm.downloader.*;
@@ -157,16 +159,19 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		// listens to hard button event
 		shakeControlListener = new ShakingListener();
 		
-		// media button
-		if (mediaButtonListener == null) {
-			mediaButtonListener = new MediaButtonListener();
-		}		
-		IntentFilter mfilter = new IntentFilter();
-		mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
-		mfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-		registerReceiver(mediaButtonListener, mfilter);
+		//if (android.os.Build.VERSION.SDK_INT == 7 
+		//		|| android.os.Build.VERSION.SDK_INT == 8) {
+			// media button
+			if (mediaButtonListener == null) {
+				mediaButtonListener = new MediaButtonListener();
+			}		
+			IntentFilter mfilter = new IntentFilter();
+			mfilter.addAction(Intent.ACTION_MEDIA_BUTTON);
+			mfilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+			registerReceiver(mediaButtonListener, mfilter);
+		//}
 		
-		// media button
+		// camera button
 		if (cameraButtonListener == null) {
 			cameraButtonListener = new CameraButtonListener();
 		}		
@@ -228,11 +233,15 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         // system will relaunch it. Make sure it gets stopped again in that case.
         Message msg = mDelayedStopHandler.obtainMessage();
         mDelayedStopHandler.sendMessageDelayed(msg, IDLE_DELAY);
+        
+        
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Debugger.warn("SERVICE ONSTARTCOMMAND");
+		
+		//new AsyncVersionChecker().execute();
 		
 		if (intent == null) { // it tells us the service was killed by system.
 			Debugger.warn("null intent");
@@ -286,6 +295,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         		closePlayer();
         	}	
         }
+        if (action.equals(Global.ACTION_VERSION_CHECK)) {        	
+        	new AsyncVersionChecker().execute();
+        }
+        if (action.equals(Global.ACTION_VERSION_UPDATE)) {
+        	int versionCode = intent.getIntExtra(Global.EXTRA_VERSION_CODE, -1);
+        	String versionName = intent.getStringExtra(Global.EXTRA_VERSION_NAME);
+        	Debugger.info("downloading code " + versionCode + " name " + versionName);
+      		VersionManager vm = new VersionManager(this);
+      		new AsyncVersionUpdater().execute(versionCode);
+        }
         if (action.equals(Global.ACTION_PLAYER_SKIP)) {
         	Debugger.info("Douban service starts with SKIP command");
         	if (!dPlayer.isOpen()) {
@@ -307,21 +326,31 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         if (action.equals(Global.ACTION_PLAYER_TRASH)) {
         	Debugger.info("Douban service starts with TRASH command");
         	banMusic();
+        	if (!Preference.getLogin(this))
+       			popNotify(getString(R.string.text_action_fail_due_to_not_login));
         }
         if (action.equals(Global.ACTION_PLAYER_RATE)) {
         	Debugger.info("Douban service starts with RATE command");
        		rateMusic();
+       		if (!Preference.getLogin(this))
+       			popNotify(getString(R.string.text_action_fail_due_to_not_login));
         }
         if (action.equals(Global.ACTION_PLAYER_UNRATE)) {
         	Debugger.info("Douban service starts with UNRATE command");
        		unrateMusic();
+       		if (!Preference.getLogin(this))
+       			popNotify(getString(R.string.text_action_fail_due_to_not_login));
         }
         if (action.equals(Global.ACTION_PLAYER_RATEUNRATE)) {
+        	
         	Debugger.info("Douban service starts with RATE/UNRATE command");
         	if (!dPlayer.isMusicRated())
         		rateMusic();
         	else 
         		unrateMusic();
+        	
+        	if (!Preference.getLogin(this))
+       			popNotify(getString(R.string.text_action_fail_due_to_not_login));
         }
         if (action.equals(Global.ACTION_PLAYER_PLAYPAUSE)) {
         	
@@ -437,13 +466,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				shakeDetector = null;
 			}
         
-			// media button
-			if (mediaButtonListener != null) {
-				unregisterReceiver(mediaButtonListener);
-				mediaButtonListener = null;
-			}		
+			//if (android.os.Build.VERSION.SDK_INT == 7 
+			//		|| android.os.Build.VERSION.SDK_INT == 8) {
+				// media button
+				if (mediaButtonListener != null) {
+					unregisterReceiver(mediaButtonListener);
+					mediaButtonListener = null;
+				}		
+			//}
 			
-			// media button
+			// camera button
 			if (cameraButtonListener == null) {
 				unregisterReceiver(cameraButtonListener);
 				cameraButtonListener = null;
@@ -517,6 +549,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
 		
 		dPlayer.open();
+		
 	}
 	
 	private void closePlayer() {
@@ -814,12 +847,152 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	}
 	
 	
-	private class AsyncNewVersionChecker extends AsyncTask<Context, Integer, String> {
+	private class AsyncVersionUpdater extends AsyncTask<Integer, Integer, File> {
+		@Override
+		protected void onPreExecute() {
+			Notification not = new Notification(android.R.drawable.stat_sys_download,
+					"正在下载新版本",
+			        System.currentTimeMillis());
+			Intent i = new Intent(Global.ACTION_NULL);
+            i.setComponent(new ComponentName(DoubanFmService.this, DoubanFmService.class));
+            PendingIntent pi = PendingIntent.getService(DoubanFmService.this, 
+					(int)System.currentTimeMillis(), 
+					i, 
+					PendingIntent.FLAG_ONE_SHOT);
+			not.setLatestEventInfo(DoubanFmService.this, "正在下载新版本", "", pi);
+			try {
+				NotificationManager notManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+				notManager.notify(Global.NOTIFICATION_ID_VERSION_UPDATE, not);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		@Override
+		protected File doInBackground(Integer... params) {
+			if (params.length < 1)
+				return null;
+			VersionManager vm = new VersionManager(DoubanFmService.this);
+			return vm.downloadVersion(params[0]);
+		}
+		
+		@Override
+		protected void onPostExecute(File result) {
+
+			
+			if (result == null) {
+				popNotify("新版本下载失败。。。请前往Android Market或机锋市场下载，谢谢");
+				try {
+					NotificationManager notManager 
+						= (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+					notManager.cancel(Global.NOTIFICATION_ID_VERSION_UPDATE);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				Notification not = new Notification(R.drawable.stat_sys_install_complete,
+						"点击安装新版本",
+				        System.currentTimeMillis());
+				Intent notificationIntent = new Intent();  
+                notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
+                notificationIntent.setAction(Intent.ACTION_VIEW);  
+                String type = "application/vnd.android.package-archive";  
+                notificationIntent.setDataAndType(Uri.fromFile(result), type);  
+				
+	            PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 
+						0, notificationIntent, 
+						0);
+	            not.contentIntent = pi;
+				not.setLatestEventInfo(DoubanFmService.this, "点击安装新版本", "文件已下载至:" + result.getPath(), pi);
+				try {
+					NotificationManager notManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+					notManager.notify(Global.NOTIFICATION_ID_VERSION_UPDATE, not);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+		}
+	}
+	
+	
+	
+	private class AsyncVersionChecker extends AsyncTask<Context, Integer, VersionInfo> {
+		@Override
+		protected void onPreExecute() {
+			Notification not = new Notification(android.R.drawable.ic_popup_sync,
+					"正在检查新版本",
+			        System.currentTimeMillis());
+			Intent i = new Intent(Global.ACTION_NULL);
+            i.setComponent(new ComponentName(DoubanFmService.this, DoubanFmService.class));
+            PendingIntent pi = PendingIntent.getService(DoubanFmService.this, 
+					(int)System.currentTimeMillis(), 
+					i, 
+					PendingIntent.FLAG_ONE_SHOT);
+			not.setLatestEventInfo(DoubanFmService.this, "正在检查新版本", "", pi);
+			try {
+				NotificationManager notManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+				notManager.notify(Global.NOTIFICATION_ID_VERSION_UPDATE, not);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		@Override
+		protected VersionInfo doInBackground(Context... params) {
+			VersionManager nvm = new VersionManager(DoubanFmService.this);
+			VersionInfo vi = nvm.getServerVersionInfo();
+			if (vi == null)
+				return null;
+			Debugger.info("found version: " + vi + " current: " + nvm.getInstalledVersionCode());
+			if (vi.versionCode > nvm.getInstalledVersionCode()) {
+				if (vi.versionCodeList.contains(vi.versionCode)) {
+					return vi;
+				}
+			}
+			return null;
+			
+		}
 
 		@Override
-		protected String doInBackground(Context... params) {
+		protected void onPostExecute(VersionInfo result) {
 			// TODO Auto-generated method stub
-			return null;
+			
+			if (result != null) {
+				Debugger.info("new version!!");
+				Notification not = new Notification(R.drawable.icon,
+						"找到新版本",
+				        System.currentTimeMillis());
+				Intent i = new Intent(Global.ACTION_VERSION_UPDATE);
+                i.setComponent(new ComponentName(DoubanFmService.this, DoubanFmService.class));
+                i.putExtra(Global.EXTRA_VERSION_CODE, result.versionCode);
+                i.putExtra(Global.EXTRA_VERSION_NAME, result.versionName);
+                PendingIntent pi = PendingIntent.getService(DoubanFmService.this, 
+						(int)System.currentTimeMillis(), 
+						i, 
+						PendingIntent.FLAG_ONE_SHOT);
+                not.contentIntent = pi;
+				not.setLatestEventInfo(DoubanFmService.this, "找到了更新版本的豆瓣电台",
+						"版本号:" + result.versionName + "，点击可下载安装", pi);
+				try {
+					NotificationManager notManager 
+						= (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+					notManager.notify(Global.NOTIFICATION_ID_VERSION_UPDATE, not);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				Debugger.info("can't find new version");
+				popNotify("已经是最新版本啦");
+				try {
+					NotificationManager notManager 
+						= (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+					notManager.cancel(Global.NOTIFICATION_ID_VERSION_UPDATE);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
 		}
 		
 	}

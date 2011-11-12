@@ -36,6 +36,17 @@ public class QuickAction {
 	        context.startService(i);
 			return true;
 		}
+		case Global.QUICKACT_RATE_DOWNLOAD_MUSIC: {
+			//openDownloader();
+			//downloadMusic(null, null);
+			Intent i = new Intent(Global.ACTION_PLAYER_RATE);
+	        i.setComponent(new ComponentName(context, DoubanFmService.class));
+	        context.startService(i);
+			i = new Intent(Global.ACTION_DOWNLOADER_DOWNLOAD);
+	        i.setComponent(new ComponentName(context, DoubanFmService.class));
+	        context.startService(i);
+			return true;
+		}
 		default:
 			return false;
 		}

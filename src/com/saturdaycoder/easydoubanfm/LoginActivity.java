@@ -35,6 +35,7 @@ public class LoginActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.loginactivity);
 		editEmail = (EditText)findViewById(R.id.editEmail);
 		editPasswd = (EditText)findViewById(R.id.editPasswd);

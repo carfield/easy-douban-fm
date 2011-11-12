@@ -30,6 +30,10 @@ public class Global {
 	public static final String ACTION_DOWNLOADER_CANCEL = BROADCAST_PREFIX + ".action.DOWNLOADER_CANCEL";
 	public static final String ACTION_DOWNLOADER_CLEAR_NOTIFICATION = BROADCAST_PREFIX + ".action.DOWNLOADER_CLEAR_NOTIFICATION";
 	
+	// action for new version download
+	public static final String ACTION_VERSION_CHECK = BROADCAST_PREFIX + ".action.VERSION_CHECK";
+	public static final String ACTION_VERSION_UPDATE = BROADCAST_PREFIX + ".action.VERSION_UPDATE";
+	
 	// extra for other, i.e. ui, etc.
 	public static final String ACTION_WIDGET_UPDATE = BROADCAST_PREFIX + ".action.UPDATE_WIDGET";
 	public static final String ACTION_ACTIVITY_UPDATE = BROADCAST_PREFIX + ".action.UPDATE_ACTIVITY";
@@ -41,6 +45,9 @@ public class Global {
 	public static final String EXTRA_LOGIN_USERNAME = "extra.LOGIN_USERNAME";
 	public static final String EXTRA_LOGIN_PASSWD = "extra.LOGIN_PASSWD";
 	
+	// extra for version update
+	public static final String EXTRA_VERSION_CODE = "extra.VERSION_CODE";
+	public static final String EXTRA_VERSION_NAME = "extra.VERSION_NAME";
 		
 	// extra for scheduler
 	public static final String EXTRA_SCHEDULE_TYPE = "extra.SCHEDULE_TYPE";
@@ -127,10 +134,13 @@ public class Global {
 	public static final int QUICKACT_NEXT_CHANNEL = 1;
 	public static final int QUICKACT_DOWNLOAD_MUSIC = 2;
 	public static final int QUICKACT_PLAY_PAUSE = 3;
-	public static final int QUICKACT_NONE = 4;
+	public static final int QUICKACT_RATE_DOWNLOAD_MUSIC = 4;
+	public static final int QUICKACT_NONE = 5;
 	public static final int NOTIFICATION_ID_PLAYER = 1;
 	public static final int NOTIFICATION_ID_SCHEDULE_STOP = NOTIFICATION_ID_PLAYER + 1;
 	public static final int NOTIFICATION_ID_SCHEDULE_START = NOTIFICATION_ID_PLAYER + 2;
+	public static final int NOTIFICATION_ID_VERSION_UPDATE = NOTIFICATION_ID_PLAYER + 3;
+	public static final int NOTIFICATION_ID_DOWNLOAD_MIN = NOTIFICATION_ID_PLAYER + 4;
 	public static final int DOWNLOAD_ERROR_OK = 0;
 	public static final int DOWNLOAD_ERROR_IOERROR = -1;
 	public static final int DOWNLOAD_ERROR_CANCELLED = -2;
