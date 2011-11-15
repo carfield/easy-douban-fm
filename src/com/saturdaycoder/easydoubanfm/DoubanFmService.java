@@ -66,6 +66,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	HttpParams httpParameters;	
 	Database db;
 	
+	boolean wifilocked = false;
+	
 	// Event Listeners
 	private CallListener callListener;
 	private ShakingListener shakeControlListener;
@@ -557,13 +559,32 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		WifiManager wMgr = (WifiManager) getSystemService(WIFI_SERVICE); 
         wifiLock = wMgr.createWifiLock("EasyDoubanFm");
         //if (!sWifiLock.isHeld())
-        wifiLock.acquire();
+        synchronized(DoubanFmService.class) {
+	        if (!wifilocked) {
+	        	try {
+	        		wifiLock.acquire();
+	        		wifilocked = true;
+	        	} catch (Exception e) {
+	        		e.printStackTrace();
+	        	}
+	        }
+        }
 	}
 	
 	private void closePlayer() {
 
-		if (wifiLock != null)
-			wifiLock.release();
+		if (wifiLock != null) {
+	        synchronized(DoubanFmService.class) {
+		        if (wifilocked) {
+		        	try {
+		        		wifiLock.release();
+		        		wifilocked = false;
+		        	} catch (Exception e) {
+		        		e.printStackTrace();
+		        	}
+		        }
+	        }
+		}
 		
 		Debugger.debug("DoubanFm Control Service unregistered");
 
