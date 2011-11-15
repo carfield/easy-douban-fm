@@ -57,10 +57,8 @@ public class EasyDoubanFm extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_NO_TITLE);
     	super.onCreate(savedInstanceState);
-        //setContentView(R.layout.main);
         
         setContentView(R.layout.main);
-        
         
 		buttonChannel = (Button)findViewById(R.id.buttonChannel);
 		imageCover = (ImageView)findViewById(R.id.imageCover);
@@ -68,15 +66,12 @@ public class EasyDoubanFm extends Activity {
 		textTitle = (TextView)findViewById(R.id.textTitle);
 		buttonSkip = (ImageButton)findViewById(R.id.buttonNext);
 		buttonPlayPause = (ImageButton)findViewById(R.id.buttonPlayPause);
-		//textButtonPlayPause = (TextView)findViewById(R.id.textButtonPlayPause);
 		buttonDownload = (ImageButton)findViewById(R.id.buttonDownload);
 		buttonBan = (ImageButton)findViewById(R.id.buttonHate);
 		buttonRateUnrate = (ImageButton)findViewById(R.id.buttonLike);
-		//textButtonRateUnrate = (TextView)findViewById(R.id.textButtonRateUnrate);
 		buttonMenu = (ImageButton)findViewById(R.id.buttonMenu);
 		progressBar = (ProgressBar)findViewById(R.id.progressBar);
 		textPosition = (TextView)findViewById(R.id.textMusicPosition);
-		//progressPower = (ProgressBar)findViewById(R.id.progressPower);
 		
 		positionTimer = new Timer();
 		buttonSkip.setOnClickListener(new Button.OnClickListener() {
@@ -92,8 +87,6 @@ public class EasyDoubanFm extends Activity {
 		buttonPlayPause.setOnClickListener(new Button.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//_this.progressBar.setVisibility(ProgressBar.VISIBLE);
-				//_this.imageCover.setVisibility(ImageView.GONE);
 				Intent i = new Intent(Global.ACTION_PLAYER_PLAYPAUSE);
 				i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
 				startService(i);
@@ -169,13 +162,9 @@ public class EasyDoubanFm extends Activity {
     }
     
     Timer positionTimer;
-    //UpdatePositionTask positionTask = new UpdatePositionTask();
     @Override
     protected void onStart() {
     	super.onStart();    	
- 	
-    	//_this = this;
-    	
     	this.progressBar.setVisibility(ProgressBar.GONE);
     	
     	try {
@@ -189,21 +178,8 @@ public class EasyDoubanFm extends Activity {
     	startService(i);
     	
 		mHandler.removeCallbacks(mPositionTask);
-		//mHandler.removeCallbacks(mOpenPlayerTask);
-        
-		//posUpdateThread.start();
     }
 
-	/*private Runnable mOpenPlayerTask = new Runnable() {
-		   public void run() {
-		    	//_this.progressBar.setVisibility(ProgressBar.VISIBLE);
-				//_this.imageCover.setVisibility(ImageView.GONE);
-		    	Intent i = new Intent(Global.ACTION_PLAYER_ON);
-		    	i.setComponent(new ComponentName(EasyDoubanFm.this, DoubanFmService.class));
-		    	startService(i);
-		   }
-		};
-    */
     @Override
     protected void onResume() {
     	super.onResume();
@@ -216,9 +192,6 @@ public class EasyDoubanFm extends Activity {
 
     	super.onStop();
     	mHandler.removeCallbacks(mPositionTask);
-    	//positionTimer.cancel();
-    	//_this = null;
-    	//posUpdateThread.stop();
     }
     
     @Override
@@ -277,28 +250,6 @@ public class EasyDoubanFm extends Activity {
         return true;  
           
     }  
-	/*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-    	Debugger.debug( "onActivityResult: " + requestCode + ", " + resultCode );
-    	switch (requestCode) {
-    	case 0: {
-    		if (resultCode != RESULT_OK) {
-    			return;
-    		}
-    		if (FmChannel.isChannelIdValid(pendingSelChanId)) {
-    			Intent i = new Intent(DoubanFmService.ACTION_PLAYER_SELECT_CHANNEL);
-                i.putExtra(DoubanFmService.EXTRA_CHANNEL, pendingSelChanId);
-                startService(i);
-                
-                ChannelSelectorActivity.this.finish();
-    		}
-    		break;
-    	}
-    	default:
-    		break;
-    	}
-    }*/
     @Override
     public boolean onOptionsItemSelected (MenuItem aMenuItem) {  
         

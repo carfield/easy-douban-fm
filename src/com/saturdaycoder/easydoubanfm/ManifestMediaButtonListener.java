@@ -89,16 +89,12 @@ public class ManifestMediaButtonListener extends BroadcastReceiver {
 		if (action.equals(Intent.ACTION_MEDIA_BUTTON)) {
 			Debugger.info("ACTION_MEDIA_BUTTON heard");
 		
-			//String kes = intent.getStringExtra(Intent.EXTRA_KEY_EVENT);
-			//Parcelable pke = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
 			KeyEvent ke = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-			
 			
 			if (ke == null) {
 				Debugger.error("ACTION_MEDIA_BUTTON heard but null KeyEvent");
 				return;
 			}
-			//Debugger.verbose("parcelable string=\"" + pke.toString() + "\"");
 			int keycode = ke.getKeyCode();
 			int keyaction = ke.getAction();
 			long eventtime = ke.getEventTime();

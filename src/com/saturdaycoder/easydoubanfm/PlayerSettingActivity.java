@@ -21,28 +21,18 @@ public class PlayerSettingActivity extends Activity {
 
 	CheckBox boxShake;
 	Spinner spinnerShake;
-	//EditText editShakeThreshold;
 	TextView textShakeHint;
 	SeekBar seekBarShakeThreshold;
-	
 	CheckBox boxMediaButton;
 	Spinner spinnerMediaButton;
-	
 	CheckBox boxLongMediaButton;
 	Spinner spinnerLongMediaButton;
 	TextView textLongMediaButtonHint;
-	//EditText editMediaButtonLongPressThreshold;
 	SeekBar seekBarLongPressThreshold;
-
 	CheckBox boxCameraButton;
 	Spinner spinnerCameraButton;
-	
 	CheckBox boxShutdownOnIdleButton;
-	//EditText editShutdownOnIdle;
 	SeekBar seekBarIdleThreshold;
-	
-	//CheckBox boxAutoClose;
-	//EditText editAutoCloseMinutes;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +42,6 @@ public class PlayerSettingActivity extends Activity {
 		
 		boxShake = (CheckBox)findViewById(R.id.cbShakeEnable);
 		textShakeHint = (TextView)findViewById(R.id.textShakeHint);
-		//editShakeThreshold = (EditText)findViewById(R.id.editShakeThreshold);
 		seekBarShakeThreshold = (SeekBar)findViewById(R.id.seekBarShakeThreshold);
 		boxMediaButton = (CheckBox)findViewById(R.id.cbMediaButtonEnable);
 		boxLongMediaButton = (CheckBox)findViewById(R.id.cbMediaButtonLongEnable);
@@ -63,10 +52,6 @@ public class PlayerSettingActivity extends Activity {
 		spinnerMediaButton = (Spinner)findViewById(R.id.spinnerActionMediaButton);
 		spinnerLongMediaButton = (Spinner)findViewById(R.id.spinnerActionMediaButtonLong);
 		spinnerCameraButton = (Spinner)findViewById(R.id.spinnerActionCameraButton);
-		//editShutdownOnIdle = (EditText)findViewById(R.id.editShutdownIdleTime);
-		//editMediaButtonLongPressThreshold = (EditText)findViewById(R.id.editMediaButtonLongPressThreshold);
-		//boxAutoClose = (CheckBox)findViewById(R.id.cbAutoCloseEnable);
-		//editAutoCloseMinutes = (EditText)findViewById(R.id.editAutoCloseTime);
 		seekBarLongPressThreshold = (SeekBar)findViewById(R.id.seekBarLongPressThreshold);
 		seekBarIdleThreshold = (SeekBar)findViewById(R.id.seekBarShutdownIdleTime);
 		// get stored value
@@ -74,7 +59,6 @@ public class PlayerSettingActivity extends Activity {
 		boxShake.setChecked(shakeEnabled);
 		seekBarShakeThreshold.setEnabled(shakeEnabled);
 		spinnerShake.setEnabled(shakeEnabled);
-		//editShakeThreshold.setText(String.valueOf(Preference.getShakeThreshold(this)));
 		int shakeaccuracy  = Global.shakeLevels[2];
 		try {
 			shakeaccuracy = Global.shakeLevels[Preference.getShakeThresholdLevel(this)];
@@ -92,7 +76,6 @@ public class PlayerSettingActivity extends Activity {
 		
 		boolean longMediaButtonEnabled = Preference.getMediaButtonLongEnable(this);
 		boxLongMediaButton.setChecked(longMediaButtonEnabled);
-		//editMediaButtonLongPressThreshold.setEnabled(longMediaButtonEnabled);
 		seekBarLongPressThreshold.setMax(Global.longPressLevels.length - 1);
 		seekBarLongPressThreshold.setProgress(Preference.getLongPressThresholdLevel(this));
 		spinnerLongMediaButton.setEnabled(longMediaButtonEnabled);
@@ -104,7 +87,6 @@ public class PlayerSettingActivity extends Activity {
 		}
 		textLongMediaButtonHint.setText(getString(R.string.radio_media_button_long_1)
 				+ longpresst + getString(R.string.radio_media_button_long_2));
-		//editMediaButtonLongPressThreshold.setText(String.valueOf(Preference.getMediaButtonLongPressThreshold(this)));
 		
 		boolean cameraButtonEnabled = Preference.getCameraButtonEnable(this);
 		boxCameraButton.setChecked(cameraButtonEnabled);
@@ -120,11 +102,8 @@ public class PlayerSettingActivity extends Activity {
 		}
 		boxShutdownOnIdleButton.setText(getString(R.string.radio_shutdown_on_idle_1)
 				+ idlemins + getString(R.string.radio_shutdown_on_idle_2));
-		//editShutdownOnIdle.setEnabled(shutDownOnIdleEnabled);
-		//editShutdownOnIdle.setText(String.valueOf(Preference.getMaxIdleTime(this)));
 		seekBarIdleThreshold.setMax(Global.idleLevels.length - 1);
 		seekBarIdleThreshold.setProgress(Preference.getIdleThresholdLevel(this));
-		
 		
 		boxShake.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
@@ -135,48 +114,19 @@ public class PlayerSettingActivity extends Activity {
 			}
 		});
 		
-	
-		/*editShakeThreshold.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence str, int i, int j, int k) {
-				
-			}
-			@Override
-			public void onTextChanged(CharSequence str, int i, int j, int k) {
-				
-			}
-			@Override
-			public void afterTextChanged(Editable editable) {
-				String s = editable.toString();
-				Debugger.info("SHAKE THRESHOLD set to " + s);
-				try {
-					int i = Integer.parseInt(s);
-					if (i > 0) {
-						Preference.setShakeThreshold(PreferenceActivity.this, i);
-					}
-				} catch (Exception e) {
-					
-				}
-			}
-		});*/
 		seekBarShakeThreshold.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 			
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
-				// TODO Auto-generated method stub
 				if (fromUser) {
 					Debugger.debug("selected shake level " + progress);
 					Preference.setShakeThresholdLevel(PlayerSettingActivity.this, progress);
@@ -195,20 +145,15 @@ public class PlayerSettingActivity extends Activity {
 			
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
-				// TODO Auto-generated method stub
 				if (fromUser) {
 					Debugger.debug("selected longpress level " + progress);
 					Preference.setLongPressThresholdLevel(PlayerSettingActivity.this, progress);
@@ -229,20 +174,15 @@ public class PlayerSettingActivity extends Activity {
 			
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
-				// TODO Auto-generated method stub
 				if (fromUser) {
 					Debugger.debug("selected idle level " + progress);
 					Preference.setIdleThresholdLevel(PlayerSettingActivity.this, progress);
@@ -258,54 +198,6 @@ public class PlayerSettingActivity extends Activity {
 			}
 		});
 
-		/*editMediaButtonLongPressThreshold.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence str, int i, int j, int k) {
-				
-			}
-			@Override
-			public void onTextChanged(CharSequence str, int i, int j, int k) {
-				
-			}
-			@Override
-			public void afterTextChanged(Editable editable) {
-				String s = editable.toString();
-				Debugger.info("MEDIA BUTTON LONG PRESS THRESHOLD set to " + s);
-				try {
-					int i = Integer.parseInt(s);
-					if (i > 0) {
-						Preference.setMediaButtonLongPressThreshold(PreferenceActivity.this, i);
-					}
-				} catch (Exception e) {
-					
-				}
-			}
-		});
-		
-		editShutdownOnIdle.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence str, int i, int j, int k) {
-				
-			}
-			@Override
-			public void onTextChanged(CharSequence str, int i, int j, int k) {
-				
-			}
-			@Override
-			public void afterTextChanged(Editable editable) {
-				String s = editable.toString();
-				Debugger.info("MAX IDLE TIME set to " + s);
-				try {
-					int i = Integer.parseInt(s);
-					if (i >= 0) {
-						Preference.setMaxIdleTime(PreferenceActivity.this, i);
-					}
-				} catch (Exception e) {
-					
-				}
-			}
-		});*/
-		
 		boxMediaButton.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
@@ -319,7 +211,6 @@ public class PlayerSettingActivity extends Activity {
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
 				Preference.setMediaButtonLongEnable(PlayerSettingActivity.this, checked);
 				spinnerLongMediaButton.setEnabled(checked);
-				//editMediaButtonLongPressThreshold.setEnabled(checked);
 				seekBarLongPressThreshold.setEnabled(checked);
 			}
 		});
@@ -336,26 +227,14 @@ public class PlayerSettingActivity extends Activity {
 			@Override
 			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
 				Preference.setShutdownOnIdleEnable(PlayerSettingActivity.this, checked);
-				//editShutdownOnIdle.setEnabled(checked);
 				seekBarIdleThreshold.setEnabled(checked);
 			}
 		});
 		
-		/*boxAutoClose.setOnCheckedChangeListener(new CheckBox.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton cb, boolean checked ) {
-				Preference.setAutoCloseEnable(PreferenceActivity.this, checked);
-			}
-		});*/
-		
-
-        //准备一个数组适配器
         ArrayAdapter adapter = ArrayAdapter.createFromResource(
                 this, R.array.options_act, android.R.layout.simple_spinner_item);
-        //设置下拉样式  android里面给大家提供了丰富的样式和功能图片
         
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        //为下拉列表设置适配器
         spinnerShake.setAdapter(adapter);
         spinnerMediaButton.setAdapter(adapter);
         spinnerLongMediaButton.setAdapter(adapter);
@@ -430,9 +309,6 @@ public class PlayerSettingActivity extends Activity {
             }
         };
         spinnerCameraButton.setOnItemSelectedListener(oislCameraButton);
-        
-
-        
 	}
 	
 	@Override

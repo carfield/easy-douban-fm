@@ -8,6 +8,7 @@ import android.app.Service;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -78,6 +79,9 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	// 
 	DoubanFmPlayer dPlayer;
 	DoubanFmDownloader dDownloader;
+	
+	
+	WifiLock wifiLock;
 	
 	private Handler mHandler = new Handler();
 	
@@ -550,10 +554,16 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		dPlayer.open();
 		
+		WifiManager wMgr = (WifiManager) getSystemService(WIFI_SERVICE); 
+        wifiLock = wMgr.createWifiLock("EasyDoubanFm");
+        //if (!sWifiLock.isHeld())
+        wifiLock.acquire();
 	}
 	
 	private void closePlayer() {
 
+		if (wifiLock != null)
+			wifiLock.release();
 		
 		Debugger.debug("DoubanFm Control Service unregistered");
 
