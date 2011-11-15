@@ -439,7 +439,7 @@ public class DoubanFmDownloader {
 					
 					notifyDownloadStateChanged(Global.STATE_ERROR, filename, url, Global.NO_REASON);
 	
-					if (musicfile.exists()) {
+					if (musicfile != null && musicfile.exists()) {
 						musicfile.delete();
 					}
 					break;
@@ -448,7 +448,7 @@ public class DoubanFmDownloader {
 					
 					notifyDownloadStateChanged(Global.STATE_CANCELLED, filename, url, Global.NO_REASON);
 	
-					if (musicfile.exists()) {
+					if (musicfile != null && musicfile.exists()) {
 						musicfile.delete();
 					}
 					
