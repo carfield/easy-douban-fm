@@ -42,6 +42,8 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.Semaphore;
+
 import android.media.MediaPlayer;
 import org.json.*;
 import android.media.AudioManager;
@@ -82,6 +84,8 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	DoubanFmPlayer dPlayer;
 	DoubanFmDownloader dDownloader;
 	
+	private Semaphore versionCheckSem = new Semaphore(1, true);
+	private Semaphore versionUpdateSem = new Semaphore(1, true);
 	
 	WifiLock wifiLock;
 	
@@ -247,8 +251,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Debugger.warn("SERVICE ONSTARTCOMMAND");
 		
-		//new AsyncVersionChecker().execute();
-		
 		if (intent == null) { // it tells us the service was killed by system.
 			Debugger.warn("null intent");
 			updateWidgets();
@@ -301,15 +303,19 @@ public class DoubanFmService extends Service implements IDoubanFmService {
         		closePlayer();
         	}	
         }
-        if (action.equals(Global.ACTION_VERSION_CHECK)) {        	
-        	new AsyncVersionChecker().execute();
+        if (action.equals(Global.ACTION_VERSION_CHECK)) {
+        	if (versionCheckSem.tryAcquire()) {
+        		new AsyncVersionChecker().execute();
+        	}
         }
         if (action.equals(Global.ACTION_VERSION_UPDATE)) {
-        	int versionCode = intent.getIntExtra(Global.EXTRA_VERSION_CODE, -1);
-        	String versionName = intent.getStringExtra(Global.EXTRA_VERSION_NAME);
-        	Debugger.info("downloading code " + versionCode + " name " + versionName);
-      		VersionManager vm = new VersionManager(this);
-      		new AsyncVersionUpdater().execute(versionCode);
+        	if (versionUpdateSem.tryAcquire()) {
+	        	int versionCode = intent.getIntExtra(Global.EXTRA_VERSION_CODE, -1);
+	        	String versionName = intent.getStringExtra(Global.EXTRA_VERSION_NAME);
+	        	Debugger.info("downloading code " + versionCode + " name " + versionName);
+	      		VersionManager vm = new VersionManager(this);
+	      		new AsyncVersionUpdater().execute(versionCode);
+        	}
         }
         if (action.equals(Global.ACTION_PLAYER_SKIP)) {
         	Debugger.info("Douban service starts with SKIP command");
@@ -534,8 +540,6 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		dPlayer.logout();
 	}
 	
-
-
 	private void openDownloader() {
 		dDownloader.open();
 	}
@@ -558,6 +562,11 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 		
 		WifiManager wMgr = (WifiManager) getSystemService(WIFI_SERVICE); 
         wifiLock = wMgr.createWifiLock("EasyDoubanFm");
+        
+        Intent i1 = new Intent(Global.ACTION_VERSION_CHECK);
+    	i1.setComponent(new ComponentName(this, DoubanFmService.class));
+    	startService(i1);
+        
         //if (!sWifiLock.isHeld())
         synchronized(DoubanFmService.class) {
 	        if (!wifilocked) {
@@ -607,12 +616,23 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	private void resumeMusic() {
 		if (dPlayer.isOpen()) {
 			dPlayer.resumeMusic();
+			Notification fgNotification = new Notification(R.drawable.icon,
+					getResources().getString(R.string.app_name),
+			        System.currentTimeMillis());
+			fgNotification.flags |= Notification.FLAG_NO_CLEAR;
+			Intent it = new Intent(DoubanFmService.this, EasyDoubanFm.class);
+			PendingIntent pi = PendingIntent.getActivity(DoubanFmService.this, 0, it, 0);
+			fgNotification.setLatestEventInfo(DoubanFmService.this, "", "", pi);		
+			startForeground(Global.NOTIFICATION_ID_PLAYER, fgNotification);
 		}
 	}
 
 	private void pauseMusic() {
 		if (dPlayer.isOpen()) {
 			dPlayer.pauseMusic();
+			
+			stopForeground(true);
+			
 	        // make sure the service will shut down on its own if it was
 	        // just started but not bound to and nothing is playing
 	        mDelayedPausedStopHandler.removeCallbacksAndMessages(null);
@@ -880,6 +900,10 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 	
 	private class AsyncVersionUpdater extends AsyncTask<Integer, Integer, File> {
 		@Override
+		protected void onCancelled() {
+			versionUpdateSem.release();
+		}
+		@Override
 		protected void onPreExecute() {
 			Notification not = new Notification(android.R.drawable.stat_sys_download,
 					"正在下载新版本",
@@ -943,12 +967,18 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				}
 			}
 			
+			
+			versionUpdateSem.release();
 		}
 	}
 	
 	
 	
 	private class AsyncVersionChecker extends AsyncTask<Context, Integer, VersionInfo> {
+		@Override
+		protected void onCancelled() {
+			versionCheckSem.release();
+		}
 		@Override
 		protected void onPreExecute() {
 			Notification not = new Notification(android.R.drawable.ic_popup_sync,
@@ -1024,6 +1054,7 @@ public class DoubanFmService extends Service implements IDoubanFmService {
 				}
 			}
 			
+			versionCheckSem.release();
 		}
 		
 	}

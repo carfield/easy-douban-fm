@@ -52,6 +52,7 @@ public class EasyDoubanFm extends Activity {
 	
 	PlayerEventListener playerEventListener;
 	
+	LinearLayout layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,9 @@ public class EasyDoubanFm extends Activity {
     	super.onCreate(savedInstanceState);
         
         setContentView(R.layout.main);
+        
+        layout = new LinearLayout(this);
+        
         
 		buttonChannel = (Button)findViewById(R.id.buttonChannel);
 		imageCover = (ImageView)findViewById(R.id.imageCover);
@@ -247,6 +251,9 @@ public class EasyDoubanFm extends Activity {
         aMenu.add(0, MENU_SETTING_ID, 0, "设置");
         aMenu.add(0, MENU_FEEDBACK_ID, 0, "意见反馈");           
         aMenu.add(0, MENU_CLOSE_ID, 0, "退出");
+        
+        
+        layout.setBackgroundResource(R.drawable.appwidget_bg);
         return true;  
           
     }  

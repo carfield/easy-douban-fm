@@ -263,13 +263,10 @@ public class DoubanFmDownloader {
 				notManager.cancel(id);
 				notificationMap.remove(id);
 				
-				Intent i = new Intent(Global.ACTION_DOWNLOADER_DOWNLOAD);
+				Intent i = new Intent(Global.ACTION_NULL);
 				if (filename == null) {
 					filename = db.getFilenameByUrl(url);
 				}
-				i.putExtra(Global.EXTRA_DOWNLOADER_DOWNLOAD_FILENAME, filename);
-				i.putExtra(Global.EXTRA_MUSIC_URL, url);
-				i.putExtra("uniquevalue", System.currentTimeMillis());
 				ComponentName cn = new ComponentName(context, DoubanFmService.class);
 				i.setComponent(cn);
 				PendingIntent pi = PendingIntent.getService(context, 
@@ -342,19 +339,10 @@ public class DoubanFmDownloader {
 	
 	private void notifyDownloadProgress(String url, int progress, String detail) {
 		synchronized(notificationMapLock) {
-			//Intent i = new Intent(DoubanFmService.ACTION_DOWNLOADER_CANCEL);
-			//i.putExtra(DoubanFmService.EXTRA_MUSIC_URL, url);
-			//ComponentName cn = new ComponentName(context, DoubanFmService.class);
-			//i.setComponent(cn);
-			
-			//PendingIntent pi = PendingIntent.getService(context, 
-			//		0, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
-	
+
 			int id = db.getDownloadIdByUrl(url);
 			if (id == -1)
 				return;
-			
-			
 					
 			Notification n = notificationMap.get(id);
 			if (n == null) {
